@@ -3,12 +3,15 @@ FROM node:22-bookworm-slim AS base
 RUN npm install -g pnpm@12.3.4
 
 FROM base AS builder
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 make g++ \
+    && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc turbo.json ./
 COPY apps/admin/package.json ./apps/admin/package.json
 COPY apps/vendor/package.json ./apps/vendor/package.json
-COPY packages/api/package.json ./packages/api/package.json
+COPY packages/api/package.json packages/api/.npmrc ./packages/api/
 
 RUN pnpm install --frozen-lockfile
 

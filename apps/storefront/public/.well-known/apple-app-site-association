@@ -1,0 +1,16 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appIDs": ["TEAMID.online.tamadee.tamadeeMobile"],
+        "components": [
+          { "/": "/products/*" },
+          { "/": "/sellers/*" },
+          { "/": "/categories" },
+          { "/": "/cart" }
+        ]
+      }
+    ]
+  }
+}
