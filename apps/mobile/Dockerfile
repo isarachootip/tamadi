@@ -1,10 +1,15 @@
 # syntax=docker/dockerfile:1
-ARG FLUTTER_IMAGE=ghcr.io/cirruslabs/flutter:stable
-FROM ${FLUTTER_IMAGE} AS builder
+FROM debian:bookworm-slim AS builder
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates curl git unzip xz-utils \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN git clone --depth 1 --branch stable https://github.com/flutter/flutter.git /usr/local/flutter
+ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
 
 WORKDIR /workspace
 
-# Cache Dart/Flutter package resolution before copying full source
 COPY packages/flutter_ui/pubspec.yaml ./packages/flutter_ui/pubspec.yaml
 COPY apps/mobile/pubspec.yaml apps/mobile/pubspec.lock ./apps/mobile/
 

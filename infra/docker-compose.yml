@@ -1,5 +1,28 @@
-# Production Compose (Phase 1-2A: PostgreSQL, Redis, Mercur Backend + Worker, Flutter Mobile Web, Caddy)
-# Service storefront will be added in Phase 2B.
+# Production Compose (PostgreSQL, Redis, Mercur Backend + Worker, Flutter Mobile Web, Next.js Storefront, Caddy)
+x-backend-env: &backend-env
+  NODE_ENV: production
+  DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+  REDIS_URL: redis://redis:6379
+  JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+  COOKIE_SECRET: ${COOKIE_SECRET:?COOKIE_SECRET is required}
+  STORE_CORS: ${STORE_CORS:-https://m.tamadee.online,https://tamdi.tamadee.online,https://webtamdi.tamadee.online}
+  ADMIN_CORS: ${ADMIN_CORS:-https://bwebtamdi.tamadee.online}
+  VENDOR_CORS: ${VENDOR_CORS:-https://bwebtamdi.tamadee.online}
+  AUTH_CORS: ${AUTH_CORS:-https://m.tamadee.online,https://tamdi.tamadee.online,https://webtamdi.tamadee.online,https://bwebtamdi.tamadee.online}
+  MERCUR_VENDOR_URL: ${MERCUR_VENDOR_URL:-https://bwebtamdi.tamadee.online/seller}
+  STOREFRONT_REVALIDATE_URL: ${STOREFRONT_REVALIDATE_URL:-http://storefront:3000}
+  STOREFRONT_REVALIDATE_SECRET: ${STOREFRONT_REVALIDATE_SECRET:-}
+  FILE_BACKEND_URL: ${FILE_BACKEND_URL:-https://bwebtamdi.tamadee.online/static}
+  S3_FILE_URL: ${S3_FILE_URL:-}
+  S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-}
+  S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-}
+  S3_REGION: ${S3_REGION:-auto}
+  S3_BUCKET: ${S3_BUCKET:-}
+  S3_ENDPOINT: ${S3_ENDPOINT:-}
+  TAMADEE_SEED_ADMIN_EMAIL: ${TAMADEE_SEED_ADMIN_EMAIL:-admin@tamadee.online}
+  TAMADEE_SEED_ADMIN_PASSWORD: ${TAMADEE_SEED_ADMIN_PASSWORD:-}
+  TAMADEE_SEED_SELLER_PASSWORD: ${TAMADEE_SEED_SELLER_PASSWORD:-}
+
 services:
   postgres:
     image: postgres:16-alpine
@@ -47,27 +70,9 @@ services:
         condition: service_healthy
     command: ["sh", "-c", "pnpm predeploy && pnpm start"]
     environment:
-      NODE_ENV: production
+      <<: *backend-env
       MEDUSA_WORKER_MODE: server
       DISABLE_MEDUSA_ADMIN: "false"
-      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-      REDIS_URL: redis://redis:6379
-      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
-      COOKIE_SECRET: ${COOKIE_SECRET:?COOKIE_SECRET is required}
-      STORE_CORS: ${STORE_CORS:-https://m.tamadee.online,https://tamdi.tamadee.online,https://webtamdi.tamadee.online}
-      ADMIN_CORS: ${ADMIN_CORS:-https://bwebtamdi.tamadee.online}
-      VENDOR_CORS: ${VENDOR_CORS:-https://bwebtamdi.tamadee.online}
-      AUTH_CORS: ${AUTH_CORS:-https://m.tamadee.online,https://tamdi.tamadee.online,https://webtamdi.tamadee.online,https://bwebtamdi.tamadee.online}
-      MERCUR_VENDOR_URL: ${MERCUR_VENDOR_URL:-https://bwebtamdi.tamadee.online/seller}
-      STOREFRONT_REVALIDATE_URL: ${STOREFRONT_REVALIDATE_URL:-http://storefront:3000}
-      STOREFRONT_REVALIDATE_SECRET: ${STOREFRONT_REVALIDATE_SECRET:-}
-      FILE_BACKEND_URL: ${FILE_BACKEND_URL:-https://bwebtamdi.tamadee.online/static}
-      S3_FILE_URL: ${S3_FILE_URL:-}
-      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-}
-      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-}
-      S3_REGION: ${S3_REGION:-auto}
-      S3_BUCKET: ${S3_BUCKET:-}
-      S3_ENDPOINT: ${S3_ENDPOINT:-}
     volumes:
       - backend_static:/app/packages/api/.medusa/server/static
     networks:
@@ -99,26 +104,9 @@ services:
         condition: service_healthy
     command: ["pnpm", "start"]
     environment:
-      NODE_ENV: production
+      <<: *backend-env
       MEDUSA_WORKER_MODE: worker
       DISABLE_MEDUSA_ADMIN: "true"
-      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-      REDIS_URL: redis://redis:6379
-      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
-      COOKIE_SECRET: ${COOKIE_SECRET:?COOKIE_SECRET is required}
-      STORE_CORS: ${STORE_CORS:-https://m.tamadee.online,https://tamdi.tamadee.online,https://webtamdi.tamadee.online}
-      ADMIN_CORS: ${ADMIN_CORS:-https://bwebtamdi.tamadee.online}
-      VENDOR_CORS: ${VENDOR_CORS:-https://bwebtamdi.tamadee.online}
-      AUTH_CORS: ${AUTH_CORS:-https://m.tamadee.online,https://tamdi.tamadee.online,https://webtamdi.tamadee.online,https://bwebtamdi.tamadee.online}
-      STOREFRONT_REVALIDATE_URL: ${STOREFRONT_REVALIDATE_URL:-http://storefront:3000}
-      STOREFRONT_REVALIDATE_SECRET: ${STOREFRONT_REVALIDATE_SECRET:-}
-      FILE_BACKEND_URL: ${FILE_BACKEND_URL:-https://bwebtamdi.tamadee.online/static}
-      S3_FILE_URL: ${S3_FILE_URL:-}
-      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-}
-      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-}
-      S3_REGION: ${S3_REGION:-auto}
-      S3_BUCKET: ${S3_BUCKET:-}
-      S3_ENDPOINT: ${S3_ENDPOINT:-}
     volumes:
       - backend_static:/app/packages/api/.medusa/server/static
     networks:
@@ -142,6 +130,36 @@ services:
       retries: 5
       start_period: 10s
 
+  storefront:
+    build:
+      context: ..
+      dockerfile: apps/storefront/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      MERCUR_BACKEND_URL: http://backend:9000
+      NEXT_PUBLIC_API_BASE_URL: ${MERCUR_BACKEND_URL:-https://bwebtamdi.tamadee.online}
+      NEXT_PUBLIC_PUBLISHABLE_KEY: ${TAMADEE_PUBLISHABLE_KEY:?TAMADEE_PUBLISHABLE_KEY is required}
+      NEXT_PUBLIC_SITE_URL: ${STOREFRONT_SITE_URL:-https://tamdi.tamadee.online}
+      COOKIE_DOMAIN: ${COOKIE_DOMAIN:-.tamadee.online}
+    networks:
+      - tamadee_net
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
@@ -149,6 +167,8 @@ services:
       backend:
         condition: service_healthy
       mobile-web:
+        condition: service_healthy
+      storefront:
         condition: service_healthy
     ports:
       - "80:80"
