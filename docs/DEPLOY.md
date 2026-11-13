@@ -86,7 +86,7 @@ docker --version && docker compose version
 ```bash
 # 1. เตรียมโฟลเดอร์โปรเจกต์
 sudo mkdir -p /opt/tamadee && sudo chown "$USER:$USER" /opt/tamadee
-git clone <YOUR_PRIVATE_GITHUB_REPO_URL> /opt/tamadee
+git clone https://github.com/isarachootip/tamadi.git /opt/tamadee
 cd /opt/tamadee/infra
 
 # 2. สร้างไฟล์ .env จากต้นแบบและสุ่มรหัสผ่านที่ปลอดภัย
