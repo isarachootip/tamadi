@@ -1,34 +1,28 @@
-# Tamadee
+# Tamadee ("ทำมาดี ทำมาขาย")
 
-Tamadee มาจาก "ทำมาดี": ทำมาดี ทำมาขาย
+Marketplace หลายผู้ขายสำหรับตลาดไทย (สินค้าไม่เกิน 500 รายการ สกุลเงิน THB)
 
-## โดเมน
-| ส่วน | โดเมน |
-|---|---|
-| Mobile | tamdi.tamadee.online |
-| Web | webtamdi.tamadee.online |
-| Backend (API) | bwebtamdi.tamadee.online |
+## สถาปัตยกรรม Hybrid & โดเมนหลัก
 
-## แผนงาน
-ดู PLAN.md และ docs/PHASE0.md (Tamadee เป็น marketplace หลายผู้ขาย สินค้าไม่เกิน 500 รายการ)
+| ส่วนระบบ | โฟลเดอร์ / โดเมน | เทคโนโลยี |
+|---|---|---|
+| **Native Mobile App** | `apps/mobile` (Android / iOS / Web Dev) | Flutter + Riverpod + GoRouter + Dio |
+| **Mobile Web (PWA)** | `tamdi.tamadee.online` (`apps/storefront`) | Next.js (App Router) + Tailwind CSS |
+| **Desktop Web & SEO** | `webtamdi.tamadee.online` (`apps/storefront`) | Next.js โค้ดชุดเดียวกับ `tamdi` แยก Layout |
+| **Backend, Admin & Vendor** | `bwebtamdi.tamadee.online` (`apps/backend`) | Mercur (บน Medusa v2) + PostgreSQL 16 + Redis 7 |
 
-## Prompt สำหรับ Antigravity
-ดู docs/PROMPTS.md (แบ่งตามระยะ 0-6)
+## แพ็กเกจที่ใช้ร่วมกัน (`packages/`)
+- `packages/ui` (`@tamadee/ui`): Design Tokens, Tailwind v4 `@theme` และ React SVG Components สำหรับฝั่งเว็บ
+- `packages/flutter_ui` (`tamadee_flutter_ui`): Flutter `ThemeData` (Light/Dark), ค่าสี/ฟอนต์ และ SVG Widgets สำหรับฝั่งแอปมือถือ
 
-## งานออกแบบ
-- ร่างหน้าจอแอป (หน้าแรก, หน้าสินค้า, ตะกร้า/ชำระเงิน, ผู้ช่วย AI) และแผ่นแบรนด์: https://claude.ai/artifact/2zwedu3khYwKvKW2rE8Fb7
-- ธีม: Minimal + bold typography มี dark mode
+## แบรนด์และอัตลักษณ์
+- **มาสคอต:** "น้องทำมะดิ" กล่องพัสดุยิ้มได้ มีตราเครื่องหมายถูกโผล่จากฝากล่อง (`brand/*.svg`)
+- **สีหลัก:** `#111111` (ดำ), `#C6F432` (เขียวมะนาว), `#FFFFFF` (ขาว), `#F1F1EE` (เทาอ่อน) รองรับ Dark Mode
+- **ฟอนต์:** `Space Grotesk` (โลโก้/ตัวเลข) และ `Anuphan` (ภาษาไทย)
+- **UX มือถือ:** Minimal + Bold Typography, มุมโค้งมน, ปุ่มกดสูงอย่างน้อย `44px` (`44dp`)
 
-## แบรนด์ (ฉบับร่าง)
-- มาสคอต: "น้องทำมะดิ" กล่องพัสดุยิ้มได้ มีตราเครื่องหมายถูกโผล่จากฝากล่อง
-- สี: #111111 (ดำ), #C6F432 (เขียวมะนาว), #FFFFFF (ขาว), #F1F1EE (เทาอ่อน)
-- ฟอนต์: Space Grotesk (โลโก้/ตัวเลข), Anuphan (ภาษาไทย) ทั้งคู่จาก Google Fonts
-
-## ไฟล์ใน brand/
-- mascot-nong-tammadi.svg, mascot-nong-tammadi-dark.svg
-- logo-tamadee.svg, logo-tamadee-dark.svg (ตัวอักษรยังเป็น text ต้องติดตั้งฟอนต์ Space Grotesk จึงจะแสดงตรงแบบ)
-- app-icon.svg
-
-## ยังไม่ได้ทำ
-- ตรวจเครื่องหมายการค้าชื่อ Tamadee / ทำมาดี
-- เลือก framework และ template โค้ด
+## เอกสารโครงการ
+- [PLAN.md](./PLAN.md) — แผนภาพรวมและข้อตกลงทางสถาปัตยกรรม
+- [docs/PHASE0.md](./docs/PHASE0.md) — ขั้นตอนเตรียมโดเมนและระบบพื้นฐาน
+- [docs/DEPLOY.md](./docs/DEPLOY.md) — คู่มือติดตั้ง VPS Ubuntu 24.04 LTS ด้วย Docker Compose
+- [docs/PROMPTS.md](./docs/PROMPTS.md) — แผนการดำเนินงานแบ่งตามระยะ

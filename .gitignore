@@ -8,7 +8,7 @@ node_modules/
 !.env.example
 !**/.env.example
 
-# Build & Framework outputs
+# Build & Framework outputs (Node / Next / Medusa)
 .next/
 .medusa/
 .turbo/
@@ -17,8 +17,25 @@ build/
 coverage/
 *.tsbuildinfo
 
-# OS & Logs
+# Dart & Flutter
+.dart_tool/
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+packages/**/pubspec.lock
+**/android/.gradle/
+**/android/local.properties
+**/android/key.properties
+**/android/**/*.keystore
+**/android/**/*.jks
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+
+# OS, IDE & Logs
 .DS_Store
 Thumbs.db
+*.iml
 *.log
 pnpm-debug.log*

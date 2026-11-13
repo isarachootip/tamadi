@@ -1,0 +1,28 @@
+name: tamadee_flutter_ui
+description: Tamadee shared Flutter design tokens, Light/Dark ThemeData, and brand SVG widgets.
+version: 0.1.0
+publish_to: "none"
+
+environment:
+  sdk: ">=3.10.0 <4.0.0"
+  flutter: ">=3.40.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_svg: ^2.4.0
+  google_fonts: ^9.0.0
+  material_ui: ^1.11.0
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  assets:
+    - assets/svg/app-icon.svg
+    - assets/svg/logo-tamadee.svg
+    - assets/svg/logo-tamadee-dark.svg
+    - assets/svg/mascot-nong-tammadi.svg
+    - assets/svg/mascot-nong-tammadi-dark.svg
