@@ -12,7 +12,7 @@ import {
   SEMANTIC_THEME,
   TamadeeAppIcon,
   TamadeeLogo,
-} from "../src/index.js";
+} from "../src/index";
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
 

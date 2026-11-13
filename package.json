@@ -21,6 +21,10 @@
     "backend:build": "pnpm --dir apps/backend build",
     "mobile:analyze": "cd apps/mobile && flutter analyze --fatal-infos --fatal-warnings",
     "mobile:test": "cd apps/mobile && flutter test",
-    "mobile:build:web": "cd apps/mobile && flutter build web --release"
+    "mobile:build:web": "cd apps/mobile && flutter build web --release",
+    "storefront:dev": "pnpm --filter @tamadee/storefront dev",
+    "storefront:build": "pnpm --filter @tamadee/storefront build",
+    "storefront:test": "pnpm --filter @tamadee/storefront test",
+    "storefront:typecheck": "pnpm --filter @tamadee/storefront typecheck"
   }
 }

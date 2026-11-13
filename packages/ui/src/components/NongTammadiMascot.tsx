@@ -1,5 +1,5 @@
 import type { JSX, SVGProps } from "react";
-import type { BrandThemeVariant } from "../tokens.js";
+import type { BrandThemeVariant } from "../tokens";
 
 export interface NongTammadiMascotProps extends Omit<SVGProps<SVGSVGElement>, "children" | "width" | "height"> {
   readonly variant?: BrandThemeVariant;

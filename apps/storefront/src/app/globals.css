@@ -1,0 +1,17 @@
+@import "tailwindcss";
+@import "@tamadee/ui/theme.css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  html {
+    font-family: var(--font-anuphan), var(--font-sans);
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .font-display {
+    font-family: var(--font-space-grotesk), var(--font-display);
+  }
+}

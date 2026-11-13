@@ -88,7 +88,8 @@ void main() {
         'id': 'cart_01',
         'currency_code': 'thb',
         'region_id': 'reg_th',
-        'item_subtotal': 2480,
+        'original_item_total': 2480,
+        'item_subtotal': 2318,
         'shipping_total': 0,
         'discount_total': 0,
         'total': 2480,
@@ -131,6 +132,7 @@ void main() {
       };
 
       final CartModel cart = CartMapper.fromJson(rawCart);
+      expect(cart.itemSubtotal, 2480);
       expect(cart.sellerGroups.length, 2);
       expect(cart.sellerGroups.first.sellerName, 'ละไม สตูดิโอ');
       expect(cart.sellerGroups.last.sellerName, 'ก้าวดี คราฟต์ชูส์');

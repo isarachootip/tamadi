@@ -6,8 +6,8 @@ export {
   type BrandColorKey,
   type BrandThemeVariant,
   type SemanticThemeTokens,
-} from "./tokens.js";
+} from "./tokens";
 
-export { TamadeeLogo, type TamadeeLogoProps } from "./components/TamadeeLogo.js";
-export { NongTammadiMascot, type NongTammadiMascotProps } from "./components/NongTammadiMascot.js";
-export { TamadeeAppIcon, type TamadeeAppIconProps } from "./components/TamadeeAppIcon.js";
+export { TamadeeLogo, type TamadeeLogoProps } from "./components/TamadeeLogo";
+export { NongTammadiMascot, type NongTammadiMascotProps } from "./components/NongTammadiMascot";
+export { TamadeeAppIcon, type TamadeeAppIconProps } from "./components/TamadeeAppIcon";

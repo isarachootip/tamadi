@@ -8,11 +8,21 @@ abstract final class CartMapper {
     final List<JsonMap> rawPromos =
         JsonParsers.asJsonMapList(map['promotions'], context: 'cart.promotions');
 
+    final int vatInclusiveItemSubtotal = JsonParsers.readInt(
+      map,
+      'original_item_total',
+      fallback: JsonParsers.readInt(
+        map,
+        'item_total',
+        fallback: JsonParsers.readInt(map, 'item_subtotal', fallback: 0),
+      ),
+    );
+
     return CartModel(
       id: JsonParsers.readString(map, 'id'),
       currencyCode: JsonParsers.readString(map, 'currency_code', fallback: 'thb'),
       regionId: JsonParsers.readString(map, 'region_id', fallback: ''),
-      itemSubtotal: JsonParsers.readInt(map, 'item_subtotal', fallback: 0),
+      itemSubtotal: vatInclusiveItemSubtotal,
       shippingTotal: JsonParsers.readInt(map, 'shipping_total', fallback: 0),
       discountTotal: JsonParsers.readInt(map, 'discount_total', fallback: 0),
       total: JsonParsers.readInt(map, 'total', fallback: 0),

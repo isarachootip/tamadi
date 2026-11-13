@@ -20,7 +20,7 @@
 - **ระยะ 0.5 (เสร็จแล้ว):** อัปเกรด Flutter 3.50.0 และสร้าง `packages/flutter_ui` พร้อม Widget Tests
 - **ระยะ 1 (เสร็จแล้ว):** Backend Marketplace (`apps/backend` ด้วย Mercur v2.4.1, THB + VAT 7% Inclusive, คอมมิชชัน 10%, Seed ข้อมูล 3 ร้านไทย 30 สินค้า, `docs/BACKEND.md`)
 - **ระยะ 2A (เสร็จแล้ว):** แอปมือถือ Flutter (`apps/mobile` + `m.tamadee.online` Docker/Nginx + Deep Links + `docs/MOBILE.md`) ครบ Flow เลือกสินค้า ร้านค้า ตะกร้าแยกร้าน สมาชิก และโครงหน้าผู้ช่วย AI
-- **ระยะ 2B:** เว็บหน้าร้านมือถือ PWA (`tamdi.tamadee.online`)
+- **ระยะ 2B (เสร็จแล้ว):** เว็บหน้าร้านมือถือ PWA (`apps/storefront` → `tamdi.tamadee.online` ด้วย Next.js 16 + Tailwind v4 + `@tamadee/ui`, Lighthouse มือถือ Performance 100 / Accessibility 100, `docs/STOREFRONT.md`)
 - **ระยะ 3:** ชำระเงิน Opn Payments, จัดส่งแยกร้าน, ล็อกสต็อก 15 นาที และรายงานยอดโอนผู้ขาย CSV
 - **ระยะ 4:** เว็บหน้าร้านจอใหญ่และ SEO (`webtamdi.tamadee.online`)
 - **ระยะ 5:** ฟีเจอร์ล้ำ (AI น้องทำมะดิ, ค้นหาด้วยรูปถ่าย, LINE Login & แจ้งเตือน, Push Notification)

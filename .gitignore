@@ -13,6 +13,7 @@ node_modules/
 
 # Build & Framework outputs (Node / Next / Medusa)
 .next/
+**/next-env.d.ts
 .medusa/
 .turbo/
 dist/
