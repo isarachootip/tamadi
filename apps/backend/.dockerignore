@@ -1,0 +1,14 @@
+node_modules
+**/node_modules
+.pnpm-store
+.turbo
+**/.medusa
+**/dist
+.env
+**/.env
+**/.env.*
+!**/.env.example
+**/uploads
+**/static
+coverage
+*.log

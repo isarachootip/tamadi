@@ -16,9 +16,9 @@
 | `packages/ui` & `packages/flutter_ui` | Design Tokens, โลโก้ และมาสคอต "น้องทำมะดิ" คู่ขนานทั้ง Web & Mobile | TypeScript/React และ Dart/Flutter |
 
 ## ลำดับระยะงาน
-- **ระยะ 0 (เสร็จแล้ว):** ตั้ง Monorepo, Docker Dev/Prod, Caddy 3 โดเมน, `@tamadee/ui` และ `docs/DEPLOY.md`
-- **ระยะ 0.5 (กำลังดำเนินการ):** อัปเกรด Flutter SDK และสร้าง `packages/flutter_ui` พร้อม Widget Tests
-- **ระยะ 1:** Backend Marketplace (`apps/backend` ด้วย Mercur, Seed ข้อมูล 3 ร้าน 30 สินค้า, `docs/BACKEND.md`)
+- **ระยะ 0 (เสร็จแล้ว):** ตั้ง Monorepo, Docker Dev/Prod, Caddy 4 โดเมน, `@tamadee/ui` และ `docs/DEPLOY.md`
+- **ระยะ 0.5 (เสร็จแล้ว):** อัปเกรด Flutter 3.50.0 และสร้าง `packages/flutter_ui` พร้อม Widget Tests
+- **ระยะ 1 (เสร็จแล้ว):** Backend Marketplace (`apps/backend` ด้วย Mercur v2.4.1, THB + VAT 7% Inclusive, คอมมิชชัน 10%, Seed ข้อมูล 3 ร้านไทย 30 สินค้า, `docs/BACKEND.md`)
 - **ระยะ 2A:** แอปมือถือ Flutter (`apps/mobile`) ครบ Flow เลือกสินค้า ร้านค้า ตะกร้า สมาชิก และโครงหน้าผู้ช่วย AI
 - **ระยะ 2B:** เว็บหน้าร้านมือถือ PWA (`tamdi.tamadee.online`)
 - **ระยะ 3:** ชำระเงิน Opn Payments, จัดส่งแยกร้าน, ล็อกสต็อก 15 นาที และรายงานยอดโอนผู้ขาย CSV
