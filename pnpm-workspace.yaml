@@ -1,0 +1,16 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+allowBuilds:
+  esbuild: true
+
+catalog:
+  react: ^19.3.1
+  react-dom: ^19.3.1
+  "@types/react": ^19.3.0
+  "@types/react-dom": ^19.3.0
+  "@types/node": ^22.0.0
+  typescript: ^7.0.2
+  tsx: ^4.23.15
+  zod: ^4.6.7

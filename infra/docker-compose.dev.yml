@@ -1,0 +1,42 @@
+# Local Development Compose (เปิดพอร์ตเฉพาะ 127.0.0.1 บนเครื่องนักพัฒนาเท่านั้น)
+# วิธีรัน: docker compose -f infra/docker-compose.dev.yml up -d
+name: tamadee-dev
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    env_file:
+      - path: ./.env
+        required: false
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-tamadee}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tamadee_dev_only}
+      POSTGRES_DB: ${POSTGRES_DB:-tamadee}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - tamadee_dev_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
+    volumes:
+      - tamadee_dev_redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  tamadee_dev_pgdata:
+  tamadee_dev_redisdata:

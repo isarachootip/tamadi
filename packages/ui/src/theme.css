@@ -1,0 +1,38 @@
+@theme {
+  /* Tamadee Core Brand Palette */
+  --color-tamadee-ink: #111111;
+  --color-tamadee-lime: #C6F432;
+  --color-tamadee-white: #FFFFFF;
+  --color-tamadee-muted: #F1F1EE;
+  --color-tamadee-dark-surface: #1C1C1A;
+  --color-tamadee-offwhite: #F4F4F1;
+
+  /* Brand Typography */
+  --font-display: "Space Grotesk", system-ui, -apple-system, sans-serif;
+  --font-sans: "Anuphan", system-ui, -apple-system, sans-serif;
+
+  /* Ergonomics & Corner Radii */
+  --spacing-touch: 2.75rem; /* 44px minimum touch height */
+  --radius-card: 1.5rem;
+  --radius-control: 1rem;
+  --radius-pill: 9999px;
+}
+
+:root {
+  --bg-page: #FFFFFF;
+  --bg-surface: #F1F1EE;
+  --text-primary: #111111;
+  --text-muted: #5C5C57;
+  --accent-lime: #C6F432;
+  --border-subtle: #E2E2DC;
+}
+
+.dark,
+[data-theme="dark"] {
+  --bg-page: #111111;
+  --bg-surface: #1C1C1A;
+  --text-primary: #FFFFFF;
+  --text-muted: #A6A6A0;
+  --accent-lime: #C6F432;
+  --border-subtle: #2E2E2B;
+}

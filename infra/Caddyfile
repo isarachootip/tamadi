@@ -1,0 +1,31 @@
+# Caddyfile สำหรับ Tamadee (3 โดเมนหลัก ออกใบรับรอง SSL อัตโนมัติผ่าน Let's Encrypt)
+(common_headers) {
+	encode zstd gzip
+	header {
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "SAMEORIGIN"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+}
+
+# Backend API, Medusa Admin (/app) และ Mercur Vendor Panel (/vendor)
+bwebtamdi.tamadee.online {
+	import common_headers
+
+	handle /vendor* {
+		reverse_proxy vendor-panel:5173
+	}
+
+	handle {
+		reverse_proxy backend:9000
+	}
+}
+
+# Storefront โค้ดชุดเดียว แยก Layout ด้วย Hostname ใน Next.js middleware
+# - tamdi.tamadee.online    -> Mobile PWA Layout
+# - webtamdi.tamadee.online -> Desktop Web Layout
+tamdi.tamadee.online, webtamdi.tamadee.online {
+	import common_headers
+	reverse_proxy storefront:3000
+}
