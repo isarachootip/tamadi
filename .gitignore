@@ -5,8 +5,11 @@ node_modules/
 # Environment variables (never commit real secrets)
 .env
 .env.*
+**/.env
+**/.env.*
 !.env.example
 !**/.env.example
+!**/.env.example.json
 
 # Build & Framework outputs (Node / Next / Medusa)
 .next/

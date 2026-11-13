@@ -1,0 +1,13 @@
+.git
+.github
+**/node_modules
+**/.dart_tool
+**/build
+**/.env
+**/.env.*
+!**/.env.example.json
+apps/backend
+apps/storefront
+packages/ui
+infra
+docs

@@ -18,6 +18,9 @@
     "backend:migrate": "pnpm --dir apps/backend --filter @acme/api db:migrate",
     "backend:seed": "pnpm --dir apps/backend --filter @acme/api seed",
     "backend:dev": "pnpm --dir apps/backend dev",
-    "backend:build": "pnpm --dir apps/backend build"
+    "backend:build": "pnpm --dir apps/backend build",
+    "mobile:analyze": "cd apps/mobile && flutter analyze --fatal-infos --fatal-warnings",
+    "mobile:test": "cd apps/mobile && flutter test",
+    "mobile:build:web": "cd apps/mobile && flutter build web --release"
   }
 }

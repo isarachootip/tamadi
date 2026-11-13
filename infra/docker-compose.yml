@@ -1,5 +1,5 @@
-# Production Compose (Phase 1: PostgreSQL, Redis, Mercur Backend Server + Worker, Caddy Reverse Proxy)
-# Services mobile-web and storefront will be added in Phases 2-3.
+# Production Compose (Phase 1-2A: PostgreSQL, Redis, Mercur Backend + Worker, Flutter Mobile Web, Caddy)
+# Service storefront will be added in Phase 2B.
 services:
   postgres:
     image: postgres:16-alpine
@@ -124,11 +124,31 @@ services:
     networks:
       - tamadee_net
 
+  mobile-web:
+    build:
+      context: ..
+      dockerfile: apps/mobile/Dockerfile
+      args:
+        TAMADEE_API_BASE_URL: ${MERCUR_BACKEND_URL:-https://bwebtamdi.tamadee.online}
+        TAMADEE_PUBLISHABLE_KEY: ${TAMADEE_PUBLISHABLE_KEY:?TAMADEE_PUBLISHABLE_KEY is required}
+        TAMADEE_SITE_URL: ${MOBILE_SITE_URL:-https://m.tamadee.online}
+    restart: unless-stopped
+    networks:
+      - tamadee_net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/healthz >/dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
     depends_on:
       backend:
+        condition: service_healthy
+      mobile-web:
         condition: service_healthy
     ports:
       - "80:80"

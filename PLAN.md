@@ -19,7 +19,7 @@
 - **ระยะ 0 (เสร็จแล้ว):** ตั้ง Monorepo, Docker Dev/Prod, Caddy 4 โดเมน, `@tamadee/ui` และ `docs/DEPLOY.md`
 - **ระยะ 0.5 (เสร็จแล้ว):** อัปเกรด Flutter 3.50.0 และสร้าง `packages/flutter_ui` พร้อม Widget Tests
 - **ระยะ 1 (เสร็จแล้ว):** Backend Marketplace (`apps/backend` ด้วย Mercur v2.4.1, THB + VAT 7% Inclusive, คอมมิชชัน 10%, Seed ข้อมูล 3 ร้านไทย 30 สินค้า, `docs/BACKEND.md`)
-- **ระยะ 2A:** แอปมือถือ Flutter (`apps/mobile`) ครบ Flow เลือกสินค้า ร้านค้า ตะกร้า สมาชิก และโครงหน้าผู้ช่วย AI
+- **ระยะ 2A (เสร็จแล้ว):** แอปมือถือ Flutter (`apps/mobile` + `m.tamadee.online` Docker/Nginx + Deep Links + `docs/MOBILE.md`) ครบ Flow เลือกสินค้า ร้านค้า ตะกร้าแยกร้าน สมาชิก และโครงหน้าผู้ช่วย AI
 - **ระยะ 2B:** เว็บหน้าร้านมือถือ PWA (`tamdi.tamadee.online`)
 - **ระยะ 3:** ชำระเงิน Opn Payments, จัดส่งแยกร้าน, ล็อกสต็อก 15 นาที และรายงานยอดโอนผู้ขาย CSV
 - **ระยะ 4:** เว็บหน้าร้านจอใหญ่และ SEO (`webtamdi.tamadee.online`)
