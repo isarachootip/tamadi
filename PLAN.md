@@ -9,8 +9,8 @@
 ## โครงสร้างระบบ (Hybrid Architecture)
 | โฟลเดอร์ / โดเมน | หน้าที่ | เทคโนโลยี |
 |---|---|---|
-| `apps/backend` -> `bwebtamdi.tamadee.online` | Store/Admin/Vendor API, Admin (`/app`), Vendor (`/vendor`), Worker | Mercur (บน Medusa v2) + PostgreSQL 16 + Redis 7 + Cloudflare R2 |
-| `apps/mobile` -> Android / iOS | แอปมือถือเนทีฟเต็มรูปแบบ (ช้อปปิ้ง, กล้องค้นหา, Push, AR ในอนาคต) | Flutter (Riverpod + GoRouter + Dio + Clean Architecture) |
+| `apps/backend` -> `bwebtamdi.tamadee.online` | Store/Admin/Vendor API, Admin (`/dashboard`), Vendor (`/seller`), Worker | Mercur (บน Medusa v2) + PostgreSQL 16 + Redis 7 + Cloudflare R2 |
+| `apps/mobile` -> `m.tamadee.online` + Android / iOS | แอปมือถือ Flutter (ทั้ง Native App, Web Build บน `m.` และ Deep Link เข้าแอปจริง) | Flutter (Riverpod + GoRouter + Dio + Clean Architecture) |
 | `apps/storefront` -> `tamdi.tamadee.online` | หน้าร้านเว็บมือถือ (PWA) โหลดไวสำหรับคลิกลิงก์จากโซเชียล | Next.js + Tailwind + `@tamadee/ui` |
 | `apps/storefront` -> `webtamdi.tamadee.online` | หน้าร้านจอใหญ่ + Google SEO / Sitemap / OpenGraph | Next.js โค้ดชุดเดียวกับ `tamdi` แยก Layout ตาม Hostname |
 | `packages/ui` & `packages/flutter_ui` | Design Tokens, โลโก้ และมาสคอต "น้องทำมะดิ" คู่ขนานทั้ง Web & Mobile | TypeScript/React และ Dart/Flutter |

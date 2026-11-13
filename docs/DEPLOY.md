@@ -12,18 +12,19 @@
 
 ---
 
-## 2. ตั้งค่า DNS ทั้ง 3 โดเมนหลัก
-ไปที่ผู้ให้บริการจัดการโดเมน `tamadee.online` แล้วสร้าง **A Record** ทั้ง 3 รายการชี้มายัง IP จริงของ VPS:
+## 2. ตั้งค่า DNS ทั้ง 4 โดเมนหลัก
+ไปที่ผู้ให้บริการจัดการโดเมน `tamadee.online` แล้วสร้าง **A Record** ทั้ง 4 รายการชี้มายัง IP จริงของ VPS:
 
 | ชื่อระเบียน (Host) | ประเภท | ค่าปลายทาง | หน้าที่ |
 |---|---|---|---|
-| `tamdi` | `A` | `<VPS_PUBLIC_IP>` | หน้าร้านมือถือ PWA (`tamdi.tamadee.online`) |
-| `webtamdi` | `A` | `<VPS_PUBLIC_IP>` | หน้าร้านจอใหญ่ (`webtamdi.tamadee.online`) |
-| `bwebtamdi` | `A` | `<VPS_PUBLIC_IP>` | Backend API, Admin (`/app`) และ Vendor (`/vendor`) |
+| `m` | `A` | `<VPS_PUBLIC_IP>` | แอป Flutter Web Build & Deep Link (`m.tamadee.online`) |
+| `tamdi` | `A` | `<VPS_PUBLIC_IP>` | หน้าร้านเว็บมือถือ PWA (`tamdi.tamadee.online`) |
+| `webtamdi` | `A` | `<VPS_PUBLIC_IP>` | หน้าร้านจอใหญ่ & SEO (`webtamdi.tamadee.online`) |
+| `bwebtamdi` | `A` | `<VPS_PUBLIC_IP>` | Backend API, Admin (`/dashboard`) และ Vendor (`/seller`) |
 
 ตรวจสอบว่า DNS กระจายตัวแล้วก่อนเริ่มเปิด Caddy:
 ```bash
-dig +short tamdi.tamadee.online webtamdi.tamadee.online bwebtamdi.tamadee.online
+dig +short m.tamadee.online tamdi.tamadee.online webtamdi.tamadee.online bwebtamdi.tamadee.online
 ```
 
 ---

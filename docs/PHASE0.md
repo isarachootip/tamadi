@@ -1,10 +1,11 @@
 # ระยะ 0: เตรียมระบบ
 
 ## 1. DNS (ทำที่ผู้ให้บริการโดเมน tamadee.online)
-สร้าง A record 3 ตัว ชี้ไปที่ IP ของ VPS:
-- tamdi
-- webtamdi
-- bwebtamdi
+สร้าง A record 4 ตัว ชี้ไปที่ IP ของ VPS:
+- `m` (แอป Flutter Web Build + Deep Link เข้าแอปมือถือ)
+- `tamdi` (เว็บมือถือ PWA โหลดไว)
+- `webtamdi` (เว็บจอใหญ่ & SEO)
+- `bwebtamdi` (Backend API, Admin, Vendor)
 
 ## 2. VPS
 - ต้องทราบ: ระบบปฏิบัติการ, RAM, พื้นที่ดิสก์, มีบริการอื่นใช้พอร์ต 80/443 อยู่หรือไม่

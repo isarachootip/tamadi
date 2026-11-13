@@ -6,8 +6,8 @@ Marketplace หลายผู้ขายสำหรับตลาดไท�
 
 | ส่วนระบบ | โฟลเดอร์ / โดเมน | เทคโนโลยี |
 |---|---|---|
-| **Native Mobile App** | `apps/mobile` (Android / iOS / Web Dev) | Flutter + Riverpod + GoRouter + Dio |
-| **Mobile Web (PWA)** | `tamdi.tamadee.online` (`apps/storefront`) | Next.js (App Router) + Tailwind CSS |
+| **Flutter Mobile App** | `m.tamadee.online` + Android / iOS (`apps/mobile`) | Flutter + Riverpod + GoRouter + Dio (Web Build + Deep Links) |
+| **Mobile Web (PWA)** | `tamdi.tamadee.online` (`apps/storefront`) | Next.js (App Router) + Tailwind CSS (โหลดไวจากลิงก์โซเชียล) |
 | **Desktop Web & SEO** | `webtamdi.tamadee.online` (`apps/storefront`) | Next.js โค้ดชุดเดียวกับ `tamdi` แยก Layout |
 | **Backend, Admin & Vendor** | `bwebtamdi.tamadee.online` (`apps/backend`) | Mercur (บน Medusa v2) + PostgreSQL 16 + Redis 7 |
 
