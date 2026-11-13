@@ -39,7 +39,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-tamadee} -d ${POSTGRES_DB:-tamadee}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -71,12 +71,6 @@ services:
         condition: service_healthy
     expose:
       - "9000"
-    command:
-      [
-        "sh",
-        "-c",
-        "pnpm predeploy && if [ \"$$AUTO_SEED\" = \"true\" ]; then npx medusa exec ./src/scripts/seed.js; fi && pnpm start",
-      ]
     environment:
       <<: *backend-env
       COOLIFY_SERVICE_URL: ${SERVICE_URL_BACKEND_9000:-https://bwebtamdi.tamadee.online}
@@ -110,7 +104,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command: ["pnpm", "start"]
     environment:
       <<: *backend-env
       MEDUSA_WORKER_MODE: worker

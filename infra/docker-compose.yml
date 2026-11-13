@@ -68,7 +68,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command: ["sh", "-c", "pnpm predeploy && pnpm start"]
     environment:
       <<: *backend-env
       MEDUSA_WORKER_MODE: server
@@ -102,7 +101,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command: ["pnpm", "start"]
     environment:
       <<: *backend-env
       MEDUSA_WORKER_MODE: worker

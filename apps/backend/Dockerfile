@@ -31,8 +31,13 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
 COPY --from=builder /app/packages/api ./packages/api
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+
+RUN sed -i 's/\r$//' /usr/local/bin/docker-entrypoint.sh \
+    && chmod +x /usr/local/bin/docker-entrypoint.sh \
+    && ln -s /app/node_modules /app/packages/api/.medusa/server/node_modules
 
 WORKDIR /app/packages/api/.medusa/server
 EXPOSE 9000
 
-CMD ["pnpm", "start"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

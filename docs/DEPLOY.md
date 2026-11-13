@@ -99,7 +99,7 @@ nano .env
 docker compose up -d --build postgres redis backend worker
 docker compose ps   # รอประมาณ 20-30 วินาทีจน backend ขึ้นสถานะ (healthy)
 
-docker compose exec backend npx medusa exec ./src/scripts/seed.js
+docker compose exec backend pnpm exec medusa exec ./src/scripts/seed.js
 ```
 
 คำสั่ง Seed ด้านบนจะพิมพ์บรรทัด **`Publishable API Key: pk_...`** ออกมาบนหน้าจอ ให้นำค่านั้นไปใส่ใน `.env`:
