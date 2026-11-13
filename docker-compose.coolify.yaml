@@ -1,0 +1,175 @@
+# Docker Compose สำหรับ Coolify v4 + Git (ไม่ต้องมี Caddy เพราะใช้ Coolify Proxy อัตโนมัติ)
+# ตั้งค่าใน Coolify:
+#   - Build Pack: Docker Compose
+#   - Base Directory: /
+#   - Docker Compose Location: /docker-compose.coolify.yaml
+
+x-backend-env: &backend-env
+  NODE_ENV: production
+  DATABASE_URL: postgres://${POSTGRES_USER:-tamadee}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@postgres:5432/${POSTGRES_DB:-tamadee}
+  REDIS_URL: redis://redis:6379
+  JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+  COOKIE_SECRET: ${COOKIE_SECRET:?COOKIE_SECRET is required}
+  STORE_CORS: ${STORE_CORS:-https://m.tamadee.online,https://tamdi.tamadee.online,https://webtamdi.tamadee.online}
+  ADMIN_CORS: ${ADMIN_CORS:-https://bwebtamdi.tamadee.online}
+  VENDOR_CORS: ${VENDOR_CORS:-https://bwebtamdi.tamadee.online}
+  AUTH_CORS: ${AUTH_CORS:-https://m.tamadee.online,https://tamdi.tamadee.online,https://webtamdi.tamadee.online,https://bwebtamdi.tamadee.online}
+  MERCUR_VENDOR_URL: ${MERCUR_VENDOR_URL:-https://bwebtamdi.tamadee.online/seller}
+  STOREFRONT_REVALIDATE_URL: ${STOREFRONT_REVALIDATE_URL:-http://storefront:3000}
+  STOREFRONT_REVALIDATE_SECRET: ${STOREFRONT_REVALIDATE_SECRET:-}
+  FILE_BACKEND_URL: ${FILE_BACKEND_URL:-https://bwebtamdi.tamadee.online/static}
+  S3_FILE_URL: ${S3_FILE_URL:-}
+  S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-}
+  S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-}
+  S3_REGION: ${S3_REGION:-auto}
+  S3_BUCKET: ${S3_BUCKET:-}
+  S3_ENDPOINT: ${S3_ENDPOINT:-}
+  TAMADEE_SEED_ADMIN_EMAIL: ${TAMADEE_SEED_ADMIN_EMAIL:-admin@tamadee.online}
+  TAMADEE_SEED_ADMIN_PASSWORD: ${TAMADEE_SEED_ADMIN_PASSWORD:-}
+  TAMADEE_SEED_SELLER_PASSWORD: ${TAMADEE_SEED_SELLER_PASSWORD:-}
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-tamadee}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:-tamadee}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile
+      args:
+        MERCUR_BACKEND_URL: ${MERCUR_BACKEND_URL:-https://bwebtamdi.tamadee.online}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    expose:
+      - "9000"
+    command:
+      [
+        "sh",
+        "-c",
+        "pnpm predeploy && if [ \"$$AUTO_SEED\" = \"true\" ]; then npx medusa exec ./src/scripts/seed.js; fi && pnpm start",
+      ]
+    environment:
+      <<: *backend-env
+      COOLIFY_SERVICE_URL: ${SERVICE_URL_BACKEND_9000:-https://bwebtamdi.tamadee.online}
+      AUTO_SEED: ${AUTO_SEED:-true}
+      MEDUSA_WORKER_MODE: server
+      DISABLE_MEDUSA_ADMIN: "false"
+    volumes:
+      - backend_static:/app/packages/api/.medusa/server/static
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:9000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 90s
+
+  worker:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile
+      args:
+        MERCUR_BACKEND_URL: ${MERCUR_BACKEND_URL:-https://bwebtamdi.tamadee.online}
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: ["pnpm", "start"]
+    environment:
+      <<: *backend-env
+      MEDUSA_WORKER_MODE: worker
+      DISABLE_MEDUSA_ADMIN: "true"
+    volumes:
+      - backend_static:/app/packages/api/.medusa/server/static
+
+  mobile-web:
+    build:
+      context: .
+      dockerfile: apps/mobile/Dockerfile
+      args:
+        TAMADEE_API_BASE_URL: ${MERCUR_BACKEND_URL:-https://bwebtamdi.tamadee.online}
+        TAMADEE_PUBLISHABLE_KEY: ${TAMADEE_PUBLISHABLE_KEY:-}
+        TAMADEE_SITE_URL: ${MOBILE_SITE_URL:-https://m.tamadee.online}
+    restart: unless-stopped
+    expose:
+      - "8080"
+    environment:
+      COOLIFY_SERVICE_URL: ${SERVICE_URL_MOBILE_WEB_8080:-https://m.tamadee.online}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/healthz >/dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  storefront:
+    build:
+      context: .
+      dockerfile: apps/storefront/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    expose:
+      - "3000"
+    environment:
+      COOLIFY_SERVICE_URL: ${SERVICE_URL_STOREFRONT_3000:-https://tamdi.tamadee.online}
+      NODE_ENV: production
+      MERCUR_BACKEND_URL: http://backend:9000
+      NEXT_PUBLIC_API_BASE_URL: ${MERCUR_BACKEND_URL:-https://bwebtamdi.tamadee.online}
+      NEXT_PUBLIC_PUBLISHABLE_KEY: ${TAMADEE_PUBLISHABLE_KEY:-}
+      NEXT_PUBLIC_SITE_URL: ${STOREFRONT_SITE_URL:-https://tamdi.tamadee.online}
+      COOKIE_DOMAIN: ${COOKIE_DOMAIN:-.tamadee.online}
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+volumes:
+  pgdata:
+  redisdata:
+  backend_static:

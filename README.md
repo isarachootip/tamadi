@@ -24,5 +24,6 @@ Marketplace หลายผู้ขายสำหรับตลาดไท�
 ## เอกสารโครงการ
 - [PLAN.md](./PLAN.md) — แผนภาพรวมและข้อตกลงทางสถาปัตยกรรม
 - [docs/PHASE0.md](./docs/PHASE0.md) — ขั้นตอนเตรียมโดเมนและระบบพื้นฐาน
-- [docs/DEPLOY.md](./docs/DEPLOY.md) — คู่มือติดตั้ง VPS Ubuntu 24.04 LTS ด้วย Docker Compose
+- [docs/COOLIFY.md](./docs/COOLIFY.md) — คู่มือขึ้นเซิร์ฟเวอร์ผ่าน Git + Coolify (4 โดเมน)
+- [docs/DEPLOY.md](./docs/DEPLOY.md) — คู่มือติดตั้ง VPS Ubuntu 24.04 LTS แบบรัน Docker Compose โดยตรง
 - [docs/PROMPTS.md](./docs/PROMPTS.md) — แผนการดำเนินงานแบ่งตามระยะ

@@ -1,5 +1,7 @@
 # คู่มือติดตั้งและเอาขึ้นเซิร์ฟเวอร์จริง (VPS Ubuntu 24.04 LTS)
 
+> **หากใช้งานผ่าน Git + Coolify:** ให้ใช้ไฟล์ `/docker-compose.coolify.yaml` และทำตามคู่มือ [COOLIFY.md](./COOLIFY.md) แทน (เพื่อไม่ให้ Caddy ชนพอร์ต 80/443 กับ Coolify Proxy)
+
 เอกสารนี้อธิบายขั้นตอนนำระบบ **Tamadee ("ทำมาดี ทำมาขาย")** ขึ้นเซิร์ฟเวอร์จริงครบทั้ง 4 โดเมนหลัก (`bwebtamdi`, `m`, `tamdi`, `webtamdi`) ด้วย Docker Compose และออกใบรับรอง HTTPS อัตโนมัติผ่าน Caddy 2
 
 ---
