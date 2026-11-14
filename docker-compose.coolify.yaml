@@ -6,6 +6,12 @@
 
 x-backend-env: &backend-env
   NODE_ENV: production
+  HOST: "0.0.0.0"
+  PORT: "9000"
+  POSTGRES_HOST: postgres
+  POSTGRES_USER: ${POSTGRES_USER:-tamadee}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+  POSTGRES_DB: ${POSTGRES_DB:-tamadee}
   DATABASE_URL: postgres://${POSTGRES_USER:-tamadee}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@postgres:5432/${POSTGRES_DB:-tamadee}
   REDIS_URL: redis://redis:6379
   JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
@@ -37,7 +43,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
       POSTGRES_DB: ${POSTGRES_DB:-tamadee}
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - tamadee_pgdata:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-tamadee} -d ${POSTGRES_DB:-tamadee}"]
       interval: 10s
@@ -89,8 +95,8 @@ services:
         ]
       interval: 15s
       timeout: 5s
-      retries: 8
-      start_period: 90s
+      retries: 12
+      start_period: 300s
 
   worker:
     build:
@@ -163,6 +169,6 @@ services:
       start_period: 15s
 
 volumes:
-  pgdata:
+  tamadee_pgdata:
   redisdata:
   backend_static:

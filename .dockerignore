@@ -1,0 +1,12 @@
+.git
+node_modules
+**/node_modules
+.pnpm-store
+.turbo
+**/.next
+**/.medusa
+**/dist
+apps/mobile/build
+apps/mobile/.dart_tool
+coverage
+*.log
