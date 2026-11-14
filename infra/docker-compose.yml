@@ -1,7 +1,7 @@
 # Production Compose (PostgreSQL, Redis, Mercur Backend + Worker, Flutter Mobile Web, Next.js Storefront, Caddy)
 x-backend-env: &backend-env
   NODE_ENV: production
-  DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+  DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable
   REDIS_URL: redis://redis:6379
   JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
   COOKIE_SECRET: ${COOKIE_SECRET:?COOKIE_SECRET is required}
