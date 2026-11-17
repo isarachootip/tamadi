@@ -14,10 +14,12 @@ import { SellerInfoCard } from "./SellerInfoCard";
 
 export interface VariantPurchasePanelProps {
   readonly detail: ProductDetail;
+  readonly inlineActions?: boolean;
 }
 
 export function VariantPurchasePanel({
   detail,
+  inlineActions = false,
 }: VariantPurchasePanelProps): JSX.Element {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -67,7 +69,7 @@ export function VariantPurchasePanel({
   }
 
   return (
-    <div className="space-y-5 pb-20">
+    <div className={inlineActions ? "space-y-5" : "space-y-5 pb-20"}>
       <div className="flex items-baseline justify-between gap-2">
         <p className="font-display text-2xl font-extrabold tracking-tight text-[#111111] dark:text-[#C6F432]">
           {formatThb(displayPrice)}
@@ -129,7 +131,13 @@ export function VariantPurchasePanel({
         </p>
       ) : null}
 
-      <div className="fixed bottom-0 left-1/2 z-40 flex w-full max-w-[430px] -translate-x-1/2 gap-2.5 border-t border-[#E2E2DC] bg-white/95 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-md dark:border-[#2E2E2B] dark:bg-[#111111]/95">
+      <div
+        className={
+          inlineActions
+            ? "flex gap-3 pt-2"
+            : "fixed bottom-0 left-1/2 z-40 flex w-full max-w-[430px] -translate-x-1/2 gap-2.5 border-t border-[#E2E2DC] bg-white/95 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-md dark:border-[#2E2E2B] dark:bg-[#111111]/95"
+        }
+      >
         <button
           type="button"
           disabled={isPending || !activeOffer}

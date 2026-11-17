@@ -1,21 +1,33 @@
 import type { JSX } from "react";
 import { RegisterFormCard } from "../../../components/account/AuthForms";
 import { TopBackHeader } from "../../../components/shared/TopBackHeader";
-import { MobileAppShell } from "../../../components/shell/MobileAppShell";
+import { StorefrontShell } from "../../../components/shell/StorefrontShell";
 
 export default function RegisterPage(): JSX.Element {
-  return (
-    <MobileAppShell>
-      <TopBackHeader title="สมัครสมาชิก" backHref="/account" />
-      <div className="space-y-4 px-4 pt-5">
-        <div>
-          <h2 className="text-lg font-extrabold">สร้างบัญชีสมาชิก Tamadee</h2>
-          <p className="text-xs text-[#4A4A45] dark:text-[#D4D4CE]">
-            สมัครฟรี ใช้บัญชีเดียวได้ทั้งบนเว็บ tamdi.tamadee.online และแอปมือถือ
-          </p>
-        </div>
-        <RegisterFormCard />
+  const formBody = (
+    <div className="space-y-4">
+      <div>
+        <h1 className="text-xl font-extrabold lg:text-2xl">
+          สร้างบัญชีสมาชิก Tamadee
+        </h1>
+        <p className="text-xs text-[#4A4A45] lg:text-sm dark:text-[#D4D4CE]">
+          สมัครฟรี ใช้บัญชีเดียวได้ทั้งบนเว็บ webtamdi, tamdi และแอปมือถือ
+        </p>
       </div>
-    </MobileAppShell>
+      <RegisterFormCard />
+    </div>
+  );
+
+  return (
+    <StorefrontShell
+      narrowDesktop
+      mobileContent={
+        <>
+          <TopBackHeader title="สมัครสมาชิก" backHref="/account" />
+          <div className="px-4 pt-5">{formBody}</div>
+        </>
+      }
+      desktopContent={<div className="mx-auto max-w-lg py-6">{formBody}</div>}
+    />
   );
 }

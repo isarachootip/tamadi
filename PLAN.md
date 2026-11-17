@@ -22,6 +22,6 @@
 - **ระยะ 2A (เสร็จแล้ว):** แอปมือถือ Flutter (`apps/mobile` + `m.tamadee.online` Docker/Nginx + Deep Links + `docs/MOBILE.md`) ครบ Flow เลือกสินค้า ร้านค้า ตะกร้าแยกร้าน สมาชิก และโครงหน้าผู้ช่วย AI
 - **ระยะ 2B (เสร็จแล้ว):** เว็บหน้าร้านมือถือ PWA (`apps/storefront` → `tamdi.tamadee.online` ด้วย Next.js 16 + Tailwind v4 + `@tamadee/ui`, Lighthouse มือถือ Performance 100 / Accessibility 100, `docs/STOREFRONT.md`)
 - **ระยะ 3:** ชำระเงิน Opn Payments, จัดส่งแยกร้าน, ล็อกสต็อก 15 นาที และรายงานยอดโอนผู้ขาย CSV
-- **ระยะ 4:** เว็บหน้าร้านจอใหญ่และ SEO (`webtamdi.tamadee.online`)
+- **ระยะ 4 (เสร็จแล้ว):** เว็บหน้าร้านจอใหญ่เต็มความกว้างและ SEO (`webtamdi.tamadee.online` แยก Layout จาก `tamdi` ด้วย `src/proxy.ts`, ตาราง 4–5 คอลัมน์, ตัวกรองด้านซ้าย, หน้าสินค้าและตะกร้า 2 คอลัมน์, `sitemap.xml`, `robots.txt`, Canonical & Product JSON-LD)
 - **ระยะ 5:** ฟีเจอร์ล้ำ (AI น้องทำมะดิ, ค้นหาด้วยรูปถ่าย, LINE Login & แจ้งเตือน, Push Notification)
 - **ระยะ 6:** ขึ้น Production, สำรองฐานข้อมูล, CI/CD, กฎหมาย PDPA และ E2E Tests

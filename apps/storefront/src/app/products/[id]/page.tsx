@@ -1,17 +1,43 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { JSX } from "react";
+import { DesktopProductDetailView } from "../../../components/desktop/DesktopProductDetailView";
 import { ProductGallery } from "../../../components/product/ProductGallery";
 import { VariantPurchasePanel } from "../../../components/product/VariantPurchasePanel";
 import { CartIconLink } from "../../../components/shared/CartIconLink";
 import { TopBackHeader } from "../../../components/shared/TopBackHeader";
-import { MobileAppShell } from "../../../components/shell/MobileAppShell";
+import { StorefrontShell } from "../../../components/shell/StorefrontShell";
 import { getProductDetail } from "../../../data/repositories/catalog-repo";
+import { buildPageMetadata, buildProductJsonLd } from "../../../data/seo";
 import { getServerCart } from "../../../data/session";
 import { buildGalleryUrls } from "../../../domain/catalog-logic";
 import { computeCartSummary } from "../../../domain/pricing";
 
 interface ProductDetailPageProps {
   readonly params: Promise<{ id: string }>;
+}
+
+export async function generateMetadata({
+  params,
+}: ProductDetailPageProps): Promise<Metadata> {
+  const { id } = await params;
+  const detail = await getProductDetail(id).catch(() => null);
+  if (!detail) {
+    return buildPageMetadata({
+      title: "ไม่พบสินค้า",
+      description: "สินค้าที่คุณค้นหาอาจถูกย้ายหรือยกเลิกการจำหน่ายแล้ว",
+      pathname: `/products/${encodeURIComponent(id)}`,
+    });
+  }
+  return buildPageMetadata({
+    title: detail.title,
+    description:
+      detail.description ??
+      detail.subtitle ??
+      `เลือกซื้อ ${detail.title} จากผู้สร้างสรรค์ไทยบน Tamadee`,
+    pathname: `/products/${encodeURIComponent(detail.id)}`,
+    imageUrl: detail.images[0] ?? detail.thumbnail,
+  });
 }
 
 export default async function ProductDetailPage({
@@ -30,9 +56,10 @@ export default async function ProductDetailPage({
 
   const cartSummary = computeCartSummary(cart);
   const galleryUrls = buildGalleryUrls(detail);
+  const productJsonLd = buildProductJsonLd(detail);
 
-  return (
-    <MobileAppShell showBottomNav={false}>
+  const mobileContent = (
+    <>
       <TopBackHeader
         title="รายละเอียดสินค้า"
         backHref="/products"
@@ -83,6 +110,23 @@ export default async function ProductDetailPage({
 
         <VariantPurchasePanel detail={detail} />
       </div>
-    </MobileAppShell>
+    </>
+  );
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
+      <StorefrontShell
+        showBottomNav={false}
+        cartCount={cartSummary.totalQuantity}
+        mobileContent={mobileContent}
+        desktopContent={
+          <DesktopProductDetailView detail={detail} galleryUrls={galleryUrls} />
+        }
+      />
+    </>
   );
 }

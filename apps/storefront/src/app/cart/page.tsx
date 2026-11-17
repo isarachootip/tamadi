@@ -1,12 +1,21 @@
 import { NongTammadiMascot } from "@tamadee/ui";
+import type { Metadata } from "next";
 import Link from "next/link";
 import type { JSX } from "react";
 import { PromoAndPaymentCard } from "../../components/cart/PromoAndPaymentCard";
 import { SellerGroupCard } from "../../components/cart/SellerGroupCard";
+import { DesktopCartView } from "../../components/desktop/DesktopCartView";
 import { TopBackHeader } from "../../components/shared/TopBackHeader";
-import { MobileAppShell } from "../../components/shell/MobileAppShell";
+import { StorefrontShell } from "../../components/shell/StorefrontShell";
+import { buildPageMetadata } from "../../data/seo";
 import { getServerCart, getServerCustomer } from "../../data/session";
 import { computeCartSummary, groupCartBySeller } from "../../domain/pricing";
+
+export const metadata: Metadata = buildPageMetadata({
+  title: "ตะกร้าสินค้าแยกร้าน",
+  description: "ตรวจสอบรายการสินค้า ค่าจัดส่งรายร้าน และสรุปยอดชำระเงินของคุณบน Tamadee",
+  pathname: "/cart",
+});
 
 export default async function CartPage(): Promise<JSX.Element> {
   const [cart, customer] = await Promise.all([
@@ -17,8 +26,8 @@ export default async function CartPage(): Promise<JSX.Element> {
   const groups = cart ? groupCartBySeller(cart.items) : [];
   const summary = computeCartSummary(cart);
 
-  return (
-    <MobileAppShell showBottomNav={groups.length === 0}>
+  const mobileContent = (
+    <>
       <TopBackHeader
         title={`ตะกร้าสินค้า (${summary.totalQuantity})`}
         backHref="/products"
@@ -59,6 +68,22 @@ export default async function CartPage(): Promise<JSX.Element> {
           </>
         )}
       </div>
-    </MobileAppShell>
+    </>
+  );
+
+  return (
+    <StorefrontShell
+      showBottomNav={groups.length === 0}
+      cartCount={summary.totalQuantity}
+      mobileContent={mobileContent}
+      desktopContent={
+        <DesktopCartView
+          groups={groups}
+          summary={summary}
+          appliedCodes={cart?.promoCodes ?? []}
+          isLoggedIn={customer !== null}
+        />
+      }
+    />
   );
 }

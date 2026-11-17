@@ -1,14 +1,24 @@
 import { Sparkles } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import type { JSX } from "react";
+import { DesktopHomeView } from "../components/desktop/DesktopHomeView";
 import { CategoryPillsRow } from "../components/home/CategoryPillsRow";
 import { HomeHeader } from "../components/home/HomeHeader";
 import { HomeHeroBanner } from "../components/home/HomeHeroBanner";
 import { ProductCard } from "../components/shared/ProductCard";
-import { MobileAppShell } from "../components/shell/MobileAppShell";
+import { StorefrontShell } from "../components/shell/StorefrontShell";
 import { listCategories, listProducts } from "../data/repositories/catalog-repo";
+import { buildPageMetadata } from "../data/seo";
 import { getServerCart } from "../data/session";
 import { computeCartSummary } from "../domain/pricing";
+
+export const metadata: Metadata = buildPageMetadata({
+  title: "Tamadee — ทำมาดี ทำมาขาย | ตลาดสินค้าดีไซน์และงานคราฟต์ไทย",
+  description:
+    "เลือกช้อปเสื้อผ้าลินิน รองเท้าหนัง กระเป๋า เครื่องประดับ และงานเซรามิกทำมือจากสตูดิโอผู้สร้างสรรค์ไทย ส่งตรงจากผู้ขาย",
+  pathname: "/",
+});
 
 export default async function HomePage(): Promise<JSX.Element> {
   const [categories, products, cart] = await Promise.all([
@@ -21,8 +31,8 @@ export default async function HomePage(): Promise<JSX.Element> {
   const aiPicks = products.slice(0, 4);
   const newArrivals = products.slice(4, 14);
 
-  return (
-    <MobileAppShell>
+  const mobileContent = (
+    <>
       <HomeHeader cartCount={cartSummary.totalQuantity} />
 
       <div className="space-y-6 px-4 pt-4">
@@ -100,6 +110,17 @@ export default async function HomePage(): Promise<JSX.Element> {
           </section>
         ) : null}
       </div>
-    </MobileAppShell>
+    </>
+  );
+
+  return (
+    <StorefrontShell
+      categories={categories}
+      cartCount={cartSummary.totalQuantity}
+      mobileContent={mobileContent}
+      desktopContent={
+        <DesktopHomeView categories={categories} products={products} />
+      }
+    />
   );
 }

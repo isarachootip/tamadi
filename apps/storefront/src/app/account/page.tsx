@@ -5,7 +5,7 @@ import type { JSX } from "react";
 import { logoutCustomerAction } from "../../actions/auth-actions";
 import { CartIconLink } from "../../components/shared/CartIconLink";
 import { TopBackHeader } from "../../components/shared/TopBackHeader";
-import { MobileAppShell } from "../../components/shell/MobileAppShell";
+import { StorefrontShell } from "../../components/shell/StorefrontShell";
 import { ThemeModeSelector } from "../../components/theme/ThemeModeSelector";
 import { readCustomerToken } from "../../data/cookies";
 import { fetchCustomerOrderGroups } from "../../data/repositories/auth-repo";
@@ -28,15 +28,9 @@ export default async function AccountPage(): Promise<JSX.Element> {
       customer.email
     : "";
 
-  return (
-    <MobileAppShell>
-      <TopBackHeader
-        title="บัญชีของฉัน"
-        rightSlot={<CartIconLink count={cartSummary.totalQuantity} />}
-      />
-
-      <div className="space-y-5 px-4 pt-4">
-        <section aria-labelledby="theme-heading" className="space-y-2">
+  const bodyContent = (
+    <div className="space-y-5">
+      <section aria-labelledby="theme-heading" className="space-y-2">
           <h2 id="theme-heading" className="text-xs font-extrabold uppercase">
             การแสดงผลหน้าจอ (Light / Dark Mode)
           </h2>
@@ -145,8 +139,29 @@ export default async function AccountPage(): Promise<JSX.Element> {
               </button>
             </form>
           </>
-        )}
-      </div>
-    </MobileAppShell>
+      )}
+    </div>
+  );
+
+  return (
+    <StorefrontShell
+      narrowDesktop
+      cartCount={cartSummary.totalQuantity}
+      mobileContent={
+        <>
+          <TopBackHeader
+            title="บัญชีของฉัน"
+            rightSlot={<CartIconLink count={cartSummary.totalQuantity} />}
+          />
+          <div className="px-4 pt-4">{bodyContent}</div>
+        </>
+      }
+      desktopContent={
+        <div className="space-y-6">
+          <h1 className="text-3xl font-extrabold">บัญชีของฉัน</h1>
+          {bodyContent}
+        </div>
+      }
+    />
   );
 }

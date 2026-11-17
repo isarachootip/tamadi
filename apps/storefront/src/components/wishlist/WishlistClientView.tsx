@@ -9,10 +9,12 @@ import { useWishlist } from "./WishlistProvider";
 
 export interface WishlistClientViewProps {
   readonly allProducts: readonly ProductSummary[];
+  readonly desktopGrid?: boolean;
 }
 
 export function WishlistClientView({
   allProducts,
+  desktopGrid = false,
 }: WishlistClientViewProps): JSX.Element {
   const { ids } = useWishlist();
   const likedProducts = allProducts.filter((p) => ids.has(p.id));
@@ -42,7 +44,13 @@ export function WishlistClientView({
       <h2 className="text-sm font-extrabold">
         สินค้าที่คุณถูกใจ ({likedProducts.length} ชิ้น)
       </h2>
-      <div className="grid grid-cols-2 gap-3">
+      <div
+        className={
+          desktopGrid
+            ? "grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+            : "grid grid-cols-2 gap-3"
+        }
+      >
         {likedProducts.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}

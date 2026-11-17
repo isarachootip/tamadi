@@ -4,6 +4,7 @@ import type { JSX, ReactNode } from "react";
 import { ServiceWorkerRegister } from "../components/pwa/ServiceWorkerRegister";
 import { ThemeProvider } from "../components/theme/ThemeProvider";
 import { WishlistProvider } from "../components/wishlist/WishlistProvider";
+import { CANONICAL_DESKTOP_ORIGIN } from "../data/seo";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -21,12 +22,16 @@ const anuphan = Anuphan({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(CANONICAL_DESKTOP_ORIGIN),
   title: {
     default: "Tamadee — ทำมาดี ทำมาขาย",
     template: "%s | Tamadee",
   },
   description:
     "ตลาดออนไลน์หลายผู้ขายสำหรับสินค้าไทยที่ตั้งใจทำมาดี เสื้อผ้า รองเท้า กระเป๋า เครื่องประดับ และงานคราฟต์",
+  alternates: {
+    canonical: CANONICAL_DESKTOP_ORIGIN,
+  },
   applicationName: "Tamadee",
   appleWebApp: {
     capable: true,

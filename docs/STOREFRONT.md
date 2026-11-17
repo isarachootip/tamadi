@@ -2,7 +2,7 @@
 
 เว็บหน้าร้านของ **Tamadee (ทำมาดี ทำมาขาย)** พัฒนาด้วย **Next.js 16.4 (App Router + Turbopack)**, **Tailwind CSS v4**, **TypeScript Strict**, **Zod 4.6** และแพ็กเกจกลาง **`@tamadee/ui`** จากโค้ดชุดเดียว รองรับการแสดงผลทั้ง:
 - **`tamdi.tamadee.online` (ระยะ 2B):** เว็บมือถือ PWA โหลดไวสำหรับลูกค้าที่กดลิงก์จาก LINE / Facebook / TikTok (เมื่อเปิดบนคอมพิวเตอร์จะแสดงกรอบจอมือถือ `max-w-[430px]` กลางหน้าจอ)
-- **`webtamdi.tamadee.online` (ระยะ 4):** เว็บจอใหญ่และ SEO เต็มรูปแบบ แยกด้วย `src/proxy.ts` (`x-tamadee-surface`)
+- **`webtamdi.tamadee.online` (ระยะ 4 — เสร็จแล้ว):** เว็บจอใหญ่เต็มความกว้าง (`max-w-[1360px]`) แถบเมนูบน, ตารางสินค้า 4–5 คอลัมน์, แผงตัวกรองด้านซ้าย, หน้าสินค้าและตะกร้าแบบ 2 คอลัมน์ พร้อมชุด SEO (`sitemap.xml`, `robots.txt`, Canonical ชี้ `webtamdi.tamadee.online`, และ Product JSON-LD) แยกอัตโนมัติด้วย `src/proxy.ts` (`x-tamadee-surface` หรือ `?surface=desktop`)
 
 ---
 

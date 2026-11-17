@@ -1,17 +1,27 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import type { JSX } from "react";
 import { ProductFilterBar } from "../../components/catalog/ProductFilterBar";
+import { DesktopCatalogView } from "../../components/desktop/DesktopCatalogView";
 import { CartIconLink } from "../../components/shared/CartIconLink";
 import { ProductCard } from "../../components/shared/ProductCard";
 import { TopBackHeader } from "../../components/shared/TopBackHeader";
-import { MobileAppShell } from "../../components/shell/MobileAppShell";
+import { StorefrontShell } from "../../components/shell/StorefrontShell";
 import {
   listCategories,
   listProducts,
 } from "../../data/repositories/catalog-repo";
+import { buildPageMetadata } from "../../data/seo";
 import { getServerCart } from "../../data/session";
 import { computeCartSummary } from "../../domain/pricing";
 import type { ProductSortOption } from "../../domain/types";
+
+export const metadata: Metadata = buildPageMetadata({
+  title: "ค้นหาและเลือกชมสินค้าทั้งหมด",
+  description:
+    "รวมสินค้าทำมาดีจากผู้ขายไทย เสื้อผ้า รองเท้า กระเป๋า เครื่องประดับ และของแต่งบ้านงานคราฟต์ กรองตามหมวดและช่วงราคาได้",
+  pathname: "/products",
+});
 
 interface ProductsPageProps {
   readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -57,8 +67,8 @@ export default async function ProductsPage({
   const cartSummary = computeCartSummary(cart);
   const selectedCategory = categories.find((c) => c.id === categoryId);
 
-  return (
-    <MobileAppShell>
+  const mobileContent = (
+    <>
       <TopBackHeader
         title={selectedCategory ? selectedCategory.name : "สินค้าทั้งหมด"}
         backHref="/categories"
@@ -108,6 +118,26 @@ export default async function ProductsPage({
           </div>
         )}
       </div>
-    </MobileAppShell>
+    </>
+  );
+
+  return (
+    <StorefrontShell
+      categories={categories}
+      cartCount={cartSummary.totalQuantity}
+      searchQuery={q}
+      mobileContent={mobileContent}
+      desktopContent={
+        <DesktopCatalogView
+          categories={categories}
+          products={products}
+          q={q}
+          categoryId={categoryId}
+          minPrice={minPrice}
+          maxPrice={maxPrice}
+          sort={sort}
+        />
+      }
+    />
   );
 }
