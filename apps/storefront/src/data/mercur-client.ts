@@ -1,5 +1,39 @@
-import type { z } from "zod";
-import { getStorefrontEnv } from "./env";
+import { z } from "zod";
+import { getStorefrontEnv, type StorefrontEnv } from "./env";
+
+const PublicConfigSchema = z.object({
+  publishableApiKey: z.string(),
+});
+
+let cachedDiscoveredKey: { key: string; expiresAt: number } | null = null;
+
+async function resolvePublishableKey(env: StorefrontEnv): Promise<string> {
+  if (env.publishableKey.length > 0) {
+    return env.publishableKey;
+  }
+  const now = Date.now();
+  if (cachedDiscoveredKey && cachedDiscoveredKey.expiresAt > now) {
+    return cachedDiscoveredKey.key;
+  }
+  try {
+    const res = await fetch(`${env.mercurBackendUrl}/public-config`, {
+      headers: { Accept: "application/json" },
+      cache: "no-store",
+    });
+    if (!res.ok) return "";
+    const parsed = PublicConfigSchema.safeParse(await res.json());
+    if (parsed.success && parsed.data.publishableApiKey.startsWith("pk_")) {
+      cachedDiscoveredKey = {
+        key: parsed.data.publishableApiKey,
+        expiresAt: now + 300_000,
+      };
+      return parsed.data.publishableApiKey;
+    }
+  } catch {
+    // Fallback to empty string below
+  }
+  return "";
+}
 
 export class MercurApiError extends Error {
   public readonly statusCode: number | undefined;
@@ -55,8 +89,11 @@ export async function mercurFetch<TSchema extends z.ZodType>(
 ): Promise<z.infer<TSchema>> {
   const env = getStorefrontEnv();
   const method = options.method ?? "GET";
+  const publishableKey = options.path.startsWith("/store")
+    ? await resolvePublishableKey(env)
+    : env.publishableKey;
 
-  if (options.path.startsWith("/store") && env.publishableKey.length === 0) {
+  if (options.path.startsWith("/store") && publishableKey.length === 0) {
     throw new MercurApiError(
       "ยังไม่ได้ตั้งค่า NEXT_PUBLIC_PUBLISHABLE_KEY ในไฟล์ .env.local"
     );
@@ -66,8 +103,8 @@ export async function mercurFetch<TSchema extends z.ZodType>(
     Accept: "application/json",
     "Content-Type": "application/json",
   };
-  if (env.publishableKey.length > 0) {
-    reqHeaders["x-publishable-api-key"] = env.publishableKey;
+  if (publishableKey.length > 0) {
+    reqHeaders["x-publishable-api-key"] = publishableKey;
   }
   if (options.bearerToken && options.bearerToken.length > 0) {
     reqHeaders["Authorization"] = `Bearer ${options.bearerToken}`;

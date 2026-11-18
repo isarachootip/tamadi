@@ -29,6 +29,33 @@ class ApiClient {
   final AppConfig config;
   final TokenStorage tokenStorage;
   final Dio _dio;
+  String? _discoveredPublishableKey;
+
+  Future<String> _resolvePublishableKey() async {
+    if (config.hasPublishableKey) {
+      return config.publishableApiKey;
+    }
+    if (_discoveredPublishableKey != null &&
+        _discoveredPublishableKey!.isNotEmpty) {
+      return _discoveredPublishableKey!;
+    }
+    try {
+      final Response<Object?> res = await _dio.get<Object?>('/public-config');
+      final JsonMap map = JsonParsers.asJsonMap(res.data, context: 'public-config');
+      final String key = JsonParsers.readString(
+        map,
+        'publishableApiKey',
+        fallback: '',
+      ).trim();
+      if (key.startsWith('pk_')) {
+        _discoveredPublishableKey = key;
+        return key;
+      }
+    } catch (_) {
+      // Fallback handled below
+    }
+    return '';
+  }
 
   Future<JsonMap> get(
     String path, {
@@ -81,14 +108,17 @@ class ApiClient {
     bool authenticated = false,
     String? overrideBearerToken,
   }) async {
-    if (path.startsWith('/store') && !config.hasPublishableKey) {
-      throw const ApiException(
-        message:
-            'ยังไม่ได้ตั้งค่า TAMADEE_PUBLISHABLE_KEY (รันด้วย --dart-define-from-file=.env.json)',
-      );
-    }
-
     final Map<String, String> extraHeaders = <String, String>{};
+    if (path.startsWith('/store')) {
+      final String pubKey = await _resolvePublishableKey();
+      if (pubKey.isEmpty) {
+        throw const ApiException(
+          message:
+              'ยังไม่ได้ตั้งค่า TAMADEE_PUBLISHABLE_KEY (รันด้วย --dart-define-from-file=.env.json)',
+        );
+      }
+      extraHeaders['x-publishable-api-key'] = pubKey;
+    }
     final String? token = overrideBearerToken ??
         (authenticated ? await tokenStorage.readToken() : null);
     if (token != null && token.isNotEmpty) {
