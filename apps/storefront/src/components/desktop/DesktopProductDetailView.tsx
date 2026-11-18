@@ -2,30 +2,33 @@ import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import type { JSX } from "react";
 import type { ProductDetail } from "../../domain/types";
+import { getUiDictionary, type UiDictionary } from "../../i18n";
 import { ProductGallery } from "../product/ProductGallery";
 import { VariantPurchasePanel } from "../product/VariantPurchasePanel";
 
 export interface DesktopProductDetailViewProps {
   readonly detail: ProductDetail;
   readonly galleryUrls: readonly string[];
+  readonly dict?: UiDictionary;
 }
 
 export function DesktopProductDetailView({
   detail,
   galleryUrls,
+  dict = getUiDictionary("th"),
 }: DesktopProductDetailViewProps): JSX.Element {
   return (
     <div className="space-y-6">
       <nav
-        aria-label="เส้นทางหน้าเว็บ"
+        aria-label="Breadcrumb"
         className="flex flex-wrap items-center gap-1.5 text-xs font-semibold text-[#4A4A45] dark:text-[#D4D4CE]"
       >
         <Link href="/" className="hover:underline">
-          หน้าแรก
+          {dict.nav.home}
         </Link>
         <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
         <Link href="/products" className="hover:underline">
-          สินค้าทั้งหมด
+          {dict.nav.allProducts}
         </Link>
         {detail.categoryNames[0] ? (
           <>
@@ -58,7 +61,7 @@ export function DesktopProductDetailView({
                 id="desktop-desc-heading"
                 className="text-sm font-extrabold tracking-wide uppercase"
               >
-                เรื่องราวและรายละเอียดชิ้นงาน
+                {dict.product.storyHeading}
               </h2>
               <p className="mt-2 text-sm leading-relaxed text-[#4A4A45] dark:text-[#D4D4CE]">
                 {detail.description}

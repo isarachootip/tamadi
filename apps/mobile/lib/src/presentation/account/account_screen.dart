@@ -4,9 +4,13 @@ import 'package:material_ui/material_ui.dart';
 import 'package:tamadee_flutter_ui/tamadee_flutter_ui.dart';
 
 import '../../core/formatters/thb_formatter.dart';
+import '../../core/l10n/app_locale.dart';
+import '../../core/l10n/app_strings.dart';
 import '../../domain/models/customer.dart';
 import '../providers/auth_controller.dart';
+import '../providers/locale_controller.dart';
 import '../providers/theme_controller.dart';
+import '../shared/language_pill_selector.dart';
 import 'widgets/guest_welcome_card.dart';
 
 class AccountScreen extends ConsumerWidget {
@@ -21,6 +25,8 @@ class AccountScreen extends ConsumerWidget {
       orderGroupsProvider,
     );
     final ThemeMode themeMode = ref.watch(themeControllerProvider);
+    final AppLocale locale = ref.watch(localeControllerProvider);
+    final AppStrings strings = ref.watch(appStringsProvider);
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final Color cardBg =
         isDark ? TamadeeColors.surfaceDark : TamadeeColors.surfaceMuted;
@@ -30,9 +36,9 @@ class AccountScreen extends ConsumerWidget {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
         children: <Widget>[
-          const Text(
-            'บัญชีของฉัน',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
+          Text(
+            strings.accountTitle,
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 14),
           authAsync.when(
@@ -64,7 +70,7 @@ class AccountScreen extends ConsumerWidget {
                       contentPadding: EdgeInsets.zero,
                       leading: const Icon(Icons.location_on_outlined),
                       title: Text(
-                        'ที่อยู่จัดส่ง (${customer.addresses.length})',
+                        '${strings.addressesPrefix} (${customer.addresses.length})',
                         style: const TextStyle(fontWeight: FontWeight.w700),
                       ),
                       trailing: const Icon(Icons.chevron_right_rounded),
@@ -76,7 +82,7 @@ class AccountScreen extends ConsumerWidget {
                         onPressed: () =>
                             ref.read(authControllerProvider.notifier).logout(),
                         icon: const Icon(Icons.logout_rounded, size: 18),
-                        label: const Text('ออกจากระบบ'),
+                        label: Text(strings.signOut),
                       ),
                     ),
                   ],
@@ -85,27 +91,37 @@ class AccountScreen extends ConsumerWidget {
             },
           ),
           const SizedBox(height: 20),
-          const Text(
-            'โหมดการแสดงผล',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+          Text(
+            strings.langHeading,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 10),
+          const Align(
+            alignment: Alignment.centerLeft,
+            child: LanguagePillSelector(compact: false),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            strings.themeHeading,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 10),
           SegmentedButton<ThemeMode>(
-            segments: const <ButtonSegment<ThemeMode>>[
+            segments: <ButtonSegment<ThemeMode>>[
               ButtonSegment<ThemeMode>(
                 value: ThemeMode.light,
-                icon: Icon(Icons.light_mode_outlined),
-                label: Text('สว่าง'),
+                icon: const Icon(Icons.light_mode_outlined),
+                label: Text(strings.themeLight),
               ),
               ButtonSegment<ThemeMode>(
                 value: ThemeMode.dark,
-                icon: Icon(Icons.dark_mode_outlined),
-                label: Text('มืด'),
+                icon: const Icon(Icons.dark_mode_outlined),
+                label: Text(strings.themeDark),
               ),
               ButtonSegment<ThemeMode>(
                 value: ThemeMode.system,
-                icon: Icon(Icons.brightness_auto_outlined),
-                label: Text('ตามระบบ'),
+                icon: const Icon(Icons.brightness_auto_outlined),
+                label: Text(strings.themeSystem),
               ),
             ],
             selected: <ThemeMode>{themeMode},
@@ -116,9 +132,9 @@ class AccountScreen extends ConsumerWidget {
             },
           ),
           const SizedBox(height: 22),
-          const Text(
-            'ประวัติคำสั่งซื้อ',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+          Text(
+            strings.ordersHeading,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 10),
           ordersAsync.maybeWhen(
@@ -130,7 +146,7 @@ class AccountScreen extends ConsumerWidget {
                     color: cardBg,
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const Text('ยังไม่มีรายการสั่งซื้อ'),
+                  child: Text(strings.noOrders),
                 );
               }
               return Column(
@@ -138,9 +154,10 @@ class AccountScreen extends ConsumerWidget {
                   for (final OrderGroupSummary g in groups)
                     ListTile(
                       tileColor: cardBg,
-                      title: Text('คำสั่งซื้อ #${g.id}'),
-                      subtitle: Text('แยกส่งจาก ${g.orderCount} ร้าน'),
-                      trailing: Text(ThbFormatter.format(g.totalAmount)),
+                      title: Text('#${g.id}'),
+                      trailing: Text(
+                        ThbFormatter.formatByLocale(g.totalAmount, locale),
+                      ),
                     ),
                 ],
               );

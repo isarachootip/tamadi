@@ -2,10 +2,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tamadee_flutter_ui/tamadee_flutter_ui.dart';
 
+import '../../core/l10n/app_locale.dart';
+import '../../core/l10n/app_strings.dart';
 import '../../core/media/image_picker_adapter.dart';
 import '../../core/network/api_exception.dart';
 import '../../domain/models/ai_chat.dart';
 import '../providers/core_providers.dart';
+import '../providers/locale_controller.dart';
 import 'widgets/ai_conversation_list.dart';
 import 'widgets/ai_input_bar.dart';
 
@@ -21,12 +24,6 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
   final ScrollController _scrollCtrl = ScrollController();
   final List<AiConversationTurn> _turns = <AiConversationTurn>[];
   bool _sending = false;
-
-  static const List<String> _suggestions = <String>[
-    'ขอโทนสีเข้มกว่านี้',
-    'ของขวัญขึ้นบ้านใหม่ งบไม่เกิน 1,000',
-    'เพิ่มกระเป๋า',
-  ];
 
   @override
   void dispose() {
@@ -48,6 +45,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
     if (text.isEmpty || _sending) return;
     _inputCtrl.clear();
 
+    final AppLocale locale = ref.read(localeControllerProvider);
     final List<AiHistoryTurn> history = <AiHistoryTurn>[
       for (final AiConversationTurn t in _turns.skip(
         _turns.length > 6 ? _turns.length - 6 : 0,
@@ -63,7 +61,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
     try {
       final AiChatResult res = await ref
           .read(aiRepositoryProvider)
-          .askAssistant(message: text, history: history);
+          .askAssistant(message: text, history: history, locale: locale);
       if (!mounted) return;
       setState(() {
         _turns.add(
@@ -85,7 +83,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
         _turns.add(
           const AiConversationTurn(
             isUser: false,
-            text: 'ไม่สามารถเชื่อมต่อผู้ช่วย AI ได้ในขณะนี้ กรุณาลองใหม่อีกครั้งครับ',
+            text: 'AI temporarily unavailable.',
           ),
         );
       });
@@ -104,6 +102,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
         .pickCompressedImage();
     if (picked == null || !mounted) return;
 
+    final AppLocale locale = ref.read(localeControllerProvider);
     final String hint = _inputCtrl.text.trim();
     _inputCtrl.clear();
     setState(() {
@@ -111,7 +110,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
       _turns.add(
         AiConversationTurn(
           isUser: true,
-          text: '📷 ค้นหาสินค้าคล้ายรูป: ${picked.fileName}',
+          text: '📷 ${picked.fileName}',
         ),
       );
     });
@@ -123,6 +122,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
             imageBase64: picked.base64Data,
             mimeType: picked.mimeType,
             hint: hint.isNotEmpty ? hint : null,
+            locale: locale,
           );
       if (!mounted) return;
       setState(() {
@@ -149,6 +149,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final AppStrings strings = ref.watch(appStringsProvider);
     return Theme(
       data: TamadeeTheme.dark(),
       child: Scaffold(
@@ -161,7 +162,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
                 scrollController: _scrollCtrl,
                 turns: _turns,
                 sending: _sending,
-                suggestions: _suggestions,
+                suggestions: strings.aiSuggestions,
                 onSelectSuggestion: _sendPrompt,
               ),
             ),

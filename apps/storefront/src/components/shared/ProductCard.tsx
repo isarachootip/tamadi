@@ -1,7 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import type { JSX } from "react";
-import { formatThb } from "../../domain/pricing";
 import type { ProductSummary } from "../../domain/types";
+import { useLocale } from "../i18n/LocaleProvider";
 import { WishlistHeartButton } from "../wishlist/WishlistHeartButton";
 import { ProductImage } from "./ProductImage";
 
@@ -14,6 +16,7 @@ export function ProductCard({
   product,
   priority = false,
 }: ProductCardProps): JSX.Element {
+  const { formatPrice } = useLocale();
   const categoryTag = product.categoryNames[0];
 
   return (
@@ -52,8 +55,8 @@ export function ProductCard({
           </h3>
         </div>
 
-        <p className="font-display text-base font-extrabold tracking-tight text-[#111111] dark:text-[#C6F432]">
-          {formatThb(product.priceAmount)}
+        <p className="font-display text-sm font-extrabold tracking-tight text-[#111111] sm:text-base dark:text-[#C6F432]">
+          {formatPrice(product.priceAmount)}
         </p>
       </Link>
     </article>

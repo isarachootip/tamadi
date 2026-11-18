@@ -1,6 +1,7 @@
 import { Search, SlidersHorizontal } from "lucide-react";
 import type { JSX } from "react";
 import type { ProductCategory, ProductSortOption } from "../../domain/types";
+import { getUiDictionary, type UiDictionary } from "../../i18n";
 
 export interface ProductFilterBarProps {
   readonly categories: readonly ProductCategory[];
@@ -9,6 +10,7 @@ export interface ProductFilterBarProps {
   readonly minPrice?: number;
   readonly maxPrice?: number;
   readonly sort?: ProductSortOption;
+  readonly dict?: UiDictionary;
 }
 
 export function ProductFilterBar({
@@ -18,17 +20,18 @@ export function ProductFilterBar({
   minPrice,
   maxPrice,
   sort = "recommended",
+  dict = getUiDictionary("th"),
 }: ProductFilterBarProps): JSX.Element {
   return (
     <form
       action="/products"
       method="get"
-      aria-label="ค้นหาและกรองสินค้า"
+      aria-label={dict.catalog.filtersTitle}
       className="space-y-2.5 rounded-3xl border border-[#E2E2DC] bg-[#F1F1EE] p-3.5 dark:border-[#2E2E2B] dark:bg-[#1C1C1A]"
     >
       <div className="relative">
         <label htmlFor="catalog-q" className="sr-only">
-          คำค้นหาสินค้า
+          {dict.catalog.keyword}
         </label>
         <Search
           className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-[#4A4A45] dark:text-[#D4D4CE]"
@@ -39,7 +42,7 @@ export function ProductFilterBar({
           name="q"
           type="search"
           defaultValue={q}
-          placeholder="ค้นหาชื่อสินค้า..."
+          placeholder={dict.nav.searchPlaceholder}
           className="min-h-[44px] w-full rounded-2xl bg-white pr-3 pl-10 text-sm font-medium text-[#111111] placeholder:text-[#4A4A45] focus:outline-2 focus:outline-[#111111] dark:bg-[#111111] dark:text-white dark:placeholder:text-[#D4D4CE]"
         />
       </div>
@@ -47,7 +50,7 @@ export function ProductFilterBar({
       <div className="grid grid-cols-2 gap-2">
         <div>
           <label htmlFor="catalog-category" className="sr-only">
-            หมวดหมู่สินค้า
+            {dict.catalog.category}
           </label>
           <select
             id="catalog-category"
@@ -55,7 +58,7 @@ export function ProductFilterBar({
             defaultValue={categoryId}
             className="min-h-[44px] w-full rounded-xl bg-white px-3 text-xs font-bold text-[#111111] dark:bg-[#111111] dark:text-white"
           >
-            <option value="">ทุกหมวดหมู่</option>
+            <option value="">{dict.catalog.allCategoriesOpt}</option>
             {categories.map((cat) => (
               <option key={cat.id} value={cat.id}>
                 {cat.name}
@@ -66,7 +69,7 @@ export function ProductFilterBar({
 
         <div>
           <label htmlFor="catalog-sort" className="sr-only">
-            เรียงลำดับสินค้า
+            {dict.catalog.sortBy}
           </label>
           <select
             id="catalog-sort"
@@ -74,10 +77,10 @@ export function ProductFilterBar({
             defaultValue={sort}
             className="min-h-[44px] w-full rounded-xl bg-white px-3 text-xs font-bold text-[#111111] dark:bg-[#111111] dark:text-white"
           >
-            <option value="recommended">แนะนำสำหรับคุณ</option>
-            <option value="newest">มาใหม่ล่าสุด</option>
-            <option value="price_asc">ราคา: ต่ำ → สูง</option>
-            <option value="price_desc">ราคา: สูง → ต่ำ</option>
+            <option value="recommended">{dict.catalog.sortRecommended}</option>
+            <option value="newest">{dict.catalog.sortNewest}</option>
+            <option value="price_asc">{dict.catalog.sortPriceAsc}</option>
+            <option value="price_desc">{dict.catalog.sortPriceDesc}</option>
           </select>
         </div>
       </div>
@@ -85,7 +88,7 @@ export function ProductFilterBar({
       <div className="grid grid-cols-3 gap-2">
         <div>
           <label htmlFor="catalog-min" className="sr-only">
-            ราคาต่ำสุด (บาท)
+            {dict.catalog.minPrice}
           </label>
           <input
             id="catalog-min"
@@ -93,13 +96,13 @@ export function ProductFilterBar({
             type="number"
             min={0}
             defaultValue={minPrice}
-            placeholder="ต่ำสุด ฿"
+            placeholder={`${dict.catalog.minPrice} ฿`}
             className="min-h-[44px] w-full rounded-xl bg-white px-3 text-xs font-semibold text-[#111111] placeholder:text-[#4A4A45] dark:bg-[#111111] dark:text-white dark:placeholder:text-[#D4D4CE]"
           />
         </div>
         <div>
           <label htmlFor="catalog-max" className="sr-only">
-            ราคาสูงสุด (บาท)
+            {dict.catalog.maxPrice}
           </label>
           <input
             id="catalog-max"
@@ -107,7 +110,7 @@ export function ProductFilterBar({
             type="number"
             min={0}
             defaultValue={maxPrice}
-            placeholder="สูงสุด ฿"
+            placeholder={`${dict.catalog.maxPrice} ฿`}
             className="min-h-[44px] w-full rounded-xl bg-white px-3 text-xs font-semibold text-[#111111] placeholder:text-[#4A4A45] dark:bg-[#111111] dark:text-white dark:placeholder:text-[#D4D4CE]"
           />
         </div>
@@ -116,7 +119,7 @@ export function ProductFilterBar({
           className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-[#111111] px-3 text-xs font-extrabold text-[#C6F432] dark:bg-[#C6F432] dark:text-[#111111]"
         >
           <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
-          <span>กรองผล</span>
+          <span>{dict.catalog.applyFilter}</span>
         </button>
       </div>
     </form>

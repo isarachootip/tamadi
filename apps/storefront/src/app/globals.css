@@ -5,7 +5,9 @@
 
 @layer base {
   html {
-    font-family: var(--font-anuphan), var(--font-sans);
+    font-family:
+      var(--font-anuphan), "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+      "Noto Sans CJK SC", "Noto Sans SC", var(--font-sans);
     background-color: var(--bg-page);
     color: var(--text-primary);
     -webkit-tap-highlight-color: transparent;

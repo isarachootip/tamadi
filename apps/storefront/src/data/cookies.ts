@@ -1,8 +1,10 @@
 import { cookies, headers } from "next/headers";
+import { parseAppLocale, type AppLocale } from "../i18n";
 import { getStorefrontEnv } from "./env";
 
 const JWT_COOKIE_NAME = "tamadee_jwt";
 const CART_COOKIE_NAME = "tamadee_cart_id";
+const LOCALE_COOKIE_NAME = "tamadee_lang";
 const THIRTY_DAYS_SECONDS = 60 * 60 * 24 * 30;
 
 async function resolveCookieOptions(): Promise<{
@@ -68,4 +70,15 @@ export async function clearCartIdCookie(): Promise<void> {
   const store = await cookies();
   const opts = await resolveCookieOptions();
   store.set(CART_COOKIE_NAME, "", { ...opts, maxAge: 0 });
+}
+
+export async function readLocaleCookie(): Promise<AppLocale> {
+  const store = await cookies();
+  return parseAppLocale(store.get(LOCALE_COOKIE_NAME)?.value);
+}
+
+export async function saveLocaleCookie(locale: AppLocale): Promise<void> {
+  const store = await cookies();
+  const opts = await resolveCookieOptions();
+  store.set(LOCALE_COOKIE_NAME, locale, { ...opts, httpOnly: false });
 }

@@ -1,8 +1,11 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tamadee_flutter_ui/tamadee_flutter_ui.dart';
 
+import '../../../core/l10n/app_strings.dart';
 import '../../../domain/models/ai_chat.dart';
+import '../../providers/locale_controller.dart';
 import 'ai_input_bar.dart';
 import 'ai_outfit_preview_card.dart';
 import 'ai_product_card_tile.dart';
@@ -20,7 +23,7 @@ class AiConversationTurn {
   final List<AiRecommendedProduct> products;
 }
 
-class AiConversationList extends StatelessWidget {
+class AiConversationList extends ConsumerWidget {
   const AiConversationList({
     super.key,
     required this.scrollController,
@@ -37,15 +40,14 @@ class AiConversationList extends StatelessWidget {
   final ValueChanged<String> onSelectSuggestion;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final AppStrings strings = ref.watch(appStringsProvider);
+
     return ListView(
       controller: scrollController,
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
       children: <Widget>[
-        const AiChatBubble(
-          isUser: true,
-          text: 'หาชุดไปทะเลให้หน่อย งบไม่เกิน 2,500',
-        ),
+        AiChatBubble(isUser: true, text: strings.aiSamplePrompt),
         AiOutfitPreviewCard(onBrowseSet: () => context.push('/products')),
         for (final AiConversationTurn turn in turns) ...<Widget>[
           Padding(
@@ -56,12 +58,9 @@ class AiConversationList extends StatelessWidget {
             AiProductCardTile(product: item),
         ],
         if (sending)
-          const Padding(
-            padding: EdgeInsets.only(top: 10),
-            child: AiChatBubble(
-              isUser: false,
-              text: 'น้องทำมะดิกำลังค้นสินค้าจริงให้สักครู่...',
-            ),
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: AiChatBubble(isUser: false, text: strings.aiThinking),
           ),
         const SizedBox(height: 14),
         Wrap(

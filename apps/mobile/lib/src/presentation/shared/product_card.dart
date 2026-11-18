@@ -3,7 +3,9 @@ import 'package:material_ui/material_ui.dart';
 import 'package:tamadee_flutter_ui/tamadee_flutter_ui.dart';
 
 import '../../core/formatters/thb_formatter.dart';
+import '../../core/l10n/app_locale.dart';
 import '../../domain/models/product.dart';
+import '../providers/locale_controller.dart';
 import '../providers/wishlist_controller.dart';
 import 'product_image_box.dart';
 
@@ -20,6 +22,7 @@ class ProductCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final AppLocale locale = ref.watch(localeControllerProvider);
     final Set<String> wishlist = ref.watch(wishlistControllerProvider);
     final bool isLiked = wishlist.contains(product.id);
     final Color mutedColor =
@@ -42,9 +45,7 @@ class ProductCard extends ConsumerWidget {
                   right: 6,
                   child: Semantics(
                     button: true,
-                    label: isLiked
-                        ? 'ลบ ${product.title} จากรายการถูกใจ'
-                        : 'เพิ่ม ${product.title} ในรายการถูกใจ',
+                    label: product.title,
                     child: InkWell(
                       onTap: () => ref
                           .read(wishlistControllerProvider.notifier)
@@ -98,10 +99,12 @@ class ProductCard extends ConsumerWidget {
           ],
           const SizedBox(height: 4),
           Text(
-            ThbFormatter.format(product.priceAmount),
+            ThbFormatter.formatByLocale(product.priceAmount, locale),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               fontFamily: 'Space Grotesk',
-              fontSize: 16,
+              fontSize: 15,
               fontWeight: FontWeight.w700,
               letterSpacing: -0.3,
             ),

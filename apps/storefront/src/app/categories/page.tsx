@@ -5,6 +5,7 @@ import type { JSX } from "react";
 import { CartIconLink } from "../../components/shared/CartIconLink";
 import { TopBackHeader } from "../../components/shared/TopBackHeader";
 import { StorefrontShell } from "../../components/shell/StorefrontShell";
+import { getServerI18n } from "../../data/i18n-server";
 import {
   listCategories,
   listProducts,
@@ -15,16 +16,17 @@ import { getServerCart } from "../../data/session";
 import { computeCartSummary } from "../../domain/pricing";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "หมวดหมู่สินค้าและร้านค้าผู้สร้างสรรค์ไทย",
+  title: "หมวดหมู่สินค้าและร้านค้าผู้สร้างสรรค์ไทย | Categories & Creators",
   description: "เลือกช้อปตามหมวดหมู่ เสื้อผ้า รองเท้า กระเป๋า เครื่องประดับ งานคราฟต์ และรวมสตูดิโอไทยบน Tamadee",
   pathname: "/categories",
 });
 
 export default async function CategoriesPage(): Promise<JSX.Element> {
+  const { locale, dict } = await getServerI18n();
   const [categories, products, sellers, cart] = await Promise.all([
-    listCategories().catch(() => []),
-    listProducts().catch(() => []),
-    listSellers().catch(() => []),
+    listCategories(locale).catch(() => []),
+    listProducts({}, locale).catch(() => []),
+    listSellers(locale).catch(() => []),
     getServerCart(),
   ]);
 
@@ -37,7 +39,7 @@ export default async function CategoriesPage(): Promise<JSX.Element> {
           id="cat-list-heading"
           className={isDesktop ? "text-3xl font-extrabold" : "text-base font-extrabold"}
         >
-          เลือกช้อปตามหมวดหมู่ ({categories.length})
+          {dict.home.shopByCategory} ({categories.length})
         </h1>
         <div
           className={
@@ -59,7 +61,7 @@ export default async function CategoriesPage(): Promise<JSX.Element> {
                 <div>
                   <p className="text-base font-extrabold">{cat.name}</p>
                   <p className="text-xs text-[#4A4A45] dark:text-[#D4D4CE]">
-                    {cat.description ?? `${count} รายการพร้อมส่ง`}
+                    {cat.description ?? `${count} ${dict.home.itemsUnit}`}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -79,7 +81,7 @@ export default async function CategoriesPage(): Promise<JSX.Element> {
           id="sellers-heading"
           className={isDesktop ? "text-2xl font-extrabold" : "text-base font-extrabold"}
         >
-          ร้านค้าผู้สร้างสรรค์ไทย ({sellers.length})
+          {dict.nav.creators} ({sellers.length})
         </h2>
         <div
           className={
@@ -101,7 +103,7 @@ export default async function CategoriesPage(): Promise<JSX.Element> {
                 <div>
                   <p className="text-sm font-extrabold">{seller.name}</p>
                   <p className="line-clamp-1 text-xs text-[#4A4A45] dark:text-[#D4D4CE]">
-                    {seller.description ?? "ผู้ขายที่ผ่านการคัดสรรโดย Tamadee"}
+                    {seller.description ?? dict.product.approvedCreator}
                   </p>
                 </div>
               </div>
@@ -120,7 +122,7 @@ export default async function CategoriesPage(): Promise<JSX.Element> {
       mobileContent={
         <>
           <TopBackHeader
-            title="หมวดหมู่และร้านค้า"
+            title={dict.nav.categories}
             rightSlot={<CartIconLink count={cartSummary.totalQuantity} />}
           />
           {renderBody(false)}

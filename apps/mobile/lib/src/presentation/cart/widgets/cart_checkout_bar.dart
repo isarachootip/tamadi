@@ -1,10 +1,14 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tamadee_flutter_ui/tamadee_flutter_ui.dart';
 
 import '../../../core/formatters/thb_formatter.dart';
+import '../../../core/l10n/app_locale.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../domain/models/cart.dart';
+import '../../providers/locale_controller.dart';
 
-class CartCheckoutBar extends StatelessWidget {
+class CartCheckoutBar extends ConsumerWidget {
   const CartCheckoutBar({
     super.key,
     required this.cart,
@@ -15,8 +19,15 @@ class CartCheckoutBar extends StatelessWidget {
   final VoidCallback onPressed;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final AppLocale locale = ref.watch(localeControllerProvider);
+    final AppStrings strings = ref.watch(appStringsProvider);
+    final String formatted = ThbFormatter.formatByLocale(
+      cart.effectiveGrandTotal,
+      locale,
+    );
+
     return SafeArea(
       top: false,
       child: Padding(
@@ -34,11 +45,15 @@ class CartCheckoutBar extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Text(
-                  'ชำระเงิน ${ThbFormatter.format(cart.effectiveGrandTotal)}',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
+                Expanded(
+                  child: Text(
+                    '${strings.payPrefix} $formatted',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
                 Container(
@@ -73,14 +88,13 @@ class CartCheckoutBar extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               const Text(
-                'พร้อมเชื่อมต่อระบบชำระเงิน (ระยะ 3)',
+                'Opn Payments Checkout (THB Settlement)',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
               ),
               const SizedBox(height: 8),
               Text(
-                'ตะกร้าของคุณแยกตามร้านผู้ขาย ${cart.sellerGroups.length} ร้าน '
-                'ยอดรวมสุทธิ ${ThbFormatter.format(cart.effectiveGrandTotal)} '
-                'ระบบชำระเงินจริง (พร้อมเพย์ QR / บัตร / เก็บเงินปลายทาง) จะเปิดใช้งานในระยะที่ 3',
+                '${cart.sellerGroups.length} seller shipment(s) • '
+                '${ThbFormatter.format(cart.effectiveGrandTotal)}',
                 style: const TextStyle(fontSize: 14, height: 1.45),
               ),
               const SizedBox(height: 18),
@@ -88,7 +102,7 @@ class CartCheckoutBar extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () => Navigator.of(ctx).pop(),
-                  child: const Text('รับทราบ'),
+                  child: const Text('OK'),
                 ),
               ),
             ],

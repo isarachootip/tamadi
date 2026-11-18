@@ -1,8 +1,10 @@
+"use client";
+
 import { Store } from "lucide-react";
 import Link from "next/link";
 import type { JSX } from "react";
-import { formatThb } from "../../domain/pricing";
 import type { SellerCartGroup } from "../../domain/types";
+import { useLocale } from "../i18n/LocaleProvider";
 import { CartLineRow } from "./CartLineRow";
 
 export interface SellerGroupCardProps {
@@ -10,9 +12,19 @@ export interface SellerGroupCardProps {
 }
 
 export function SellerGroupCard({ group }: SellerGroupCardProps): JSX.Element {
+  const { locale, formatPrice } = useLocale();
+  const freeText = locale === "en" ? "Free shipping" : locale === "zh" ? "免运费" : "ส่งฟรี";
+  const shipPrefix = locale === "en" ? "Shipping" : locale === "zh" ? "运费" : "ค่าส่ง";
+  const subLabel =
+    locale === "en"
+      ? `Seller subtotal (${group.items.length})`
+      : locale === "zh"
+        ? `店铺小计 (${group.items.length})`
+        : `ยอดสินค้าร้านนี้ (${group.items.length} รายการ)`;
+
   return (
     <section
-      aria-label={`สินค้าจากร้าน ${group.sellerName}`}
+      aria-label={group.sellerName}
       className="rounded-3xl border border-[#E2E2DC] bg-[#F1F1EE] p-4 dark:border-[#2E2E2B] dark:bg-[#1C1C1A]"
     >
       <div className="flex items-center justify-between border-b border-[#E2E2DC] pb-2.5 dark:border-[#2E2E2B]">
@@ -27,8 +39,8 @@ export function SellerGroupCard({ group }: SellerGroupCardProps): JSX.Element {
         </Link>
         <span className="text-xs font-bold text-[#4A4A45] dark:text-[#D4D4CE]">
           {group.shippingEstimate === 0
-            ? "ส่งฟรี"
-            : `ค่าส่ง ${formatThb(group.shippingEstimate)}`}
+            ? freeText
+            : `${shipPrefix} ${formatPrice(group.shippingEstimate)}`}
         </span>
       </div>
 
@@ -39,11 +51,9 @@ export function SellerGroupCard({ group }: SellerGroupCardProps): JSX.Element {
       </div>
 
       <div className="mt-3 flex items-center justify-between border-t border-[#E2E2DC] pt-2.5 text-xs font-bold dark:border-[#2E2E2B]">
-        <span className="text-[#4A4A45] dark:text-[#D4D4CE]">
-          ยอดสินค้าร้านนี้ ({group.items.length} รายการ)
-        </span>
+        <span className="text-[#4A4A45] dark:text-[#D4D4CE]">{subLabel}</span>
         <span className="font-display text-sm font-extrabold">
-          {formatThb(group.subtotal)}
+          {formatPrice(group.subtotal)}
         </span>
       </div>
     </section>

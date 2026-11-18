@@ -7,6 +7,7 @@ import { VariantPurchasePanel } from "../../../components/product/VariantPurchas
 import { CartIconLink } from "../../../components/shared/CartIconLink";
 import { TopBackHeader } from "../../../components/shared/TopBackHeader";
 import { StorefrontShell } from "../../../components/shell/StorefrontShell";
+import { getServerI18n } from "../../../data/i18n-server";
 import { getProductDetail } from "../../../data/repositories/catalog-repo";
 import { buildPageMetadata, buildProductJsonLd } from "../../../data/seo";
 import { getServerCart } from "../../../data/session";
@@ -24,8 +25,8 @@ export async function generateMetadata({
   const detail = await getProductDetail(id).catch(() => null);
   if (!detail) {
     return buildPageMetadata({
-      title: "ไม่พบสินค้า",
-      description: "สินค้าที่คุณค้นหาอาจถูกย้ายหรือยกเลิกการจำหน่ายแล้ว",
+      title: "Product Not Found",
+      description: "The requested item could not be found.",
       pathname: `/products/${encodeURIComponent(id)}`,
     });
   }
@@ -34,7 +35,7 @@ export async function generateMetadata({
     description:
       detail.description ??
       detail.subtitle ??
-      `เลือกซื้อ ${detail.title} จากผู้สร้างสรรค์ไทยบน Tamadee`,
+      `${detail.title} — Tamadee Marketplace`,
     pathname: `/products/${encodeURIComponent(detail.id)}`,
     imageUrl: detail.images[0] ?? detail.thumbnail,
   });
@@ -43,10 +44,13 @@ export async function generateMetadata({
 export default async function ProductDetailPage({
   params,
 }: ProductDetailPageProps): Promise<JSX.Element> {
-  const { id } = await params;
+  const [{ id }, { locale, dict }] = await Promise.all([
+    params,
+    getServerI18n(),
+  ]);
 
   const [detail, cart] = await Promise.all([
-    getProductDetail(id).catch(() => null),
+    getProductDetail(id, locale).catch(() => null),
     getServerCart(),
   ]);
 
@@ -61,7 +65,7 @@ export default async function ProductDetailPage({
   const mobileContent = (
     <>
       <TopBackHeader
-        title="รายละเอียดสินค้า"
+        title={dict.product.detailTitle}
         backHref="/products"
         rightSlot={<CartIconLink count={cartSummary.totalQuantity} />}
       />
@@ -100,7 +104,7 @@ export default async function ProductDetailPage({
         {detail.description ? (
           <section aria-labelledby="desc-heading" className="space-y-1">
             <h2 id="desc-heading" className="text-xs font-extrabold uppercase">
-              เรื่องราวและรายละเอียดชิ้นงาน
+              {dict.product.storyHeading}
             </h2>
             <p className="text-sm leading-relaxed text-[#4A4A45] dark:text-[#D4D4CE]">
               {detail.description}
@@ -124,7 +128,11 @@ export default async function ProductDetailPage({
         cartCount={cartSummary.totalQuantity}
         mobileContent={mobileContent}
         desktopContent={
-          <DesktopProductDetailView detail={detail} galleryUrls={galleryUrls} />
+          <DesktopProductDetailView
+            detail={detail}
+            galleryUrls={galleryUrls}
+            dict={dict}
+          />
         }
       />
     </>

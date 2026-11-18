@@ -1,5 +1,6 @@
 import { runAiSchemaTests } from "./ai-schemas.test";
 import { runDomainTests } from "./domain.test";
+import { runI18nTests } from "./i18n.test";
 import { runMapperAndSchemaTests } from "./mappers-and-schemas.test";
 import { runSurfaceAndSeoTests } from "./surface-and-seo.test";
 import { runWellKnownTests } from "./well-known.test";
@@ -19,6 +20,9 @@ function main(): void {
 
   runAiSchemaTests();
   console.log("✓ AI assistant boundary schema tests passed");
+
+  runI18nTests();
+  console.log("✓ Trilingual i18n (TH/EN/ZH) & catalog localization tests passed");
 
   console.log("All @tamadee/storefront unit tests passed!");
 }

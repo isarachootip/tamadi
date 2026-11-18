@@ -72,6 +72,8 @@ export function filterAndSortProducts(
     result = result.filter(
       (p) =>
         p.title.toLowerCase().includes(keyword) ||
+        p.handle.toLowerCase().includes(keyword) ||
+        p.categoryNames.some((c) => c.toLowerCase().includes(keyword)) ||
         (p.subtitle?.toLowerCase().includes(keyword) ?? false)
     );
   }

@@ -1,7 +1,11 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tamadee_flutter_ui/tamadee_flutter_ui.dart';
 
-class ProductBottomActionBar extends StatelessWidget {
+import '../../../core/l10n/app_strings.dart';
+import '../../providers/locale_controller.dart';
+
+class ProductBottomActionBar extends ConsumerWidget {
   const ProductBottomActionBar({
     super.key,
     required this.submitting,
@@ -14,8 +18,10 @@ class ProductBottomActionBar extends StatelessWidget {
   final VoidCallback onBuyNow;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final AppStrings strings = ref.watch(appStringsProvider);
+
     return SafeArea(
       top: false,
       child: Container(
@@ -35,7 +41,7 @@ class ProductBottomActionBar extends StatelessWidget {
             Expanded(
               child: OutlinedButton(
                 onPressed: submitting ? null : onAddToCart,
-                child: const Text('ใส่ตะกร้า'),
+                child: Text(strings.addToCart),
               ),
             ),
             const SizedBox(width: 12),
@@ -50,7 +56,7 @@ class ProductBottomActionBar extends StatelessWidget {
                       ? TamadeeColors.ink
                       : TamadeeColors.white,
                 ),
-                child: const Text('ซื้อเลย'),
+                child: Text(strings.buyNow),
               ),
             ),
           ],

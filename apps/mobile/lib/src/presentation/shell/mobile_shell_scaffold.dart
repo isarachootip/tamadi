@@ -1,9 +1,13 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tamadee_flutter_ui/tamadee_flutter_ui.dart';
 
+import '../../core/l10n/app_strings.dart';
+import '../providers/locale_controller.dart';
+
 /// 5-slot Minimal + Bold bottom navigation bar with center lime AI sparkle CTA.
-class MobileShellScaffold extends StatelessWidget {
+class MobileShellScaffold extends ConsumerWidget {
   const MobileShellScaffold({
     super.key,
     required this.navigationShell,
@@ -12,8 +16,9 @@ class MobileShellScaffold extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final AppStrings strings = ref.watch(appStringsProvider);
     final Color barBg = isDark ? TamadeeColors.ink : TamadeeColors.white;
     final Color borderColor =
         isDark ? TamadeeColors.borderDark : TamadeeColors.borderLight;
@@ -33,7 +38,7 @@ class MobileShellScaffold extends StatelessWidget {
               children: <Widget>[
                 Expanded(
                   child: _NavTabButton(
-                    label: 'หน้าแรก',
+                    label: strings.navHome,
                     icon: Icons.home_outlined,
                     activeIcon: Icons.home_rounded,
                     selected: navigationShell.currentIndex == 0,
@@ -42,7 +47,7 @@ class MobileShellScaffold extends StatelessWidget {
                 ),
                 Expanded(
                   child: _NavTabButton(
-                    label: 'หมวดหมู่',
+                    label: strings.navCategories,
                     icon: Icons.grid_view_outlined,
                     activeIcon: Icons.grid_view_rounded,
                     selected: navigationShell.currentIndex == 1,
@@ -54,7 +59,7 @@ class MobileShellScaffold extends StatelessWidget {
                   child: Center(
                     child: Semantics(
                       button: true,
-                      label: 'ผู้ช่วยช้อป AI น้องทำมะดิ',
+                      label: strings.aiName,
                       child: InkWell(
                         onTap: () => context.push('/ai-assistant'),
                         customBorder: const CircleBorder(),
@@ -77,7 +82,7 @@ class MobileShellScaffold extends StatelessWidget {
                 ),
                 Expanded(
                   child: _NavTabButton(
-                    label: 'ถูกใจ',
+                    label: strings.navWishlist,
                     icon: Icons.favorite_border_rounded,
                     activeIcon: Icons.favorite_rounded,
                     selected: navigationShell.currentIndex == 2,
@@ -86,7 +91,7 @@ class MobileShellScaffold extends StatelessWidget {
                 ),
                 Expanded(
                   child: _NavTabButton(
-                    label: 'ฉัน',
+                    label: strings.navMe,
                     icon: Icons.person_outline_rounded,
                     activeIcon: Icons.person_rounded,
                     selected: navigationShell.currentIndex == 3,
@@ -146,6 +151,8 @@ class _NavTabButton extends StatelessWidget {
             const SizedBox(height: 3),
             Text(
               label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: 11.5,
                 fontWeight: selected ? FontWeight.w700 : FontWeight.w500,

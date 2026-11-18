@@ -4,14 +4,18 @@ import type {
   ProductDetail,
   ProductQueryFilter,
   ProductSummary,
-  SellerSummary,
 } from "../../domain/types";
+import type { AppLocale } from "../../i18n";
+import {
+  localizeCategory,
+  localizeProductDetail,
+  localizeProductSummary,
+} from "../../i18n/localize-catalog";
+import { readLocaleCookie } from "../cookies";
 import {
   mapCategoryDto,
-  mapOfferToProductSummary,
   mapProductDetailDto,
   mapProductSummaryDto,
-  mapSellerDto,
 } from "../mappers/catalog-mapper";
 import { MercurApiError, mercurFetch } from "../mercur-client";
 import {
@@ -20,9 +24,9 @@ import {
   ProductDetailResponseSchema,
   ProductsResponseSchema,
   RegionsResponseSchema,
-  SellersResponseSchema,
-  SingleSellerResponseSchema,
 } from "../schemas/catalog-schemas";
+
+export { getSeller, listSellerProducts, listSellers } from "./seller-repo";
 
 let cachedThailandRegionId: string | undefined;
 
@@ -44,44 +48,78 @@ export async function getThailandRegionId(): Promise<string> {
   return chosen.id;
 }
 
-export async function listCategories(): Promise<readonly ProductCategory[]> {
-  const data = await mercurFetch({
-    path: "/store/product-categories",
-    query: { limit: 50 },
-    revalidateSeconds: 60,
-    schema: CategoriesResponseSchema,
-  });
+export async function listCategories(
+  localeOverride?: AppLocale
+): Promise<readonly ProductCategory[]> {
+  const [locale, data] = await Promise.all([
+    localeOverride ? Promise.resolve(localeOverride) : readLocaleCookie(),
+    mercurFetch({
+      path: "/store/product-categories",
+      query: { limit: 50 },
+      revalidateSeconds: 60,
+      schema: CategoriesResponseSchema,
+    }),
+  ]);
   return data.product_categories
     .map(mapCategoryDto)
-    .sort((a, b) => a.rank - b.rank);
+    .sort((a, b) => a.rank - b.rank)
+    .map((cat) => localizeCategory(cat, locale));
 }
 
 export async function listProducts(
-  filter: ProductQueryFilter = {}
+  filter: ProductQueryFilter = {},
+  localeOverride?: AppLocale
 ): Promise<readonly ProductSummary[]> {
-  const regionId = await getThailandRegionId();
+  const [locale, regionId] = await Promise.all([
+    localeOverride ? Promise.resolve(localeOverride) : readLocaleCookie(),
+    getThailandRegionId(),
+  ]);
   const data = await mercurFetch({
     path: "/store/products",
     query: {
       limit: 50,
       region_id: regionId,
       fields: "*variants.calculated_price,+variants.offer_id,*categories",
-      q: filter.q?.trim() || undefined,
       category_id: filter.categoryId || undefined,
     },
     revalidateSeconds: 30,
     schema: ProductsResponseSchema,
   });
-  const mapped = data.products.map(mapProductSummaryDto);
-  return filterAndSortProducts(mapped, {
+
+  const rawMapped = data.products.map(mapProductSummaryDto);
+  const localized = rawMapped.map((p) => localizeProductSummary(p, locale));
+
+  const trimmedQ = filter.q?.trim().toLowerCase();
+  const matched = trimmedQ
+    ? localized.filter((locProd, index) => {
+        const raw = rawMapped[index];
+        return (
+          locProd.title.toLowerCase().includes(trimmedQ) ||
+          locProd.handle.toLowerCase().includes(trimmedQ) ||
+          locProd.categoryNames.some((c) => c.toLowerCase().includes(trimmedQ)) ||
+          (locProd.subtitle?.toLowerCase().includes(trimmedQ) ?? false) ||
+          (raw?.title.toLowerCase().includes(trimmedQ) ?? false) ||
+          (raw?.subtitle?.toLowerCase().includes(trimmedQ) ?? false)
+        );
+      })
+    : localized;
+
+  return filterAndSortProducts(matched, {
+    categoryId: filter.categoryId,
     minPrice: filter.minPrice,
     maxPrice: filter.maxPrice,
     sort: filter.sort,
   });
 }
 
-export async function getProductDetail(productId: string): Promise<ProductDetail> {
-  const regionId = await getThailandRegionId();
+export async function getProductDetail(
+  productId: string,
+  localeOverride?: AppLocale
+): Promise<ProductDetail> {
+  const [locale, regionId] = await Promise.all([
+    localeOverride ? Promise.resolve(localeOverride) : readLocaleCookie(),
+    getThailandRegionId(),
+  ]);
   const [productRes, offersRes] = await Promise.all([
     mercurFetch({
       path: `/store/products/${encodeURIComponent(productId)}`,
@@ -105,51 +143,6 @@ export async function getProductDetail(productId: string): Promise<ProductDetail
       schema: OffersResponseSchema,
     }),
   ]);
-  return mapProductDetailDto(productRes.product, offersRes.offers);
-}
-
-export async function listSellers(): Promise<readonly SellerSummary[]> {
-  const data = await mercurFetch({
-    path: "/store/sellers",
-    query: { limit: 50, fields: "+default_leadtime_to_ship" },
-    revalidateSeconds: 60,
-    schema: SellersResponseSchema,
-  });
-  return data.sellers.map(mapSellerDto);
-}
-
-export async function getSeller(sellerId: string): Promise<SellerSummary> {
-  const data = await mercurFetch({
-    path: `/store/sellers/${encodeURIComponent(sellerId)}`,
-    query: { fields: "+default_leadtime_to_ship" },
-    revalidateSeconds: 60,
-    schema: SingleSellerResponseSchema,
-  });
-  return mapSellerDto(data.seller);
-}
-
-export async function listSellerProducts(
-  sellerId: string
-): Promise<readonly ProductSummary[]> {
-  const regionId = await getThailandRegionId();
-  const data = await mercurFetch({
-    path: "/store/offers",
-    query: {
-      seller_id: sellerId,
-      region_id: regionId,
-      limit: 50,
-      fields:
-        "+calculated_price,+product.id,+product.title,+product.subtitle,+product.handle,+product.thumbnail",
-    },
-    revalidateSeconds: 30,
-    schema: OffersResponseSchema,
-  });
-  const deduped = new Map<string, ProductSummary>();
-  for (const offer of data.offers) {
-    const summary = mapOfferToProductSummary(offer);
-    if (summary && !deduped.has(summary.id)) {
-      deduped.set(summary.id, summary);
-    }
-  }
-  return Array.from(deduped.values());
+  const detail = mapProductDetailDto(productRes.product, offersRes.offers);
+  return localizeProductDetail(detail, locale);
 }

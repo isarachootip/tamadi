@@ -1,9 +1,12 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tamadee_flutter_ui/tamadee_flutter_ui.dart';
 
+import '../../../core/l10n/app_strings.dart';
 import '../../../domain/models/category.dart';
+import '../../providers/locale_controller.dart';
 
-class CategoryPillsBar extends StatelessWidget {
+class CategoryPillsBar extends ConsumerWidget {
   const CategoryPillsBar({
     super.key,
     required this.categories,
@@ -16,15 +19,17 @@ class CategoryPillsBar extends StatelessWidget {
   final ValueChanged<String?> onSelect;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final AppStrings strings = ref.watch(appStringsProvider);
+
     return SizedBox(
       height: TamadeeLayout.minTouchTarget,
       child: ListView(
         scrollDirection: Axis.horizontal,
         children: <Widget>[
           _PillChip(
-            label: 'สำหรับคุณ',
+            label: strings.forYou,
             selected: selectedCategoryId == null,
             isDark: isDark,
             onTap: () => onSelect(null),

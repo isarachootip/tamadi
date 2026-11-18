@@ -3,9 +3,11 @@ import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tamadee_flutter_ui/tamadee_flutter_ui.dart';
 
+import '../../core/l10n/app_strings.dart';
 import '../../domain/models/category.dart';
 import '../../domain/models/product.dart';
 import '../providers/catalog_providers.dart';
+import '../providers/locale_controller.dart';
 import '../shared/error_retry_view.dart';
 import '../shared/product_card.dart';
 import 'widgets/category_pills_bar.dart';
@@ -24,6 +26,7 @@ class HomeScreen extends ConsumerWidget {
     final AsyncValue<List<ProductSummary>> productsAsync = ref.watch(
       homeProductsProvider,
     );
+    final AppStrings strings = ref.watch(appStringsProvider);
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     return SafeArea(
@@ -60,12 +63,12 @@ class HomeScreen extends ConsumerWidget {
                     const SizedBox(height: 18),
                     Row(
                       children: <Widget>[
-                        const Expanded(
+                        Expanded(
                           child: Text(
-                            'AI เลือกให้คุณ',
+                            strings.aiPicks,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w800,
                             ),
@@ -80,7 +83,7 @@ class HomeScreen extends ConsumerWidget {
                             ),
                           ),
                           child: Text(
-                            'ดูทั้งหมด',
+                            strings.viewAll,
                             style: TextStyle(
                               fontSize: 13.5,
                               fontWeight: FontWeight.w600,
@@ -110,9 +113,9 @@ class HomeScreen extends ConsumerWidget {
               ),
               data: (List<ProductSummary> products) {
                 if (products.isEmpty) {
-                  return const SliverFillRemaining(
+                  return SliverFillRemaining(
                     hasScrollBody: false,
-                    child: Center(child: Text('ไม่พบสินค้าในหมวดหมู่นี้')),
+                    child: Center(child: Text(strings.emptyCategory)),
                   );
                 }
                 return SliverPadding(

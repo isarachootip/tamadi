@@ -2,12 +2,17 @@ import { NongTammadiMascot, TamadeeLogo } from "@tamadee/ui";
 import Link from "next/link";
 import type { JSX } from "react";
 import type { ProductCategory } from "../../domain/types";
+import type { UiDictionary } from "../../i18n";
 
 export interface DesktopFooterProps {
   readonly categories: readonly ProductCategory[];
+  readonly dict: UiDictionary;
 }
 
-export function DesktopFooter({ categories }: DesktopFooterProps): JSX.Element {
+export function DesktopFooter({
+  categories,
+  dict,
+}: DesktopFooterProps): JSX.Element {
   return (
     <footer className="mt-16 border-t border-[#E2E2DC] bg-[#F1F1EE] text-[#111111] dark:border-[#2E2E2B] dark:bg-[#161614] dark:text-white">
       <div className="mx-auto grid max-w-[1360px] grid-cols-1 gap-10 px-6 py-12 md:grid-cols-4 lg:px-10">
@@ -24,20 +29,18 @@ export function DesktopFooter({ categories }: DesktopFooterProps): JSX.Element {
             </div>
           </div>
           <p className="max-w-md text-sm leading-relaxed text-[#4A4A45] dark:text-[#D4D4CE]">
-            Tamadee (“ทำมาดี ทำมาขาย”) — ตลาดออนไลน์หลายผู้ขายที่คัดสรรเสื้อผ้า
-            รองเท้า กระเป๋า เครื่องประดับ และงานคราฟต์ทำมือจากสตูดิโอไทย
-            ราคารวมภาษีมูลค่าเพิ่ม (VAT 7% Inclusive) จัดส่งตรงจากผู้สร้างสรรค์ถึงมือคุณ
+            {dict.footer.tagline}
           </p>
         </div>
 
         <div className="space-y-2.5">
           <h2 className="text-xs font-extrabold tracking-wider uppercase">
-            หมวดหมู่สินค้า
+            {dict.footer.categoriesHeading}
           </h2>
           <ul className="space-y-1.5 text-sm font-medium text-[#4A4A45] dark:text-[#D4D4CE]">
             <li>
               <Link href="/products" className="hover:underline">
-                สินค้าทั้งหมด
+                {dict.nav.allProducts}
               </Link>
             </li>
             {categories.slice(0, 5).map((cat) => (
@@ -55,22 +58,22 @@ export function DesktopFooter({ categories }: DesktopFooterProps): JSX.Element {
 
         <div className="space-y-2.5">
           <h2 className="text-xs font-extrabold tracking-wider uppercase">
-            สำหรับลูกค้าและผู้ขาย
+            {dict.footer.linksHeading}
           </h2>
           <ul className="space-y-1.5 text-sm font-medium text-[#4A4A45] dark:text-[#D4D4CE]">
             <li>
               <Link href="/categories" className="hover:underline">
-                รวมร้านค้าผู้สร้างสรรค์ไทย
+                {dict.nav.creators}
               </Link>
             </li>
             <li>
               <Link href="/ai" className="hover:underline">
-                ผู้ช่วย AI น้องทำมะดิ
+                {dict.nav.askAi}
               </Link>
             </li>
             <li>
               <Link href="/account" className="hover:underline">
-                บัญชีสมาชิกและติดตามพัสดุ
+                {dict.nav.account}
               </Link>
             </li>
             <li>
@@ -80,7 +83,7 @@ export function DesktopFooter({ categories }: DesktopFooterProps): JSX.Element {
                 rel="noreferrer"
                 className="font-bold text-[#111111] hover:underline dark:text-[#C6F432]"
               >
-                สมัครเป็นผู้ขาย / เข้าสู่ระบบร้านค้า
+                {dict.footer.becomeSeller}
               </a>
             </li>
           </ul>

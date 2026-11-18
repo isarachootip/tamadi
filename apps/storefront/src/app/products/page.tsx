@@ -7,6 +7,7 @@ import { CartIconLink } from "../../components/shared/CartIconLink";
 import { ProductCard } from "../../components/shared/ProductCard";
 import { TopBackHeader } from "../../components/shared/TopBackHeader";
 import { StorefrontShell } from "../../components/shell/StorefrontShell";
+import { getServerI18n } from "../../data/i18n-server";
 import {
   listCategories,
   listProducts,
@@ -17,7 +18,7 @@ import { computeCartSummary } from "../../domain/pricing";
 import type { ProductSortOption } from "../../domain/types";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "ค้นหาและเลือกชมสินค้าทั้งหมด",
+  title: "ค้นหาและเลือกชมสินค้าทั้งหมด | All Products",
   description:
     "รวมสินค้าทำมาดีจากผู้ขายไทย เสื้อผ้า รองเท้า กระเป๋า เครื่องประดับ และของแต่งบ้านงานคราฟต์ กรองตามหมวดและช่วงราคาได้",
   pathname: "/products",
@@ -47,7 +48,10 @@ function parseOptionalNumber(raw: string | undefined): number | undefined {
 export default async function ProductsPage({
   searchParams,
 }: ProductsPageProps): Promise<JSX.Element> {
-  const resolvedParams = await searchParams;
+  const [resolvedParams, { locale, dict }] = await Promise.all([
+    searchParams,
+    getServerI18n(),
+  ]);
   const q = readParam(resolvedParams, "q");
   const categoryId = readParam(resolvedParams, "category");
   const minPrice = parseOptionalNumber(readParam(resolvedParams, "minPrice"));
@@ -59,8 +63,10 @@ export default async function ProductsPage({
       : "recommended";
 
   const [categories, products, cart] = await Promise.all([
-    listCategories().catch(() => []),
-    listProducts({ q, categoryId, minPrice, maxPrice, sort }).catch(() => []),
+    listCategories(locale).catch(() => []),
+    listProducts({ q, categoryId, minPrice, maxPrice, sort }, locale).catch(
+      () => []
+    ),
     getServerCart(),
   ]);
 
@@ -70,7 +76,7 @@ export default async function ProductsPage({
   const mobileContent = (
     <>
       <TopBackHeader
-        title={selectedCategory ? selectedCategory.name : "สินค้าทั้งหมด"}
+        title={selectedCategory ? selectedCategory.name : dict.nav.allProducts}
         backHref="/categories"
         rightSlot={<CartIconLink count={cartSummary.totalQuantity} />}
       />
@@ -83,27 +89,29 @@ export default async function ProductsPage({
           minPrice={minPrice}
           maxPrice={maxPrice}
           sort={sort}
+          dict={dict}
         />
 
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-extrabold">
-            พบสินค้า {products.length} รายการ
+            {dict.catalog.foundCountPrefix} {products.length}{" "}
+            {dict.catalog.foundCountSuffix}
           </h2>
           {q || categoryId || minPrice !== undefined || maxPrice !== undefined ? (
             <Link
               href="/products"
               className="inline-flex min-h-[44px] items-center px-2 text-xs font-bold text-[#4A4A45] underline dark:text-[#D4D4CE]"
             >
-              ล้างตัวกรอง
+              {dict.catalog.clearFilters}
             </Link>
           ) : null}
         </div>
 
         {products.length === 0 ? (
           <div className="rounded-3xl bg-[#F1F1EE] p-8 text-center dark:bg-[#1C1C1A]">
-            <p className="text-sm font-bold">ไม่พบสินค้าที่ตรงกับเงื่อนไข</p>
+            <p className="text-sm font-bold">{dict.catalog.emptySearchTitle}</p>
             <p className="mt-1 text-xs text-[#4A4A45] dark:text-[#D4D4CE]">
-              ลองเปลี่ยนคำค้นหาหรือขยายช่วงราคาดูอีกครั้ง
+              {dict.catalog.emptySearchDesc}
             </p>
           </div>
         ) : (
@@ -136,6 +144,7 @@ export default async function ProductsPage({
           minPrice={minPrice}
           maxPrice={maxPrice}
           sort={sort}
+          dict={dict}
         />
       }
     />

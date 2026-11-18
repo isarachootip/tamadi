@@ -8,8 +8,8 @@ import {
   findMatchingVariant,
   findOfferForVariant,
 } from "../../domain/catalog-logic";
-import { formatThb } from "../../domain/pricing";
 import type { ProductDetail } from "../../domain/types";
+import { useLocale } from "../i18n/LocaleProvider";
 import { SellerInfoCard } from "./SellerInfoCard";
 
 export interface VariantPurchasePanelProps {
@@ -22,6 +22,7 @@ export function VariantPurchasePanel({
   inlineActions = false,
 }: VariantPurchasePanelProps): JSX.Element {
   const router = useRouter();
+  const { dict, formatPrice } = useLocale();
   const [isPending, startTransition] = useTransition();
   const [feedback, setFeedback] = useState<string | null>(null);
 
@@ -43,10 +44,7 @@ export function VariantPurchasePanel({
     activeOffer?.priceAmount ?? matchedVariant?.priceAmount ?? 0;
 
   function handleAdd(goToCartAfter: boolean): void {
-    if (!activeOffer) {
-      setFeedback("สินค้านี้ยังไม่เปิดรับคำสั่งซื้อชั่วคราว");
-      return;
-    }
+    if (!activeOffer) return;
     setFeedback(null);
     startTransition(async () => {
       const res = await addToCartAction({
@@ -56,13 +54,13 @@ export function VariantPurchasePanel({
         sellerName: activeOffer.sellerName,
       });
       if (!res.ok) {
-        setFeedback(res.message ?? "ไม่สามารถเพิ่มลงตะกร้าได้");
+        setFeedback(res.message ?? "Error");
         return;
       }
       if (goToCartAfter) {
         router.push("/cart");
       } else {
-        setFeedback("เพิ่มสินค้าลงตะกร้าเรียบร้อยแล้ว");
+        setFeedback(dict.product.addedSuccess);
         router.refresh();
       }
     });
@@ -70,19 +68,19 @@ export function VariantPurchasePanel({
 
   return (
     <div className={inlineActions ? "space-y-5" : "space-y-5 pb-20"}>
-      <div className="flex items-baseline justify-between gap-2">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
         <p className="font-display text-2xl font-extrabold tracking-tight text-[#111111] dark:text-[#C6F432]">
-          {formatThb(displayPrice)}
+          {formatPrice(displayPrice)}
         </p>
         <span className="text-xs font-bold text-[#4A4A45] dark:text-[#D4D4CE]">
-          ราคารวม VAT 7% แล้ว
+          {dict.product.vatIncluded}
         </span>
       </div>
 
       {detail.options.map((opt) => (
         <div key={opt.id} className="space-y-2">
           <h2 className="text-xs font-extrabold tracking-wide uppercase">
-            เลือก{opt.title}:{" "}
+            {dict.product.selectOptionPrefix} {opt.title}:{" "}
             <span className="text-[#4A4A45] dark:text-[#D4D4CE]">
               {selectedOptions[opt.id]}
             </span>
@@ -145,7 +143,7 @@ export function VariantPurchasePanel({
           className="inline-flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-2xl border-2 border-[#111111] bg-white px-4 text-sm font-extrabold text-[#111111] transition hover:bg-[#F1F1EE] disabled:opacity-50 dark:border-[#C6F432] dark:bg-[#1C1C1A] dark:text-white"
         >
           <ShoppingBag className="h-4 w-4" aria-hidden="true" />
-          <span>{isPending ? "กำลังเพิ่ม..." : "ใส่ตะกร้า"}</span>
+          <span>{isPending ? dict.product.adding : dict.product.addToCart}</span>
         </button>
         <button
           type="button"
@@ -153,7 +151,7 @@ export function VariantPurchasePanel({
           onClick={() => handleAdd(true)}
           className="inline-flex min-h-[48px] flex-1 items-center justify-center rounded-2xl bg-[#C6F432] px-4 text-sm font-extrabold text-[#111111] transition hover:brightness-95 disabled:opacity-50"
         >
-          ซื้อเลย
+          {dict.product.buyNow}
         </button>
       </div>
     </div>

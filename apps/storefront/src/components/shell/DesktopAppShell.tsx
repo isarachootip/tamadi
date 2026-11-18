@@ -1,4 +1,5 @@
 import type { JSX, ReactNode } from "react";
+import { getServerI18n } from "../../data/i18n-server";
 import { listCategories } from "../../data/repositories/catalog-repo";
 import { getServerCart } from "../../data/session";
 import { computeCartSummary } from "../../domain/pricing";
@@ -23,7 +24,8 @@ export async function DesktopAppShell({
   forceDark = false,
   narrowContent = false,
 }: DesktopAppShellProps): Promise<JSX.Element> {
-  const [resolvedCategories, resolvedCount] = await Promise.all([
+  const [{ dict }, resolvedCategories, resolvedCount] = await Promise.all([
+    getServerI18n(),
     categories ? Promise.resolve(categories) : listCategories().catch(() => []),
     cartCount !== undefined
       ? Promise.resolve(cartCount)
@@ -42,6 +44,7 @@ export async function DesktopAppShell({
         categories={resolvedCategories}
         cartCount={resolvedCount}
         searchQuery={searchQuery}
+        dict={dict}
       />
 
       <main
@@ -52,7 +55,7 @@ export async function DesktopAppShell({
         {children}
       </main>
 
-      <DesktopFooter categories={resolvedCategories} />
+      <DesktopFooter categories={resolvedCategories} dict={dict} />
     </div>
   );
 }

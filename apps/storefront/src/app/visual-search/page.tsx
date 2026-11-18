@@ -4,6 +4,7 @@ import { VisualSearchPanel } from "../../components/ai/VisualSearchPanel";
 import { CartIconLink } from "../../components/shared/CartIconLink";
 import { TopBackHeader } from "../../components/shared/TopBackHeader";
 import { StorefrontShell } from "../../components/shell/StorefrontShell";
+import { getServerI18n } from "../../data/i18n-server";
 import { buildPageMetadata } from "../../data/seo";
 import { getServerCart } from "../../data/session";
 import { computeCartSummary } from "../../domain/pricing";
@@ -16,7 +17,10 @@ export const metadata: Metadata = buildPageMetadata({
 });
 
 export default async function VisualSearchPage(): Promise<JSX.Element> {
-  const cart = await getServerCart();
+  const [{ dict }, cart] = await Promise.all([
+    getServerI18n(),
+    getServerCart(),
+  ]);
   const cartSummary = computeCartSummary(cart);
 
   return (
@@ -26,7 +30,7 @@ export default async function VisualSearchPage(): Promise<JSX.Element> {
       mobileContent={
         <>
           <TopBackHeader
-            title="ค้นหาด้วยรูปภาพ"
+            title={dict.nav.visualSearchLabel}
             backHref="/"
             rightSlot={<CartIconLink count={cartSummary.totalQuantity} />}
           />
@@ -38,7 +42,7 @@ export default async function VisualSearchPage(): Promise<JSX.Element> {
       desktopContent={
         <div className="space-y-5">
           <h1 className="text-3xl font-extrabold">
-            ค้นหาสินค้าด้วยรูปภาพ (Visual Search)
+            {dict.nav.visualSearchLabel}
           </h1>
           <VisualSearchPanel />
         </div>

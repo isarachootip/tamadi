@@ -9,14 +9,8 @@ import type {
   AiHistoryTurn,
   AiRecommendedProduct,
 } from "../../data/schemas/ai-schemas";
+import { useLocale } from "../i18n/LocaleProvider";
 import { AiProductCard } from "./AiProductCard";
-
-const QUICK_PROMPTS = [
-  "หาชุดไปทะเล งบไม่เกิน 2,500",
-  "ของขวัญงานคราฟต์ขึ้นบ้านใหม่ งบไม่เกิน 1,000",
-  "รองเท้าหนังใส่สบายเดินทั้งวัน",
-  "หากระเป๋าผ้าสะพายไปคาเฟ่",
-] as const;
 
 interface ChatMessageItem {
   readonly id: string;
@@ -33,33 +27,35 @@ export interface AiChatShellProps {
 export function AiChatShell({
   initialProducts,
 }: AiChatShellProps): JSX.Element {
+  const { dict } = useLocale();
   const [draft, setDraft] = useState("");
   const [isPending, startTransition] = useTransition();
-  const [messages, setMessages] = useState<readonly ChatMessageItem[]>(() => [
+  const [messages, setMessages] = useState<readonly ChatMessageItem[]>([]);
+
+  const visibleMessages: readonly ChatMessageItem[] = [
     {
       id: "welcome",
       role: "assistant",
-      text: "สวัสดีครับ! น้องทำมะดิพร้อมช่วยหาเสื้อผ้า รองเท้า กระเป๋า และของขวัญงานคราฟต์จากร้านไทยแล้ว บอกโอกาสและงบประมาณมาได้เลย (เช่น “หาชุดไปทะเล งบไม่เกิน 2,500”) กดใส่ตะกร้าจากการ์ดได้ทันทีครับ!",
+      text: dict.ai.welcomeBubble,
       products: initialProducts.slice(0, 2),
     },
-  ]);
+    ...messages,
+  ];
 
   function sendQuestion(rawText: string): void {
     const clean = rawText.trim();
     if (clean.length === 0 || isPending) return;
 
-    const historySnapshot: AiHistoryTurn[] = messages.slice(-6).map((m) => ({
+    const historySnapshot: AiHistoryTurn[] = visibleMessages.slice(-6).map((m) => ({
       role: m.role,
       content: m.text,
     }));
 
-    const userMsg: ChatMessageItem = {
-      id: `u_${Date.now()}`,
-      role: "user",
-      text: clean,
-    };
     setDraft("");
-    setMessages((prev) => [...prev, userMsg]);
+    setMessages((prev) => [
+      ...prev,
+      { id: `u_${Date.now()}`, role: "user", text: clean },
+    ]);
 
     startTransition(async () => {
       const res = await askNongTammadiAction({
@@ -68,17 +64,26 @@ export function AiChatShell({
       });
 
       if (!res.ok || !res.data) {
-        const errText = res.message ?? "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง";
         setMessages((prev) => [
           ...prev,
-          { id: `err_${Date.now()}`, role: "assistant", text: errText, isError: true },
+          {
+            id: `err_${Date.now()}`,
+            role: "assistant",
+            text: res.message ?? "Error",
+            isError: true,
+          },
         ]);
         return;
       }
 
       setMessages((prev) => [
         ...prev,
-        { id: `a_${Date.now()}`, role: "assistant", text: res.data!.reply, products: res.data!.products },
+        {
+          id: `a_${Date.now()}`,
+          role: "assistant",
+          text: res.data!.reply,
+          products: res.data!.products,
+        },
       ]);
     });
   }
@@ -91,19 +96,17 @@ export function AiChatShell({
           <div>
             <span className="inline-flex items-center gap-1 rounded-full bg-[#C6F432] px-2.5 py-0.5 text-[11px] font-extrabold text-[#111111]">
               <Sparkles className="h-3 w-3" aria-hidden="true" />
-              Gemini AI Stylist & Real Catalog Search
+              {dict.ai.badge}
             </span>
             <h2 className="mt-1 text-sm font-extrabold text-white">
-              ผู้ช่วยช้อป &ldquo;น้องทำมะดิ&rdquo;
+              {dict.ai.welcomeTitle}
             </h2>
-            <p className="text-xs text-[#D4D4CE]">
-              ค้นจากสินค้าและสต็อกจริงในระบบ 100% ไม่มีแต่งราคาปลอม
-            </p>
+            <p className="text-xs text-[#D4D4CE]">{dict.ai.welcomeSub}</p>
           </div>
         </div>
 
         <div className="space-y-4" aria-live="polite">
-          {messages.map((msg) =>
+          {visibleMessages.map((msg) =>
             msg.role === "user" ? (
               <div
                 key={msg.id}
@@ -135,13 +138,13 @@ export function AiChatShell({
           {isPending ? (
             <div className="inline-flex items-center gap-2 rounded-2xl border border-[#2E2E2B] bg-[#1C1C1A] px-4 py-3 text-xs font-bold text-[#C6F432]">
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-              <span>น้องทำมะดิกำลังค้นสินค้าจริงในร้านให้...</span>
+              <span>{dict.ai.thinking}</span>
             </div>
           ) : null}
         </div>
 
         <div className="flex flex-wrap gap-2 pt-1">
-          {QUICK_PROMPTS.map((prompt) => (
+          {dict.ai.quickPrompts.map((prompt) => (
             <button
               key={prompt}
               type="button"
@@ -164,13 +167,13 @@ export function AiChatShell({
       >
         <Link
           href="/visual-search"
-          aria-label="ค้นหาสินค้าด้วยรูปภาพ"
+          aria-label={dict.nav.visualSearchLabel}
           className="inline-flex min-h-[48px] min-w-[48px] shrink-0 items-center justify-center rounded-2xl border border-[#2E2E2B] bg-[#1C1C1A] text-[#C6F432]"
         >
           <Camera className="h-4 w-4" aria-hidden="true" />
         </Link>
         <label htmlFor="ai-prompt-input" className="sr-only">
-          พิมพ์คำถามถึงน้องทำมะดิ
+          {dict.ai.inputPlaceholder}
         </label>
         <input
           id="ai-prompt-input"
@@ -178,13 +181,13 @@ export function AiChatShell({
           value={draft}
           disabled={isPending}
           onChange={(e) => setDraft(e.target.value)}
-          placeholder="เช่น หาชุดไปทะเล งบไม่เกิน 2,500..."
+          placeholder={dict.ai.inputPlaceholder}
           className="min-h-[48px] flex-1 rounded-2xl border border-[#2E2E2B] bg-[#1C1C1A] px-4 text-xs font-medium text-white placeholder:text-[#D4D4CE] focus:border-[#C6F432] focus:outline-none"
         />
         <button
           type="submit"
           disabled={isPending || draft.trim().length === 0}
-          aria-label="ส่งข้อความถามน้องทำมะดิ"
+          aria-label="Send"
           className="inline-flex min-h-[48px] min-w-[48px] items-center justify-center rounded-2xl bg-[#C6F432] text-[#111111] disabled:opacity-50"
         >
           <Send className="h-4 w-4" aria-hidden="true" />

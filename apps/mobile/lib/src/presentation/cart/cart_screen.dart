@@ -2,10 +2,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../core/l10n/app_strings.dart';
 import '../../domain/models/cart.dart';
 import '../../domain/models/customer.dart';
 import '../providers/auth_controller.dart';
 import '../providers/cart_controller.dart';
+import '../providers/locale_controller.dart';
 import '../shared/error_retry_view.dart';
 import 'widgets/cart_checkout_bar.dart';
 import 'widgets/cart_promo_and_payment_section.dart';
@@ -35,13 +37,13 @@ class _CartScreenState extends ConsumerState<CartScreen> {
       await ref.read(cartControllerProvider.notifier).applyPromoCode(code);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('ใช้โค้ดส่วนลด $code เรียบร้อยแล้ว')),
+          SnackBar(content: Text('Promo $code applied')),
         );
       }
     } on Exception catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('ไม่สามารถใช้โค้ดส่วนลด: $error')),
+          SnackBar(content: Text('$error')),
         );
       }
     }
@@ -50,6 +52,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
   @override
   Widget build(BuildContext context) {
     final AsyncValue<CartModel?> cartAsync = ref.watch(cartControllerProvider);
+    final AppStrings strings = ref.watch(appStringsProvider);
     final CustomerProfile? customer = ref
         .watch(authControllerProvider)
         .maybeWhen(data: (CustomerProfile? c) => c, orElse: () => null);
@@ -63,7 +66,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
           onPressed: () => context.canPop() ? context.pop() : context.go('/'),
         ),
         title: Text(
-          'ตะกร้า (${cartAsync.value?.totalQuantity ?? 0})',
+          '${strings.cartTitlePrefix} (${cartAsync.value?.totalQuantity ?? 0})',
           style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w800),
         ),
       ),
@@ -79,14 +82,17 @@ class _CartScreenState extends ConsumerState<CartScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  const Text(
-                    'ยังไม่มีสินค้าในตะกร้า',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                  Text(
+                    strings.emptyCart,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   ElevatedButton(
                     onPressed: () => context.go('/'),
-                    child: const Text('เลือกดูสินค้า'),
+                    child: Text(strings.browseProducts),
                   ),
                 ],
               ),

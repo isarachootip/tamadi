@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition, type JSX } from "react";
 import { addToCartAction } from "../../actions/cart-actions";
 import type { AiRecommendedProduct } from "../../data/schemas/ai-schemas";
-import { formatThb } from "../../domain/pricing";
+import { useLocale } from "../i18n/LocaleProvider";
 import { ProductImage } from "../shared/ProductImage";
 
 export interface AiProductCardProps {
@@ -15,6 +15,7 @@ export interface AiProductCardProps {
 
 export function AiProductCard({ product }: AiProductCardProps): JSX.Element {
   const router = useRouter();
+  const { dict, formatPrice } = useLocale();
   const [isPending, startTransition] = useTransition();
   const [added, setAdded] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -29,7 +30,7 @@ export function AiProductCard({ product }: AiProductCardProps): JSX.Element {
         sellerName: product.sellerName,
       });
       if (!res.ok) {
-        setErrorMsg(res.message ?? "เพิ่มไม่สำเร็จ");
+        setErrorMsg(res.message ?? "Error");
         return;
       }
       setAdded(true);
@@ -55,8 +56,8 @@ export function AiProductCard({ product }: AiProductCardProps): JSX.Element {
           <p className="line-clamp-1 text-[11px] text-[#9E9E96]">
             {product.sellerName} • {product.variantTitle}
           </p>
-          <p className="font-display text-sm font-extrabold text-[#C6F432]">
-            {formatThb(product.priceAmount)}
+          <p className="font-display text-xs font-extrabold text-[#C6F432] sm:text-sm">
+            {formatPrice(product.priceAmount)}
           </p>
         </div>
       </Link>
@@ -71,12 +72,12 @@ export function AiProductCard({ product }: AiProductCardProps): JSX.Element {
           {added ? (
             <>
               <Check className="h-3.5 w-3.5" aria-hidden="true" />
-              <span>อยู่ในตะกร้าแล้ว</span>
+              <span>✓</span>
             </>
           ) : (
             <>
               <ShoppingBag className="h-3.5 w-3.5" aria-hidden="true" />
-              <span>{isPending ? "กำลังเพิ่ม..." : "ใส่ตะกร้า"}</span>
+              <span>{isPending ? dict.product.adding : dict.product.addToCart}</span>
             </>
           )}
         </button>

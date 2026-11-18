@@ -9,16 +9,19 @@ import {
 import Link from "next/link";
 import type { JSX } from "react";
 import type { ProductCategory, ProductSummary } from "../../domain/types";
+import { getUiDictionary, type UiDictionary } from "../../i18n";
 import { ProductCard } from "../shared/ProductCard";
 
 export interface DesktopHomeViewProps {
   readonly categories: readonly ProductCategory[];
   readonly products: readonly ProductSummary[];
+  readonly dict?: UiDictionary;
 }
 
 export function DesktopHomeView({
   categories,
   products,
+  dict = getUiDictionary("th"),
 }: DesktopHomeViewProps): JSX.Element {
   const featured = products.slice(0, 5);
   const arrivals = products.slice(5, 25);
@@ -30,16 +33,15 @@ export function DesktopHomeView({
           <div className="space-y-5 lg:col-span-8">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-[#C6F432] px-4 py-1 text-xs font-extrabold text-[#111111]">
               <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-              <span>NEW DROP 2026 • THAI CREATOR MARKETPLACE</span>
+              <span>{dict.home.heroBadge}</span>
             </span>
 
             <h1 className="text-4xl leading-tight font-extrabold tracking-tight lg:text-5xl">
-              ทำมาดี ทำมาขาย — คัดของตั้งใจทำจากสตูดิโอไทย ส่งตรงถึงมือคุณ
+              {dict.home.heroTitle}
             </h1>
 
             <p className="max-w-2xl text-base leading-relaxed text-[#D4D4CE]">
-              เสื้อผ้าลินินทอมือ รองเท้าหนังตัดเย็บประณีต กระเป๋าแคนวาส เครื่องประดับทองเหลือง
-              และเซรามิกปั้นมือจากผู้สร้างสรรค์ไทยที่ผ่านการคัดเลือกโดย Tamadee
+              {dict.home.heroDesc}
             </p>
 
             <div className="flex flex-wrap items-center gap-3 pt-1">
@@ -47,7 +49,7 @@ export function DesktopHomeView({
                 href="/products"
                 className="inline-flex min-h-[50px] items-center gap-2 rounded-full bg-[#C6F432] px-7 text-sm font-extrabold text-[#111111] transition hover:brightness-95"
               >
-                <span>ช้อปคอลเลกชันทั้งหมด</span>
+                <span>{dict.home.shopNow}</span>
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
               <Link
@@ -55,22 +57,22 @@ export function DesktopHomeView({
                 className="inline-flex min-h-[50px] items-center gap-2 rounded-full border border-white/25 bg-white/10 px-6 text-sm font-extrabold text-white transition hover:bg-white/20"
               >
                 <Sparkles className="h-4 w-4 text-[#C6F432]" aria-hidden="true" />
-                <span>ให้ AI น้องทำมะดิช่วยเลือกชุด</span>
+                <span>{dict.home.askAiOutfit}</span>
               </Link>
             </div>
 
             <div className="grid grid-cols-1 gap-3 pt-3 sm:grid-cols-3">
               <div className="flex items-center gap-2.5 rounded-2xl bg-white/5 px-4 py-3 text-xs font-semibold text-[#E2E2DC]">
                 <ShieldCheck className="h-4 w-4 shrink-0 text-[#C6F432]" aria-hidden="true" />
-                <span>ร้านค้าผ่านการอนุมัติทุกแบรนด์</span>
+                <span>{dict.home.trustApproved}</span>
               </div>
               <div className="flex items-center gap-2.5 rounded-2xl bg-white/5 px-4 py-3 text-xs font-semibold text-[#E2E2DC]">
                 <Truck className="h-4 w-4 shrink-0 text-[#C6F432]" aria-hidden="true" />
-                <span>จัดส่งตรงจากผู้ขาย คิดค่าส่งตามจริงรายร้าน</span>
+                <span>{dict.home.trustDirectShip}</span>
               </div>
               <div className="flex items-center gap-2.5 rounded-2xl bg-white/5 px-4 py-3 text-xs font-semibold text-[#E2E2DC]">
                 <Store className="h-4 w-4 shrink-0 text-[#C6F432]" aria-hidden="true" />
-                <span>ราคารวมภาษี VAT 7% ไม่มีบวกเพิ่มตอนจ่าย</span>
+                <span>{dict.home.trustVatIncluded}</span>
               </div>
             </div>
           </div>
@@ -88,17 +90,17 @@ export function DesktopHomeView({
           <div className="flex items-end justify-between">
             <div>
               <h2 id="desktop-cats-heading" className="text-2xl font-extrabold">
-                เลือกช้อปตามหมวดหมู่
+                {dict.home.shopByCategory}
               </h2>
               <p className="text-sm text-[#4A4A45] dark:text-[#D4D4CE]">
-                ครบทั้ง 5 หมวดงานดีไซน์และงานคราฟต์ประจำวัน
+                {dict.home.categorySub}
               </p>
             </div>
             <Link
               href="/categories"
               className="inline-flex min-h-[44px] items-center text-sm font-extrabold hover:underline"
             >
-              ดูหมวดหมู่และร้านค้าทั้งหมด →
+              {dict.home.viewAllCategories} →
             </Link>
           </div>
 
@@ -114,12 +116,12 @@ export function DesktopHomeView({
                   className="group flex flex-col justify-between rounded-3xl border border-[#E2E2DC] bg-[#F1F1EE] p-5 transition hover:-translate-y-0.5 hover:border-[#111111] hover:bg-white dark:border-[#2E2E2B] dark:bg-[#1C1C1A] dark:hover:border-[#C6F432]"
                 >
                   <span className="font-display inline-flex w-fit rounded-full bg-[#111111] px-3 py-0.5 text-xs font-bold text-[#C6F432] dark:bg-[#C6F432] dark:text-[#111111]">
-                    {count} ชิ้น
+                    {count} {dict.home.itemsUnit}
                   </span>
                   <div className="mt-6">
                     <h3 className="text-lg font-extrabold">{cat.name}</h3>
                     <p className="mt-0.5 line-clamp-1 text-xs text-[#4A4A45] dark:text-[#D4D4CE]">
-                      {cat.description ?? "ช้อปคอลเลกชันคัดพิเศษ"}
+                      {cat.description ?? ""}
                     </p>
                   </div>
                 </Link>
@@ -138,19 +140,19 @@ export function DesktopHomeView({
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#C6F432] text-[#111111]">
               <Sparkles className="h-4 w-4" aria-hidden="true" />
             </span>
-            <span>AI เลือกให้คุณ</span>
+            <span>{dict.home.aiPicks}</span>
           </h2>
           <Link
             href="/products"
             className="inline-flex min-h-[44px] items-center text-sm font-extrabold hover:underline"
           >
-            ดูสินค้าทั้งหมด ({products.length}) →
+            {dict.home.viewAll} ({products.length}) →
           </Link>
         </div>
 
         {products.length === 0 ? (
           <div className="rounded-3xl bg-[#F1F1EE] p-10 text-center text-base font-medium text-[#4A4A45] dark:bg-[#1C1C1A] dark:text-[#D4D4CE]">
-            กำลังเตรียมรายการสินค้าจากผู้ขายไทย กรุณาตั้งค่า TAMADEE_PUBLISHABLE_KEY ในระบบหลังบ้าน
+            {dict.home.emptyCatalog}
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
@@ -169,13 +171,13 @@ export function DesktopHomeView({
         <section aria-labelledby="desktop-new-heading" className="space-y-5">
           <div className="flex items-center justify-between">
             <h2 id="desktop-new-heading" className="text-2xl font-extrabold">
-              สินค้ามาใหม่จากสตูดิโอไทย
+              {dict.home.newArrivals}
             </h2>
             <Link
               href="/products?sort=newest"
               className="inline-flex min-h-[44px] items-center text-sm font-extrabold hover:underline"
             >
-              เรียงตามมาใหม่ล่าสุด →
+              {dict.home.sortByNewest} →
             </Link>
           </div>
           <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">

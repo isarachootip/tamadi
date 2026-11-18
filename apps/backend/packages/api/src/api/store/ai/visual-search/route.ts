@@ -74,6 +74,7 @@ export async function POST(
     imageBase64: parsed.data.imageBase64,
     mimeType: parsed.data.mimeType,
     hint: parsed.data.hint,
+    locale: parsed.data.locale,
     catalog,
     geminiApiKey: env.geminiApiKey,
     geminiModel: env.geminiModel,

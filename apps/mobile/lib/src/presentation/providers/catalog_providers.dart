@@ -1,10 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/l10n/app_locale.dart';
+import '../../core/l10n/catalog_localizer.dart';
 import '../../domain/models/category.dart';
 import '../../domain/models/product.dart';
 import '../../domain/models/seller.dart';
 import '../../domain/repositories/catalog_repository.dart';
 import 'core_providers.dart';
+import 'locale_controller.dart';
 
 class SelectedCategoryNotifier extends Notifier<String?> {
   @override
@@ -37,47 +40,88 @@ final NotifierProvider<ProductFilterNotifier, ProductQueryFilter>
     );
 
 final FutureProvider<List<ProductCategory>> categoriesProvider =
-    FutureProvider<List<ProductCategory>>((Ref ref) {
-      return ref.watch(catalogRepositoryProvider).listCategories();
+    FutureProvider<List<ProductCategory>>((Ref ref) async {
+      final AppLocale locale = ref.watch(localeControllerProvider);
+      final List<ProductCategory> raw = await ref
+          .watch(catalogRepositoryProvider)
+          .listCategories();
+      return <ProductCategory>[
+        for (final ProductCategory c in raw)
+          CatalogLocalizer.localizeCategory(c, locale),
+      ];
     });
 
 final FutureProvider<List<ProductSummary>> homeProductsProvider =
-    FutureProvider<List<ProductSummary>>((Ref ref) {
+    FutureProvider<List<ProductSummary>>((Ref ref) async {
+      final AppLocale locale = ref.watch(localeControllerProvider);
       final String? categoryId = ref.watch(selectedHomeCategoryProvider);
-      return ref.watch(catalogRepositoryProvider).listProducts(
-            filter: ProductQueryFilter(categoryId: categoryId),
-          );
+      final List<ProductSummary> raw = await ref
+          .watch(catalogRepositoryProvider)
+          .listProducts(filter: ProductQueryFilter(categoryId: categoryId));
+      return <ProductSummary>[
+        for (final ProductSummary p in raw)
+          CatalogLocalizer.localizeProductSummary(p, locale),
+      ];
     });
 
 final FutureProvider<List<ProductSummary>> filteredProductsProvider =
-    FutureProvider<List<ProductSummary>>((Ref ref) {
+    FutureProvider<List<ProductSummary>>((Ref ref) async {
+      final AppLocale locale = ref.watch(localeControllerProvider);
       final ProductQueryFilter filter = ref.watch(productFilterProvider);
-      return ref.watch(catalogRepositoryProvider).listProducts(filter: filter);
+      final List<ProductSummary> raw = await ref
+          .watch(catalogRepositoryProvider)
+          .listProducts(filter: filter);
+      return <ProductSummary>[
+        for (final ProductSummary p in raw)
+          CatalogLocalizer.localizeProductSummary(p, locale),
+      ];
     });
 
 final productDetailProvider = FutureProvider.family<ProductDetail, String>((
   Ref ref,
   String productId,
-) {
-  return ref.watch(catalogRepositoryProvider).getProductDetail(productId);
+) async {
+  final AppLocale locale = ref.watch(localeControllerProvider);
+  final ProductDetail raw = await ref
+      .watch(catalogRepositoryProvider)
+      .getProductDetail(productId);
+  return CatalogLocalizer.localizeProductDetail(raw, locale);
 });
 
 final FutureProvider<List<SellerSummary>> sellersListProvider =
-    FutureProvider<List<SellerSummary>>((Ref ref) {
-      return ref.watch(catalogRepositoryProvider).listSellers();
+    FutureProvider<List<SellerSummary>>((Ref ref) async {
+      final AppLocale locale = ref.watch(localeControllerProvider);
+      final List<SellerSummary> raw = await ref
+          .watch(catalogRepositoryProvider)
+          .listSellers();
+      return <SellerSummary>[
+        for (final SellerSummary s in raw)
+          CatalogLocalizer.localizeSeller(s, locale),
+      ];
     });
 
 final sellerDetailProvider = FutureProvider.family<SellerSummary, String>((
   Ref ref,
   String sellerId,
-) {
-  return ref.watch(catalogRepositoryProvider).getSeller(sellerId);
+) async {
+  final AppLocale locale = ref.watch(localeControllerProvider);
+  final SellerSummary raw = await ref
+      .watch(catalogRepositoryProvider)
+      .getSeller(sellerId);
+  return CatalogLocalizer.localizeSeller(raw, locale);
 });
 
 final sellerProductsProvider =
     FutureProvider.family<List<ProductSummary>, String>((
       Ref ref,
       String sellerId,
-    ) {
-      return ref.watch(catalogRepositoryProvider).listSellerProducts(sellerId);
+    ) async {
+      final AppLocale locale = ref.watch(localeControllerProvider);
+      final List<ProductSummary> raw = await ref
+          .watch(catalogRepositoryProvider)
+          .listSellerProducts(sellerId);
+      return <ProductSummary>[
+        for (final ProductSummary p in raw)
+          CatalogLocalizer.localizeProductSummary(p, locale),
+      ];
     });

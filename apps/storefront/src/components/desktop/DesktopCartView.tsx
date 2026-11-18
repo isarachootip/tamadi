@@ -2,6 +2,7 @@ import { NongTammadiMascot } from "@tamadee/ui";
 import Link from "next/link";
 import type { JSX } from "react";
 import type { CartSummaryTotals, SellerCartGroup } from "../../domain/types";
+import { getUiDictionary, type UiDictionary } from "../../i18n";
 import { PromoAndPaymentCard } from "../cart/PromoAndPaymentCard";
 import { SellerGroupCard } from "../cart/SellerGroupCard";
 
@@ -10,6 +11,7 @@ export interface DesktopCartViewProps {
   readonly summary: CartSummaryTotals;
   readonly appliedCodes: readonly string[];
   readonly isLoggedIn: boolean;
+  readonly dict?: UiDictionary;
 }
 
 export function DesktopCartView({
@@ -17,22 +19,23 @@ export function DesktopCartView({
   summary,
   appliedCodes,
   isLoggedIn,
+  dict = getUiDictionary("th"),
 }: DesktopCartViewProps): JSX.Element {
   if (groups.length === 0) {
     return (
       <div className="mx-auto flex max-w-2xl flex-col items-center rounded-[2rem] bg-[#F1F1EE] px-8 py-16 text-center dark:bg-[#1C1C1A]">
         <NongTammadiMascot size={112} />
         <h1 className="mt-5 text-2xl font-extrabold">
-          ตะกร้าสินค้าของคุณยังว่างอยู่
+          {dict.cart.emptyTitle}
         </h1>
         <p className="mt-1.5 max-w-md text-sm text-[#4A4A45] dark:text-[#D4D4CE]">
-          ลองเลือกชมเสื้อผ้าลินิน รองเท้าหนัง หรือเซรามิกทำมือจากสตูดิโอผู้สร้างสรรค์ไทย
+          {dict.cart.emptyDesc}
         </p>
         <Link
           href="/products"
           className="mt-6 inline-flex min-h-[50px] items-center rounded-full bg-[#C6F432] px-8 text-sm font-extrabold text-[#111111]"
         >
-          เริ่มเลือกช้อปสินค้า
+          {dict.cart.startShopping}
         </Link>
       </div>
     );
@@ -42,10 +45,10 @@ export function DesktopCartView({
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-extrabold">
-          ตะกร้าสินค้า ({summary.totalQuantity} ชิ้น)
+          {dict.cart.title} ({summary.totalQuantity})
         </h1>
         <p className="mt-1 text-sm text-[#4A4A45] dark:text-[#D4D4CE]">
-          จัดกลุ่มตามร้านค้าผู้ขาย ({groups.length} ร้าน) • ผู้ขายแต่ละร้านจัดส่งแยกพัสดุโดยตรง
+          {dict.cart.groupedSubtitle} ({groups.length})
         </p>
       </div>
 

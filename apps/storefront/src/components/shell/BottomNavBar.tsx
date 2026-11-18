@@ -4,9 +4,11 @@ import { Grid2X2, Heart, Home, Sparkles, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { JSX } from "react";
+import { useLocale } from "../i18n/LocaleProvider";
 
 export function BottomNavBar(): JSX.Element {
   const pathname = usePathname();
+  const { dict } = useLocale();
 
   const isHome = pathname === "/";
   const isCategories =
@@ -17,26 +19,21 @@ export function BottomNavBar(): JSX.Element {
 
   return (
     <nav
-      aria-label="เมนูหลักด้านล่าง"
+      aria-label="Bottom navigation"
       className="fixed bottom-0 left-1/2 z-40 w-full max-w-[430px] -translate-x-1/2 border-t border-[#E2E2DC] bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] backdrop-blur-md dark:border-[#2E2E2B] dark:bg-[#111111]/95"
     >
       <div className="grid h-16 grid-cols-5 items-center">
-        <NavItem
-          href="/"
-          label="หน้าแรก"
-          active={isHome}
-          Icon={Home}
-        />
+        <NavItem href="/" label={dict.nav.home} active={isHome} Icon={Home} />
         <NavItem
           href="/categories"
-          label="หมวดหมู่"
+          label={dict.nav.categories}
           active={isCategories}
           Icon={Grid2X2}
         />
         <div className="flex items-center justify-center">
           <Link
             href="/ai"
-            aria-label="ผู้ช่วย AI น้องทำมะดิ"
+            aria-label={dict.nav.askAi}
             aria-current={isAi ? "page" : undefined}
             className="flex h-12 w-12 items-center justify-center rounded-full bg-[#C6F432] text-[#111111] shadow-md ring-2 ring-[#111111]/10 transition hover:scale-105 dark:ring-white/15"
           >
@@ -45,13 +42,13 @@ export function BottomNavBar(): JSX.Element {
         </div>
         <NavItem
           href="/wishlist"
-          label="ถูกใจ"
+          label={dict.nav.wishlist}
           active={isWishlist}
           Icon={Heart}
         />
         <NavItem
           href="/account"
-          label="ฉัน"
+          label={dict.nav.account}
           active={isAccount}
           Icon={User}
         />

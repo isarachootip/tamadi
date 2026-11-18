@@ -78,6 +78,7 @@ export async function POST(
     catalog,
     geminiApiKey: env.geminiApiKey,
     geminiModel: env.geminiModel,
+    locale: parsedBody.data.locale,
   });
 
   res.status(200).json({

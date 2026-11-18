@@ -1,5 +1,8 @@
 import { z } from "@medusajs/framework/zod";
 
+export const SupportedLocaleSchema = z.enum(["th", "en", "zh"]);
+export type SupportedLocale = z.infer<typeof SupportedLocaleSchema>;
+
 export const AiChatTurnSchema = z.object({
   role: z.enum(["user", "assistant"]),
   content: z.string().trim().min(1).max(600),
@@ -8,6 +11,7 @@ export const AiChatTurnSchema = z.object({
 export const AiChatRequestSchema = z.object({
   message: z.string().trim().min(1, "กรุณาพิมพ์ข้อความที่ต้องการถาม").max(400),
   history: z.array(AiChatTurnSchema).max(8).default([]),
+  locale: SupportedLocaleSchema.optional(),
 });
 
 export const GeminiStructuredReplySchema = z.object({

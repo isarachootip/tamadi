@@ -1,10 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import { Anuphan, Space_Grotesk } from "next/font/google";
 import type { JSX, ReactNode } from "react";
+import { LocaleProvider } from "../components/i18n/LocaleProvider";
 import { ServiceWorkerRegister } from "../components/pwa/ServiceWorkerRegister";
 import { ThemeProvider } from "../components/theme/ThemeProvider";
 import { WishlistProvider } from "../components/wishlist/WishlistProvider";
+import { readLocaleCookie } from "../data/cookies";
 import { CANONICAL_DESKTOP_ORIGIN } from "../data/seo";
+import { getUiDictionary } from "../i18n";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -55,14 +58,17 @@ export const viewport: Viewport = {
 
 const THEME_INIT_SCRIPT = `(function(){try{var p=localStorage.getItem('tamadee_theme_pref')||'light';var d=p==='dark'||(p==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.classList.add('dark');document.documentElement.dataset.theme='dark';}}catch(e){}})();`;
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   readonly children: ReactNode;
-}): JSX.Element {
+}): Promise<JSX.Element> {
+  const locale = await readLocaleCookie();
+  const dict = getUiDictionary(locale);
+
   return (
     <html
-      lang="th"
+      lang={dict.htmlLang}
       suppressHydrationWarning
       className={`${spaceGrotesk.variable} ${anuphan.variable}`}
     >
@@ -70,12 +76,14 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body className="antialiased">
-        <ThemeProvider>
-          <WishlistProvider>
-            {children}
-            <ServiceWorkerRegister />
-          </WishlistProvider>
-        </ThemeProvider>
+        <LocaleProvider initialLocale={locale}>
+          <ThemeProvider>
+            <WishlistProvider>
+              {children}
+              <ServiceWorkerRegister />
+            </WishlistProvider>
+          </ThemeProvider>
+        </LocaleProvider>
       </body>
     </html>
   );

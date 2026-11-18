@@ -8,8 +8,8 @@ import {
   removeCartLineAction,
   updateCartLineAction,
 } from "../../actions/cart-actions";
-import { formatThb } from "../../domain/pricing";
 import type { CartLineItem } from "../../domain/types";
+import { useLocale } from "../i18n/LocaleProvider";
 import { ProductImage } from "../shared/ProductImage";
 
 export interface CartLineRowProps {
@@ -18,6 +18,7 @@ export interface CartLineRowProps {
 
 export function CartLineRow({ item }: CartLineRowProps): JSX.Element {
   const router = useRouter();
+  const { formatPrice } = useLocale();
   const [isPending, startTransition] = useTransition();
 
   function changeQty(nextQty: number): void {
@@ -76,7 +77,7 @@ export function CartLineRow({ item }: CartLineRowProps): JSX.Element {
 
         <div className="mt-1 flex items-center justify-between gap-2">
           <p className="font-display text-sm font-extrabold text-[#111111] dark:text-[#C6F432]">
-            {formatThb(item.unitPrice * item.quantity)}
+            {formatPrice(item.unitPrice * item.quantity)}
           </p>
 
           <div className="flex items-center rounded-full bg-white ring-1 ring-[#E2E2DC] dark:bg-[#111111] dark:ring-[#2E2E2B]">

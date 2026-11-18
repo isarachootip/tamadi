@@ -4,8 +4,11 @@ import 'package:material_ui/material_ui.dart';
 import 'package:tamadee_flutter_ui/tamadee_flutter_ui.dart';
 
 import '../../../core/formatters/thb_formatter.dart';
+import '../../../core/l10n/app_locale.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../domain/models/ai_chat.dart';
 import '../../providers/cart_controller.dart';
+import '../../providers/locale_controller.dart';
 import '../../shared/product_image_box.dart';
 
 class AiProductCardTile extends ConsumerStatefulWidget {
@@ -39,7 +42,7 @@ class _AiProductCardTileState extends ConsumerState<AiProductCardTile> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('ไม่สามารถเพิ่มลงตะกร้าได้ในขณะนี้')),
+          const SnackBar(content: Text('Could not add item right now')),
         );
       }
     } finally {
@@ -52,6 +55,9 @@ class _AiProductCardTileState extends ConsumerState<AiProductCardTile> {
   @override
   Widget build(BuildContext context) {
     final AiRecommendedProduct p = widget.product;
+    final AppLocale locale = ref.watch(localeControllerProvider);
+    final AppStrings strings = ref.watch(appStringsProvider);
+
     return Container(
       margin: const EdgeInsets.only(top: 8),
       padding: const EdgeInsets.all(10),
@@ -103,7 +109,7 @@ class _AiProductCardTileState extends ConsumerState<AiProductCardTile> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    ThbFormatter.format(p.priceAmount),
+                    ThbFormatter.formatByLocale(p.priceAmount, locale),
                     style: const TextStyle(
                       color: TamadeeColors.lime,
                       fontWeight: FontWeight.w800,
@@ -128,7 +134,9 @@ class _AiProductCardTileState extends ConsumerState<AiProductCardTile> {
                 ),
               ),
               child: Text(
-                _added ? 'ใส่แล้ว ✓' : (_loading ? '...' : 'ใส่ตะกร้า'),
+                _added
+                    ? strings.addedShort
+                    : (_loading ? '...' : strings.addToCart),
                 style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w800,

@@ -1,13 +1,17 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tamadee_flutter_ui/tamadee_flutter_ui.dart';
 
 import '../../../core/formatters/thb_formatter.dart';
+import '../../../core/l10n/app_locale.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../domain/models/product.dart';
+import '../../providers/locale_controller.dart';
 import 'seller_store_card.dart';
 import 'variant_selector_section.dart';
 
-class ProductDetailBody extends StatelessWidget {
+class ProductDetailBody extends ConsumerWidget {
   const ProductDetailBody({
     super.key,
     required this.detail,
@@ -24,8 +28,11 @@ class ProductDetailBody extends StatelessWidget {
   final void Function(String axis, String val) onSelectOption;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final AppLocale locale = ref.watch(localeControllerProvider);
+    final AppStrings strings = ref.watch(appStringsProvider);
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(18, 18, 18, 0),
       child: Column(
@@ -45,10 +52,10 @@ class ProductDetailBody extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Text(
-                ThbFormatter.format(price),
+                ThbFormatter.formatByLocale(price, locale),
                 style: const TextStyle(
                   fontFamily: 'Space Grotesk',
-                  fontSize: 23,
+                  fontSize: 20,
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -81,9 +88,9 @@ class ProductDetailBody extends StatelessWidget {
           ],
           if (detail.description != null) ...<Widget>[
             const SizedBox(height: 20),
-            const Text(
-              'รายละเอียดสินค้า',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+            Text(
+              strings.productDetailsHeading,
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 6),
             Text(

@@ -1,7 +1,9 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Persists non-sensitive preferences: active cart ID, wishlist IDs, and ThemeMode.
+import '../l10n/app_locale.dart';
+
+/// Persists non-sensitive preferences: active cart ID, wishlist IDs, ThemeMode, and AppLocale.
 abstract interface class LocalPrefsStorage {
   Future<String?> readCartId();
   Future<void> saveCartId(String cartId);
@@ -12,6 +14,9 @@ abstract interface class LocalPrefsStorage {
 
   Future<ThemeMode> readThemeMode();
   Future<void> saveThemeMode(ThemeMode mode);
+
+  Future<AppLocale> readLocale();
+  Future<void> saveLocale(AppLocale locale);
 }
 
 class SharedPrefsLocalStorage implements LocalPrefsStorage {
@@ -20,6 +25,7 @@ class SharedPrefsLocalStorage implements LocalPrefsStorage {
   static const String _cartIdKey = 'tamadee_cart_id';
   static const String _wishlistKey = 'tamadee_wishlist_ids';
   static const String _themeKey = 'tamadee_theme_mode';
+  static const String _localeKey = 'tamadee_locale';
 
   @override
   Future<String?> readCartId() async {
@@ -42,7 +48,8 @@ class SharedPrefsLocalStorage implements LocalPrefsStorage {
   @override
   Future<Set<String>> readWishlistIds() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final List<String> list = prefs.getStringList(_wishlistKey) ?? const <String>[];
+    final List<String> list =
+        prefs.getStringList(_wishlistKey) ?? const <String>[];
     return list.toSet();
   }
 
@@ -73,12 +80,25 @@ class SharedPrefsLocalStorage implements LocalPrefsStorage {
     };
     await prefs.setString(_themeKey, raw);
   }
+
+  @override
+  Future<AppLocale> readLocale() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return AppLocale.fromCode(prefs.getString(_localeKey));
+  }
+
+  @override
+  Future<void> saveLocale(AppLocale locale) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_localeKey, locale.code);
+  }
 }
 
 class InMemoryPrefsStorage implements LocalPrefsStorage {
   String? _cartId;
   Set<String> _wishlist = <String>{};
   ThemeMode _themeMode = ThemeMode.light;
+  AppLocale _locale = AppLocale.th;
 
   @override
   Future<String?> readCartId() async => _cartId;
@@ -107,5 +127,13 @@ class InMemoryPrefsStorage implements LocalPrefsStorage {
   @override
   Future<void> saveThemeMode(ThemeMode mode) async {
     _themeMode = mode;
+  }
+
+  @override
+  Future<AppLocale> readLocale() async => _locale;
+
+  @override
+  Future<void> saveLocale(AppLocale locale) async {
+    _locale = locale;
   }
 }

@@ -1,15 +1,22 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tamadee_flutter_ui/tamadee_flutter_ui.dart';
 
-class AiAssistantAppBar extends StatelessWidget implements PreferredSizeWidget {
+import '../../../core/l10n/app_strings.dart';
+import '../../providers/locale_controller.dart';
+import '../../shared/language_pill_selector.dart';
+
+class AiAssistantAppBar extends ConsumerWidget implements PreferredSizeWidget {
   const AiAssistantAppBar({super.key});
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final AppStrings strings = ref.watch(appStringsProvider);
+
     return AppBar(
       backgroundColor: TamadeeColors.ink,
       surfaceTintColor: Colors.transparent,
@@ -22,24 +29,24 @@ class AiAssistantAppBar extends StatelessWidget implements PreferredSizeWidget {
         onPressed: () => context.canPop() ? context.pop() : context.go('/'),
       ),
       titleSpacing: 0,
-      title: const Row(
+      title: Row(
         children: <Widget>[
-          NongTammadiMascotWidget(size: 34, brightness: Brightness.dark),
-          SizedBox(width: 10),
+          const NongTammadiMascotWidget(size: 34, brightness: Brightness.dark),
+          const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'น้องทำมะดิ',
-                  style: TextStyle(
+                  strings.aiName,
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
                     color: TamadeeColors.white,
                   ),
                 ),
-                Text(
-                  'ผู้ช่วยช้อป AI Gemini ค้นสินค้าจริงจากร้านไทย',
+                const Text(
+                  'Gemini AI • Live Thai Catalog',
                   style: TextStyle(
                     fontSize: 11.5,
                     color: TamadeeColors.textMutedDark,
@@ -50,6 +57,12 @@ class AiAssistantAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ],
       ),
+      actions: const <Widget>[
+        Padding(
+          padding: EdgeInsets.only(right: 12),
+          child: LanguagePillSelector(compact: true),
+        ),
+      ],
     );
   }
 }
@@ -88,7 +101,7 @@ class AiChatBubble extends StatelessWidget {
   }
 }
 
-class AiBottomInputBar extends StatelessWidget {
+class AiBottomInputBar extends ConsumerWidget {
   const AiBottomInputBar({
     super.key,
     required this.controller,
@@ -101,7 +114,9 @@ class AiBottomInputBar extends StatelessWidget {
   final VoidCallback onPickImage;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final AppStrings strings = ref.watch(appStringsProvider);
+
     return SafeArea(
       top: false,
       child: Padding(
@@ -116,7 +131,7 @@ class AiBottomInputBar extends StatelessWidget {
           child: Row(
             children: <Widget>[
               IconButton(
-                tooltip: 'ค้นหาด้วยรูปภาพ',
+                tooltip: 'Visual Search',
                 onPressed: onPickImage,
                 icon: const Icon(
                   Icons.camera_alt_outlined,
@@ -128,9 +143,11 @@ class AiBottomInputBar extends StatelessWidget {
                   controller: controller,
                   style: const TextStyle(color: TamadeeColors.white),
                   onSubmitted: onSend,
-                  decoration: const InputDecoration(
-                    hintText: 'พิมพ์ หรือกดพูด',
-                    hintStyle: TextStyle(color: TamadeeColors.textMutedDark),
+                  decoration: InputDecoration(
+                    hintText: strings.aiInputHint,
+                    hintStyle: const TextStyle(
+                      color: TamadeeColors.textMutedDark,
+                    ),
                     border: InputBorder.none,
                   ),
                 ),
@@ -138,7 +155,7 @@ class AiBottomInputBar extends StatelessWidget {
               InkWell(
                 onTap: () => onSend(
                   controller.text.isEmpty
-                      ? 'แนะนำสินค้าขายดีประจำสัปดาห์'
+                      ? strings.aiSuggestions.first
                       : controller.text,
                 ),
                 customBorder: const CircleBorder(),
@@ -150,7 +167,8 @@ class AiBottomInputBar extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
-                    Icons.mic_none_rounded,
+                    Icons.send_rounded,
+                    size: 18,
                     color: TamadeeColors.ink,
                   ),
                 ),

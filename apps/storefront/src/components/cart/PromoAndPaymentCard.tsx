@@ -4,8 +4,8 @@ import { Banknote, CreditCard, QrCode, Tag } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition, type JSX } from "react";
 import { applyPromoCodeAction } from "../../actions/cart-actions";
-import { formatThb } from "../../domain/pricing";
 import type { CartSummaryTotals } from "../../domain/types";
+import { useLocale } from "../i18n/LocaleProvider";
 
 const PAYMENT_OPTIONS = [
   { id: "promptpay", label: "พร้อมเพย์ QR (ล็อกสต็อก 15 นาที)", Icon: QrCode },
@@ -25,6 +25,7 @@ export function PromoAndPaymentCard({
   isLoggedIn,
 }: PromoAndPaymentCardProps): JSX.Element {
   const router = useRouter();
+  const { formatPrice } = useLocale();
   const [isPending, startTransition] = useTransition();
   const [code, setCode] = useState("");
   const [selectedPay, setSelectedPay] = useState<string>("promptpay");
@@ -130,7 +131,7 @@ export function PromoAndPaymentCard({
         <div className="flex justify-between">
           <span>ยอดรวมสินค้า ({summary.totalQuantity} ชิ้น)</span>
           <span className="font-display font-bold">
-            {formatThb(summary.itemSubtotal)}
+            {formatPrice(summary.itemSubtotal)}
           </span>
         </div>
         <div className="flex justify-between">
@@ -138,21 +139,21 @@ export function PromoAndPaymentCard({
           <span className="font-display font-bold">
             {summary.shippingTotal === 0
               ? "ฟรี"
-              : formatThb(summary.shippingTotal)}
+              : formatPrice(summary.shippingTotal)}
           </span>
         </div>
         {summary.discountTotal > 0 ? (
           <div className="flex justify-between text-[#15803D] dark:text-[#86EFAC]">
             <span>ส่วนลด</span>
             <span className="font-display font-bold">
-              -{formatThb(summary.discountTotal)}
+              -{formatPrice(summary.discountTotal)}
             </span>
           </div>
         ) : null}
         <div className="flex justify-between border-t border-[#E2E2DC] pt-2 text-sm font-extrabold dark:border-[#2E2E2B]">
           <span>ยอดสุทธิรวม VAT 7%</span>
           <span className="font-display text-base">
-            {formatThb(summary.grandTotal)}
+            {formatPrice(summary.grandTotal)}
           </span>
         </div>
       </section>
@@ -172,7 +173,7 @@ export function PromoAndPaymentCard({
             ยอดชำระทั้งหมด
           </p>
           <p className="font-display text-lg font-extrabold">
-            {formatThb(summary.grandTotal)}
+            {formatPrice(summary.grandTotal)}
           </p>
         </div>
         <button

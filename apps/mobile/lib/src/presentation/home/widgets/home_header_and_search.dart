@@ -3,7 +3,10 @@ import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tamadee_flutter_ui/tamadee_flutter_ui.dart';
 
+import '../../../core/l10n/app_strings.dart';
 import '../../providers/cart_controller.dart';
+import '../../providers/locale_controller.dart';
+import '../../shared/language_pill_selector.dart';
 
 class HomeHeaderAndSearch extends ConsumerWidget {
   const HomeHeaderAndSearch({super.key});
@@ -12,6 +15,7 @@ class HomeHeaderAndSearch extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final int badgeCount = ref.watch(cartBadgeCountProvider);
+    final AppStrings strings = ref.watch(appStringsProvider);
     final Color surfaceColor =
         isDark ? TamadeeColors.surfaceDark : TamadeeColors.surfaceMuted;
     final Color mutedColor =
@@ -22,56 +26,66 @@ class HomeHeaderAndSearch extends ConsumerWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            const TamadeeLogoWidget(height: 34),
-            Semantics(
-              button: true,
-              label: 'ตะกร้าสินค้า $badgeCount ชิ้น',
-              child: InkWell(
-                onTap: () => context.push('/cart'),
-                customBorder: const CircleBorder(),
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: <Widget>[
-                    Container(
-                      width: TamadeeLayout.minTouchTarget,
-                      height: TamadeeLayout.minTouchTarget,
-                      decoration: BoxDecoration(
-                        color: surfaceColor,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(Icons.shopping_bag_outlined, size: 21),
-                    ),
-                    if (badgeCount > 0)
-                      Positioned(
-                        top: -2,
-                        right: -2,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
+            const TamadeeLogoWidget(height: 32),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                const LanguagePillSelector(compact: true),
+                const SizedBox(width: 8),
+                Semantics(
+                  button: true,
+                  label: '${strings.cartTitlePrefix} $badgeCount',
+                  child: InkWell(
+                    onTap: () => context.push('/cart'),
+                    customBorder: const CircleBorder(),
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: <Widget>[
+                        Container(
+                          width: TamadeeLayout.minTouchTarget,
+                          height: TamadeeLayout.minTouchTarget,
                           decoration: BoxDecoration(
-                            color: isDark
-                                ? TamadeeColors.lime
-                                : TamadeeColors.ink,
-                            borderRadius: TamadeeLayout.pillBorderRadius,
+                            color: surfaceColor,
+                            shape: BoxShape.circle,
                           ),
-                          child: Text(
-                            '$badgeCount',
-                            style: TextStyle(
-                              fontFamily: 'Space Grotesk',
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: isDark
-                                  ? TamadeeColors.ink
-                                  : TamadeeColors.white,
-                            ),
+                          child: const Icon(
+                            Icons.shopping_bag_outlined,
+                            size: 21,
                           ),
                         ),
-                      ),
-                  ],
+                        if (badgeCount > 0)
+                          Positioned(
+                            top: -2,
+                            right: -2,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? TamadeeColors.lime
+                                    : TamadeeColors.ink,
+                                borderRadius: TamadeeLayout.pillBorderRadius,
+                              ),
+                              child: Text(
+                                '$badgeCount',
+                                style: TextStyle(
+                                  fontFamily: 'Space Grotesk',
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: isDark
+                                      ? TamadeeColors.ink
+                                      : TamadeeColors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
           ],
         ),
@@ -92,7 +106,9 @@ class HomeHeaderAndSearch extends ConsumerWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    'ค้นหา หรือถ่ายรูปสินค้า',
+                    strings.searchHint,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 14.5,
                       color: mutedColor,
@@ -102,7 +118,7 @@ class HomeHeaderAndSearch extends ConsumerWidget {
                 ),
                 Semantics(
                   button: true,
-                  label: 'ถ่ายรูปหรือถามผู้ช่วยช้อป AI',
+                  label: strings.aiName,
                   child: InkWell(
                     onTap: () => context.push('/ai-assistant'),
                     customBorder: const CircleBorder(),

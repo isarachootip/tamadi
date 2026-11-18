@@ -1,7 +1,12 @@
 import { z } from "@medusajs/framework/zod";
 import { groundProductIds, matchCatalogProducts } from "./catalog-matcher";
 import { resolveGeminiEndpoint } from "./gemini-client";
-import { GeminiApiEnvelopeSchema, type AiCatalogItem } from "./types";
+import {
+  GeminiApiEnvelopeSchema,
+  SupportedLocaleSchema,
+  type AiCatalogItem,
+  type SupportedLocale,
+} from "./types";
 
 const MAX_BASE64_CHARS = 5_500_000;
 
@@ -19,6 +24,7 @@ export const VisualSearchRequestSchema = z.object({
     .max(MAX_BASE64_CHARS, "ไฟล์รูปภาพมีขนาดใหญ่เกิน 4 MB กรุณาเลือกรูปที่เล็กลง"),
   mimeType: AllowedVisualMimeSchema,
   hint: z.string().trim().max(160).optional(),
+  locale: SupportedLocaleSchema.optional(),
 });
 
 const GeminiVisionReplySchema = z.object({
@@ -40,6 +46,7 @@ export interface SearchCatalogByImageInput {
   readonly imageBase64: string;
   readonly mimeType: AllowedVisualMime;
   readonly hint?: string;
+  readonly locale?: SupportedLocale;
   readonly catalog: readonly AiCatalogItem[];
   readonly geminiApiKey: string | undefined;
   readonly geminiModel: string;
@@ -57,22 +64,29 @@ export function normalizeBase64Image(raw: string): string {
 
 function buildVisionPrompt(
   catalog: readonly AiCatalogItem[],
-  hint?: string
+  hint?: string,
+  locale: SupportedLocale = "th"
 ): string {
   const compact = catalog.map((item) => ({
     id: item.id,
+    handle: item.handle,
     title: item.title,
     category: item.categoryNames.join("/"),
     priceThb: item.priceAmount,
-    desc: (item.description ?? "").slice(0, 80),
   }));
 
+  const summaryLang =
+    locale === "en"
+      ? "1 concise English sentence"
+      : locale === "zh"
+        ? "1 concise Simplified Chinese sentence (简体中文)"
+        : "ภาษาไทย 1 ประโยค";
+
   return [
-    "คุณคือระบบค้นหาสินค้าด้วยภาพ (Visual Search) ของตลาดออนไลน์ไทย Tamadee",
-    "วิเคราะห์รูปภาพที่ลูกค้าอัปโหลด (ประเภทสินค้า วัสดุ โทนสี รูปทรง สไตล์) แล้วจับคู่กับรหัสสินค้า `id` ที่ใกล้เคียงที่สุดจาก CATALOG_JSON เท่านั้น (สูงสุด 4 ชิ้น)",
-    hint ? `คำใบ้เพิ่มเติมจากลูกค้า: "${hint}"` : "",
-    "ห้ามแต่งรหัสสินค้าขึ้นมาเองเด็ดขาด ตอบกลับเป็น JSON เท่านั้นตามรูปแบบ:",
-    '{"detectedSummary":"สรุปลักษณะสินค้าในภาพเป็นภาษาไทย 1 ประโยค","keywords":["คำสำคัญ1","คำสำคัญ2"],"productIds":["id1","id2"]}',
+    "You are the Visual Search matcher for Tamadee Thai Creator Marketplace.",
+    "Analyze the uploaded photo and pick up to 4 closest real `id` values from CATALOG_JSON.",
+    hint ? `Shopper hint: "${hint}"` : "",
+    `Return JSON strictly: {"detectedSummary":"(${summaryLang})","keywords":["k1","k2"],"productIds":["id1","id2"]}`,
     `CATALOG_JSON=${JSON.stringify(compact)}`,
   ]
     .filter(Boolean)
@@ -118,7 +132,7 @@ export async function searchCatalogByImage(
                   data: cleanBase64,
                 },
               },
-              { text: buildVisionPrompt(input.catalog, input.hint) },
+              { text: buildVisionPrompt(input.catalog, input.hint, input.locale) },
             ],
           },
         ],

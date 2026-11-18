@@ -1,3 +1,5 @@
+import 'package:tamadee_mobile/src/core/l10n/app_locale.dart';
+import 'package:tamadee_mobile/src/core/l10n/catalog_localizer.dart';
 import 'package:tamadee_mobile/src/core/media/image_picker_adapter.dart';
 import 'package:tamadee_mobile/src/domain/models/ai_chat.dart';
 import 'package:tamadee_mobile/src/domain/models/category.dart';
@@ -124,22 +126,31 @@ class FakeAiRepository implements AiRepository {
   Future<AiChatResult> askAssistant({
     required String message,
     List<AiHistoryTurn> history = const <AiHistoryTurn>[],
+    AppLocale locale = AppLocale.th,
   }) async {
+    final String reply = switch (locale) {
+      AppLocale.th => 'จัดให้ตามคำขอ "$message" ครับ!',
+      AppLocale.en => 'Here are live Thai studio picks for "$message"!',
+      AppLocale.zh => '已为您找到关于“$message”的泰国工坊现货推荐！',
+    };
     return AiChatResult(
-      reply: 'จัดให้ตามคำขอ "$message" ครับ!',
+      reply: reply,
       source: 'gemini',
       budgetThb: 2500,
-      products: const <AiRecommendedProduct>[
-        AiRecommendedProduct(
-          id: 'prod_shirt',
-          title: 'เสื้อเชิ้ตลินิน',
-          handle: 'linen-relaxed-shirt',
-          priceAmount: 890,
-          offerId: 'off_shirt_m',
-          variantId: 'var_shirt_m',
-          variantTitle: 'M / ขาวครีม',
-          sellerId: 'sel_lamai',
-          sellerName: 'ละไม สตูดิโอ',
+      products: <AiRecommendedProduct>[
+        CatalogLocalizer.localizeAiProduct(
+          const AiRecommendedProduct(
+            id: 'prod_shirt',
+            title: 'เสื้อเชิ้ตลินิน',
+            handle: 'linen-relaxed-shirt',
+            priceAmount: 890,
+            offerId: 'off_shirt_m',
+            variantId: 'var_shirt_m',
+            variantTitle: 'M / ขาวครีม',
+            sellerId: 'sel_lamai',
+            sellerName: 'ละไม สตูดิโอ',
+          ),
+          locale,
         ),
       ],
     );
@@ -150,22 +161,31 @@ class FakeAiRepository implements AiRepository {
     required String imageBase64,
     required String mimeType,
     String? hint,
+    AppLocale locale = AppLocale.th,
   }) async {
-    return const VisualSearchResult(
-      detectedSummary: 'พบเสื้อเชิ้ตผ้าลินินโทนสีขาวครีมใกล้เคียงกับภาพของคุณ',
-      keywords: <String>['ลินิน', 'เชิ้ต'],
+    final String summary = switch (locale) {
+      AppLocale.th => 'พบเสื้อเชิ้ตผ้าลินินโทนสีขาวครีมใกล้เคียงกับภาพของคุณ',
+      AppLocale.en => 'Matched natural cream pure linen shirt from your photo',
+      AppLocale.zh => '为您匹配到与图片相似的米白色纯亚麻衬衫',
+    };
+    return VisualSearchResult(
+      detectedSummary: summary,
+      keywords: const <String>['ลินิน', 'เชิ้ต'],
       source: 'gemini-vision',
       products: <AiRecommendedProduct>[
-        AiRecommendedProduct(
-          id: 'prod_shirt',
-          title: 'เสื้อเชิ้ตลินิน',
-          handle: 'linen-relaxed-shirt',
-          priceAmount: 890,
-          offerId: 'off_shirt_m',
-          variantId: 'var_shirt_m',
-          variantTitle: 'M / ขาวครีม',
-          sellerId: 'sel_lamai',
-          sellerName: 'ละไม สตูดิโอ',
+        CatalogLocalizer.localizeAiProduct(
+          const AiRecommendedProduct(
+            id: 'prod_shirt',
+            title: 'เสื้อเชิ้ตลินิน',
+            handle: 'linen-relaxed-shirt',
+            priceAmount: 890,
+            offerId: 'off_shirt_m',
+            variantId: 'var_shirt_m',
+            variantTitle: 'M / ขาวครีม',
+            sellerId: 'sel_lamai',
+            sellerName: 'ละไม สตูดิโอ',
+          ),
+          locale,
         ),
       ],
     );

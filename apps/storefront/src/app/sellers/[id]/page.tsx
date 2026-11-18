@@ -6,6 +6,7 @@ import { CartIconLink } from "../../../components/shared/CartIconLink";
 import { ProductCard } from "../../../components/shared/ProductCard";
 import { TopBackHeader } from "../../../components/shared/TopBackHeader";
 import { StorefrontShell } from "../../../components/shell/StorefrontShell";
+import { getServerI18n } from "../../../data/i18n-server";
 import {
   getSeller,
   listSellerProducts,
@@ -24,9 +25,9 @@ export async function generateMetadata({
   const { id } = await params;
   const seller = await getSeller(id).catch(() => null);
   return buildPageMetadata({
-    title: seller ? `ร้าน ${seller.name}` : "หน้าร้านผู้สร้างสรรค์",
+    title: seller ? seller.name : "Creator Studio",
     description:
-      seller?.description ?? "เลือกชมสินค้าจากสตูดิโอผู้สร้างสรรค์ไทยที่ผ่านการอนุมัติบน Tamadee",
+      seller?.description ?? "Approved Thai Creator Studio on Tamadee",
     pathname: `/sellers/${encodeURIComponent(id)}`,
   });
 }
@@ -34,11 +35,14 @@ export async function generateMetadata({
 export default async function SellerStorePage({
   params,
 }: SellerPageProps): Promise<JSX.Element> {
-  const { id } = await params;
+  const [{ id }, { locale, dict }] = await Promise.all([
+    params,
+    getServerI18n(),
+  ]);
 
   const [seller, products, cart] = await Promise.all([
-    getSeller(id).catch(() => null),
-    listSellerProducts(id).catch(() => []),
+    getSeller(id, locale).catch(() => null),
+    listSellerProducts(id, locale).catch(() => []),
     getServerCart(),
   ]);
 
@@ -58,7 +62,7 @@ export default async function SellerStorePage({
           <div className="space-y-1">
             <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2.5 py-0.5 text-[11px] font-bold text-[#C6F432]">
               <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
-              ผู้ขายที่ผ่านการอนุมัติจาก Tamadee
+              {dict.product.approvedCreator}
             </span>
             <h1 className="text-xl font-extrabold lg:text-2xl">{seller.name}</h1>
             {seller.description ? (
@@ -72,7 +76,8 @@ export default async function SellerStorePage({
         <div className="flex items-center gap-2 rounded-2xl bg-white/10 px-4 py-3 text-xs font-semibold text-white">
           <Truck className="h-4 w-4 shrink-0 text-[#C6F432]" aria-hidden="true" />
           <span>
-            จัดส่งภายใน {seller.leadtimeDays ?? 2} วันทำการ • ค่าส่ง ฿40/ร้าน (ฟรีเมื่อครบ ฿3,000)
+            {dict.product.shipsInPrefix} {seller.leadtimeDays ?? 2}{" "}
+            {dict.product.shipsInSuffix}
           </span>
         </div>
       </div>
@@ -90,7 +95,7 @@ export default async function SellerStorePage({
         {sellerBanner}
         <section aria-labelledby="seller-products-heading" className="space-y-3">
           <h2 id="seller-products-heading" className="text-base font-extrabold">
-            สินค้าจากร้านนี้ ({products.length})
+            {dict.nav.allProducts} ({products.length})
           </h2>
           <div className="grid grid-cols-2 gap-3">
             {products.map((product, idx) => (
@@ -107,7 +112,7 @@ export default async function SellerStorePage({
       {sellerBanner}
       <section aria-labelledby="desktop-seller-products" className="space-y-4">
         <h2 id="desktop-seller-products" className="text-2xl font-extrabold">
-          สินค้าทั้งหมดจากร้าน {seller.name} ({products.length})
+          {seller.name} ({products.length})
         </h2>
         <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {products.map((product, idx) => (

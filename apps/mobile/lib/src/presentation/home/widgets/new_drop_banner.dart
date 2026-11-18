@@ -1,13 +1,18 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tamadee_flutter_ui/tamadee_flutter_ui.dart';
 
-class NewDropBanner extends StatelessWidget {
+import '../../../core/l10n/app_strings.dart';
+import '../../providers/locale_controller.dart';
+
+class NewDropBanner extends ConsumerWidget {
   const NewDropBanner({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final AppStrings strings = ref.watch(appStringsProvider);
     final Color cardColor =
         isDark ? const Color(0xFF1F1F1C) : TamadeeColors.ink;
 
@@ -17,9 +22,7 @@ class NewDropBanner extends StatelessWidget {
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: TamadeeLayout.cardBorderRadius,
-        border: isDark
-            ? Border.all(color: TamadeeColors.borderDark)
-            : null,
+        border: isDark ? Border.all(color: TamadeeColors.borderDark) : null,
       ),
       child: Row(
         children: <Widget>[
@@ -27,9 +30,9 @@ class NewDropBanner extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                const Text(
-                  'คอลเลกชันใหม่',
-                  style: TextStyle(
+                Text(
+                  strings.newDropSub,
+                  style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                     color: Color(0xFFB5B5AE),
@@ -57,9 +60,9 @@ class NewDropBanner extends StatelessWidget {
                       foregroundColor: TamadeeColors.ink,
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                     ),
-                    child: const Text(
-                      'ช้อปเลย',
-                      style: TextStyle(
+                    child: Text(
+                      strings.shopNow,
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                       ),

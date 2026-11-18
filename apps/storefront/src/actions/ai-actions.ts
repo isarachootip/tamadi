@@ -1,6 +1,6 @@
 "use server";
 
-import { readCustomerToken } from "../data/cookies";
+import { readCustomerToken, readLocaleCookie } from "../data/cookies";
 import { MercurApiError, mercurFetch } from "../data/mercur-client";
 import {
   AiChatResponseSchema,
@@ -11,6 +11,7 @@ import {
   type AiHistoryTurn,
   type VisualSearchResponse,
 } from "../data/schemas/ai-schemas";
+import { localizeAiProduct } from "../i18n/localize-catalog";
 
 export interface AskAiActionResult {
   readonly ok: boolean;
@@ -32,30 +33,40 @@ export async function askNongTammadiAction(input: {
   if (!parsed.success) {
     return {
       ok: false,
-      message: parsed.error.issues[0]?.message ?? "ข้อความที่ส่งมาไม่ถูกต้อง",
+      message: parsed.error.issues[0]?.message ?? "Invalid message",
     };
   }
 
   try {
-    const bearerToken = await readCustomerToken();
+    const [bearerToken, locale] = await Promise.all([
+      readCustomerToken(),
+      readLocaleCookie(),
+    ]);
     const response = await mercurFetch({
       method: "POST",
       path: "/store/ai/chat",
       body: {
         message: parsed.data.message,
         history: parsed.data.history,
+        locale,
       },
       bearerToken,
       schema: AiChatResponseSchema,
     });
-    return { ok: true, data: response };
+    return {
+      ok: true,
+      data: {
+        ...response,
+        products: response.products.map((p) => localizeAiProduct(p, locale)),
+      },
+    };
   } catch (error) {
     if (error instanceof MercurApiError) {
       return { ok: false, message: error.message };
     }
     return {
       ok: false,
-      message: "ไม่สามารถติดต่อผู้ช่วย AI น้องทำมะดิได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง",
+      message: "AI assistant is temporarily unavailable. Please try again.",
     };
   }
 }
@@ -69,12 +80,15 @@ export async function visualSearchAction(input: {
   if (!parsed.success) {
     return {
       ok: false,
-      message: parsed.error.issues[0]?.message ?? "รูปภาพที่อัปโหลดไม่ถูกต้อง",
+      message: parsed.error.issues[0]?.message ?? "Invalid image",
     };
   }
 
   try {
-    const bearerToken = await readCustomerToken();
+    const [bearerToken, locale] = await Promise.all([
+      readCustomerToken(),
+      readLocaleCookie(),
+    ]);
     const response = await mercurFetch({
       method: "POST",
       path: "/store/ai/visual-search",
@@ -82,18 +96,25 @@ export async function visualSearchAction(input: {
         imageBase64: parsed.data.imageBase64,
         mimeType: parsed.data.mimeType,
         ...(parsed.data.hint ? { hint: parsed.data.hint } : {}),
+        locale,
       },
       bearerToken,
       schema: VisualSearchResponseSchema,
     });
-    return { ok: true, data: response };
+    return {
+      ok: true,
+      data: {
+        ...response,
+        products: response.products.map((p) => localizeAiProduct(p, locale)),
+      },
+    };
   } catch (error) {
     if (error instanceof MercurApiError) {
       return { ok: false, message: error.message };
     }
     return {
       ok: false,
-      message: "ไม่สามารถค้นหาสินค้าด้วยรูปภาพได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง",
+      message: "Visual search is temporarily unavailable. Please try again.",
     };
   }
 }

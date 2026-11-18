@@ -1,3 +1,5 @@
+import '../../core/l10n/app_locale.dart';
+import '../../core/l10n/catalog_localizer.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/json_parsers.dart';
 import '../../domain/models/ai_chat.dart';
@@ -8,28 +10,34 @@ class MercurAiRepository implements AiRepository {
 
   final ApiClient apiClient;
 
-  static List<AiRecommendedProduct> _parseProducts(Object? rawList) {
+  static List<AiRecommendedProduct> _parseProducts(
+    Object? rawList,
+    AppLocale locale,
+  ) {
     final List<JsonMap> rawProducts = JsonParsers.asJsonMapList(
       rawList,
       context: 'products',
     );
     return <AiRecommendedProduct>[
       for (final JsonMap p in rawProducts)
-        AiRecommendedProduct(
-          id: JsonParsers.readString(p, 'id'),
-          title: JsonParsers.readString(p, 'title'),
-          handle: JsonParsers.readString(p, 'handle', fallback: ''),
-          priceAmount: JsonParsers.readInt(p, 'priceAmount', fallback: 0),
-          offerId: JsonParsers.readString(p, 'offerId'),
-          variantId: JsonParsers.readString(p, 'variantId', fallback: ''),
-          variantTitle: JsonParsers.readString(
-            p,
-            'variantTitle',
-            fallback: 'มาตรฐาน',
+        CatalogLocalizer.localizeAiProduct(
+          AiRecommendedProduct(
+            id: JsonParsers.readString(p, 'id'),
+            title: JsonParsers.readString(p, 'title'),
+            handle: JsonParsers.readString(p, 'handle', fallback: ''),
+            priceAmount: JsonParsers.readInt(p, 'priceAmount', fallback: 0),
+            offerId: JsonParsers.readString(p, 'offerId'),
+            variantId: JsonParsers.readString(p, 'variantId', fallback: ''),
+            variantTitle: JsonParsers.readString(
+              p,
+              'variantTitle',
+              fallback: 'มาตรฐาน',
+            ),
+            sellerId: JsonParsers.readString(p, 'sellerId'),
+            sellerName: JsonParsers.readString(p, 'sellerName'),
+            thumbnail: JsonParsers.readNullableString(p, 'thumbnail'),
           ),
-          sellerId: JsonParsers.readString(p, 'sellerId'),
-          sellerName: JsonParsers.readString(p, 'sellerName'),
-          thumbnail: JsonParsers.readNullableString(p, 'thumbnail'),
+          locale,
         ),
     ];
   }
@@ -38,6 +46,7 @@ class MercurAiRepository implements AiRepository {
   Future<AiChatResult> askAssistant({
     required String message,
     List<AiHistoryTurn> history = const <AiHistoryTurn>[],
+    AppLocale locale = AppLocale.th,
   }) async {
     final JsonMap json = await apiClient.post(
       '/store/ai/chat',
@@ -46,6 +55,7 @@ class MercurAiRepository implements AiRepository {
         'history': <Map<String, Object?>>[
           for (final AiHistoryTurn turn in history) turn.toJson(),
         ],
+        'locale': locale.code,
       },
     );
 
@@ -58,7 +68,7 @@ class MercurAiRepository implements AiRepository {
         fallback: 'catalog-fallback',
       ),
       budgetThb: rawBudget is num ? rawBudget.round() : null,
-      products: _parseProducts(json['products']),
+      products: _parseProducts(json['products'], locale),
     );
   }
 
@@ -67,6 +77,7 @@ class MercurAiRepository implements AiRepository {
     required String imageBase64,
     required String mimeType,
     String? hint,
+    AppLocale locale = AppLocale.th,
   }) async {
     final String trimmedHint = (hint ?? '').trim();
     final JsonMap json = await apiClient.post(
@@ -75,6 +86,7 @@ class MercurAiRepository implements AiRepository {
         'imageBase64': imageBase64,
         'mimeType': mimeType,
         if (trimmedHint.isNotEmpty) 'hint': trimmedHint,
+        'locale': locale.code,
       },
     );
 
@@ -93,7 +105,7 @@ class MercurAiRepository implements AiRepository {
         'source',
         fallback: 'catalog-fallback',
       ),
-      products: _parseProducts(json['products']),
+      products: _parseProducts(json['products'], locale),
     );
   }
 }
