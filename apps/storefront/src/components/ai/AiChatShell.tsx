@@ -1,7 +1,8 @@
 "use client";
 
 import { NongTammadiMascot } from "@tamadee/ui";
-import { Loader2, Send, Sparkles } from "lucide-react";
+import { Camera, Loader2, Send, Sparkles } from "lucide-react";
+import Link from "next/link";
 import { useState, useTransition, type JSX } from "react";
 import { askNongTammadiAction } from "../../actions/ai-actions";
 import type {
@@ -67,33 +68,19 @@ export function AiChatShell({
       });
 
       if (!res.ok || !res.data) {
+        const errText = res.message ?? "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง";
         setMessages((prev) => [
           ...prev,
-          {
-            id: `err_${Date.now()}`,
-            role: "assistant",
-            text: res.message ?? "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง",
-            isError: true,
-          },
+          { id: `err_${Date.now()}`, role: "assistant", text: errText, isError: true },
         ]);
         return;
       }
 
       setMessages((prev) => [
         ...prev,
-        {
-          id: `a_${Date.now()}`,
-          role: "assistant",
-          text: res.data!.reply,
-          products: res.data!.products,
-        },
+        { id: `a_${Date.now()}`, role: "assistant", text: res.data!.reply, products: res.data!.products },
       ]);
     });
-  }
-
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>): void {
-    event.preventDefault();
-    sendQuestion(draft);
   }
 
   return (
@@ -168,7 +155,20 @@ export function AiChatShell({
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="mt-6 flex gap-2">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          sendQuestion(draft);
+        }}
+        className="mt-6 flex gap-2"
+      >
+        <Link
+          href="/visual-search"
+          aria-label="ค้นหาสินค้าด้วยรูปภาพ"
+          className="inline-flex min-h-[48px] min-w-[48px] shrink-0 items-center justify-center rounded-2xl border border-[#2E2E2B] bg-[#1C1C1A] text-[#C6F432]"
+        >
+          <Camera className="h-4 w-4" aria-hidden="true" />
+        </Link>
         <label htmlFor="ai-prompt-input" className="sr-only">
           พิมพ์คำถามถึงน้องทำมะดิ
         </label>

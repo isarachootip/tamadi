@@ -1,5 +1,5 @@
 import { TamadeeLogo } from "@tamadee/ui";
-import { Search } from "lucide-react";
+import { Camera, Search } from "lucide-react";
 import Link from "next/link";
 import type { JSX } from "react";
 import { CartIconLink } from "../shared/CartIconLink";
@@ -44,6 +44,13 @@ export function HomeHeader({ cartCount }: HomeHeaderProps): JSX.Element {
             className="min-h-[44px] w-full rounded-2xl border border-transparent bg-[#F1F1EE] pr-3 pl-10 text-sm font-medium text-[#111111] placeholder:text-[#4A4A45] focus:border-[#111111] focus:outline-none dark:bg-[#1C1C1A] dark:text-white dark:placeholder:text-[#D4D4CE] dark:focus:border-[#C6F432]"
           />
         </div>
+        <Link
+          href="/visual-search"
+          aria-label="ค้นหาสินค้าด้วยรูปภาพ"
+          className="inline-flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-2xl bg-[#F1F1EE] text-[#111111] transition hover:bg-[#E2E2DC] dark:bg-[#1C1C1A] dark:text-[#C6F432]"
+        >
+          <Camera className="h-4 w-4" aria-hidden="true" />
+        </Link>
         <button
           type="submit"
           className="min-h-[44px] shrink-0 rounded-2xl bg-[#111111] px-4 text-xs font-extrabold text-[#C6F432] transition hover:opacity-90 dark:bg-[#C6F432] dark:text-[#111111]"

@@ -93,10 +93,12 @@ class AiBottomInputBar extends StatelessWidget {
     super.key,
     required this.controller,
     required this.onSend,
+    required this.onPickImage,
   });
 
   final TextEditingController controller;
   final ValueChanged<String> onSend;
+  final VoidCallback onPickImage;
 
   @override
   Widget build(BuildContext context) {
@@ -115,10 +117,10 @@ class AiBottomInputBar extends StatelessWidget {
             children: <Widget>[
               IconButton(
                 tooltip: 'ค้นหาด้วยรูปภาพ',
-                onPressed: () => onSend('ค้นหาจากรูปถ่ายสินค้า'),
+                onPressed: onPickImage,
                 icon: const Icon(
                   Icons.camera_alt_outlined,
-                  color: TamadeeColors.textMutedDark,
+                  color: TamadeeColors.lime,
                 ),
               ),
               Expanded(

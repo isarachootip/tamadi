@@ -1,5 +1,6 @@
 import { TamadeeLogo } from "@tamadee/ui";
 import {
+  Camera,
   Heart,
   Search,
   ShoppingBag,
@@ -61,6 +62,14 @@ export function DesktopNavbar({
               className="min-h-[46px] w-full rounded-full border border-[#E2E2DC] bg-[#F1F1EE] pr-4 pl-11 text-sm font-medium text-[#111111] placeholder:text-[#4A4A45] focus:border-[#111111] focus:bg-white focus:outline-none dark:border-[#2E2E2B] dark:bg-[#1C1C1A] dark:text-white dark:placeholder:text-[#D4D4CE] dark:focus:border-[#C6F432]"
             />
           </div>
+          <Link
+            href="/visual-search"
+            aria-label="ค้นหาสินค้าด้วยรูปภาพ"
+            title="ค้นหาสินค้าด้วยรูปภาพ"
+            className="inline-flex min-h-[46px] min-w-[46px] shrink-0 items-center justify-center rounded-full border border-[#E2E2DC] bg-[#F1F1EE] text-[#111111] transition hover:border-[#111111] dark:border-[#2E2E2B] dark:bg-[#1C1C1A] dark:text-[#C6F432] dark:hover:border-[#C6F432]"
+          >
+            <Camera className="h-4 w-4" aria-hidden="true" />
+          </Link>
           <button
             type="submit"
             className="min-h-[46px] shrink-0 rounded-full bg-[#111111] px-6 text-xs font-extrabold text-[#C6F432] transition hover:opacity-90 dark:bg-[#C6F432] dark:text-[#111111]"

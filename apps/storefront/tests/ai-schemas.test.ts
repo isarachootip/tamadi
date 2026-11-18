@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import {
   AiChatResponseSchema,
   AskAiInputSchema,
+  VisualSearchInputSchema,
+  VisualSearchResponseSchema,
 } from "../src/data/schemas/ai-schemas";
 
 export function runAiSchemaTests(): void {
@@ -36,4 +38,20 @@ export function runAiSchemaTests(): void {
 
   assert.equal(parsedResponse.products.length, 1);
   assert.equal(parsedResponse.products[0]?.offerId, "off_01");
+
+  const visualInput = VisualSearchInputSchema.parse({
+    imageBase64: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/",
+    mimeType: "image/jpeg",
+    hint: "  เสื้อลินิน  ",
+  });
+  assert.equal(visualInput.hint, "เสื้อลินิน");
+
+  const visualRes = VisualSearchResponseSchema.parse({
+    enabled: true,
+    detectedSummary: "เสื้อเชิ้ตลินินสีขาวครีม",
+    keywords: ["ลินิน", "เชิ้ต"],
+    source: "gemini-vision",
+    products: [],
+  });
+  assert.equal(visualRes.source, "gemini-vision");
 }

@@ -5,4 +5,10 @@ abstract interface class AiRepository {
     required String message,
     List<AiHistoryTurn> history = const <AiHistoryTurn>[],
   });
+
+  Future<VisualSearchResult> searchByImage({
+    required String imageBase64,
+    required String mimeType,
+    String? hint,
+  });
 }

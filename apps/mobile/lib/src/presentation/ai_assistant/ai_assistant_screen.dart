@@ -1,26 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tamadee_flutter_ui/tamadee_flutter_ui.dart';
 
+import '../../core/media/image_picker_adapter.dart';
 import '../../core/network/api_exception.dart';
 import '../../domain/models/ai_chat.dart';
 import '../providers/core_providers.dart';
+import 'widgets/ai_conversation_list.dart';
 import 'widgets/ai_input_bar.dart';
-import 'widgets/ai_outfit_preview_card.dart';
-import 'widgets/ai_product_card_tile.dart';
-
-class _ConversationTurn {
-  const _ConversationTurn({
-    required this.isUser,
-    required this.text,
-    this.products = const <AiRecommendedProduct>[],
-  });
-
-  final bool isUser;
-  final String text;
-  final List<AiRecommendedProduct> products;
-}
 
 class AiAssistantScreen extends ConsumerStatefulWidget {
   const AiAssistantScreen({super.key});
@@ -31,7 +18,8 @@ class AiAssistantScreen extends ConsumerStatefulWidget {
 
 class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
   final TextEditingController _inputCtrl = TextEditingController();
-  final List<_ConversationTurn> _turns = <_ConversationTurn>[];
+  final ScrollController _scrollCtrl = ScrollController();
+  final List<AiConversationTurn> _turns = <AiConversationTurn>[];
   bool _sending = false;
 
   static const List<String> _suggestions = <String>[
@@ -43,7 +31,16 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
   @override
   void dispose() {
     _inputCtrl.dispose();
+    _scrollCtrl.dispose();
     super.dispose();
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollCtrl.hasClients) {
+        _scrollCtrl.jumpTo(_scrollCtrl.position.maxScrollExtent);
+      }
+    });
   }
 
   Future<void> _sendPrompt(String raw) async {
@@ -52,7 +49,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
     _inputCtrl.clear();
 
     final List<AiHistoryTurn> history = <AiHistoryTurn>[
-      for (final _ConversationTurn t in _turns.skip(
+      for (final AiConversationTurn t in _turns.skip(
         _turns.length > 6 ? _turns.length - 6 : 0,
       ))
         AiHistoryTurn(role: t.isUser ? 'user' : 'assistant', content: t.text),
@@ -60,7 +57,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
 
     setState(() {
       _sending = true;
-      _turns.add(_ConversationTurn(isUser: true, text: text));
+      _turns.add(AiConversationTurn(isUser: true, text: text));
     });
 
     try {
@@ -70,7 +67,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
       if (!mounted) return;
       setState(() {
         _turns.add(
-          _ConversationTurn(
+          AiConversationTurn(
             isUser: false,
             text: res.reply,
             products: res.products,
@@ -79,14 +76,14 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
       });
     } on ApiException catch (e) {
       if (!mounted) return;
-      setState(() {
-        _turns.add(_ConversationTurn(isUser: false, text: e.message));
-      });
+      setState(
+        () => _turns.add(AiConversationTurn(isUser: false, text: e.message)),
+      );
     } catch (_) {
       if (!mounted) return;
       setState(() {
         _turns.add(
-          const _ConversationTurn(
+          const AiConversationTurn(
             isUser: false,
             text: 'ไม่สามารถเชื่อมต่อผู้ช่วย AI ได้ในขณะนี้ กรุณาลองใหม่อีกครั้งครับ',
           ),
@@ -95,6 +92,57 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
     } finally {
       if (mounted) {
         setState(() => _sending = false);
+        _scrollToBottom();
+      }
+    }
+  }
+
+  Future<void> _pickAndSearchImage() async {
+    if (_sending) return;
+    final PickedSearchImage? picked = await ref
+        .read(imagePickerAdapterProvider)
+        .pickCompressedImage();
+    if (picked == null || !mounted) return;
+
+    final String hint = _inputCtrl.text.trim();
+    _inputCtrl.clear();
+    setState(() {
+      _sending = true;
+      _turns.add(
+        AiConversationTurn(
+          isUser: true,
+          text: '📷 ค้นหาสินค้าคล้ายรูป: ${picked.fileName}',
+        ),
+      );
+    });
+
+    try {
+      final VisualSearchResult res = await ref
+          .read(aiRepositoryProvider)
+          .searchByImage(
+            imageBase64: picked.base64Data,
+            mimeType: picked.mimeType,
+            hint: hint.isNotEmpty ? hint : null,
+          );
+      if (!mounted) return;
+      setState(() {
+        _turns.add(
+          AiConversationTurn(
+            isUser: false,
+            text: res.detectedSummary,
+            products: res.products,
+          ),
+        );
+      });
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      setState(
+        () => _turns.add(AiConversationTurn(isUser: false, text: e.message)),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _sending = false);
+        _scrollToBottom();
       }
     }
   }
@@ -109,55 +157,19 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
         body: Column(
           children: <Widget>[
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-                children: <Widget>[
-                  const AiChatBubble(
-                    isUser: true,
-                    text: 'หาชุดไปทะเลให้หน่อย งบไม่เกิน 2,500',
-                  ),
-                  AiOutfitPreviewCard(
-                    onBrowseSet: () => context.push('/products'),
-                  ),
-                  for (final _ConversationTurn turn in _turns) ...<Widget>[
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10),
-                      child: AiChatBubble(isUser: turn.isUser, text: turn.text),
-                    ),
-                    for (final AiRecommendedProduct item in turn.products)
-                      AiProductCardTile(product: item),
-                  ],
-                  if (_sending)
-                    const Padding(
-                      padding: EdgeInsets.only(top: 10),
-                      child: AiChatBubble(
-                        isUser: false,
-                        text: 'น้องทำมะดิกำลังค้นสินค้าจริงให้สักครู่...',
-                      ),
-                    ),
-                  const SizedBox(height: 14),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: <Widget>[
-                      for (final String chip in _suggestions)
-                        ActionChip(
-                          backgroundColor: const Color(0xFF1C1C1A),
-                          side: const BorderSide(
-                            color: TamadeeColors.borderDark,
-                          ),
-                          label: Text(
-                            chip,
-                            style: const TextStyle(color: TamadeeColors.white),
-                          ),
-                          onPressed: _sending ? null : () => _sendPrompt(chip),
-                        ),
-                    ],
-                  ),
-                ],
+              child: AiConversationList(
+                scrollController: _scrollCtrl,
+                turns: _turns,
+                sending: _sending,
+                suggestions: _suggestions,
+                onSelectSuggestion: _sendPrompt,
               ),
             ),
-            AiBottomInputBar(controller: _inputCtrl, onSend: _sendPrompt),
+            AiBottomInputBar(
+              controller: _inputCtrl,
+              onSend: _sendPrompt,
+              onPickImage: _pickAndSearchImage,
+            ),
           ],
         ),
       ),

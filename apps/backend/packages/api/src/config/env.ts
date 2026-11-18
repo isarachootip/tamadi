@@ -58,6 +58,10 @@ const rawEnvSchema = z.object({
     .enum(["true", "false"])
     .default("true")
     .transform((v) => v === "true"),
+  VISUAL_SEARCH_ENABLED: z
+    .enum(["true", "false"])
+    .default("true")
+    .transform((v) => v === "true"),
   GEMINI_API_KEY: z.string().optional(),
   GEMINI_MODEL: z.string().min(1).default("gemini-2.5-flash"),
   AI_RATE_LIMIT_PER_MINUTE: z.coerce.number().int().positive().default(15),
@@ -79,6 +83,7 @@ export interface BackendEnv {
   readonly fileBackendUrl: string;
   readonly s3: S3StorageConfig | null;
   readonly aiAssistantEnabled: boolean;
+  readonly visualSearchEnabled: boolean;
   readonly geminiApiKey: string | undefined;
   readonly geminiModel: string;
   readonly aiRateLimitPerMinute: number;
@@ -124,6 +129,7 @@ export function parseBackendEnv(
     fileBackendUrl: parsed.FILE_BACKEND_URL,
     s3,
     aiAssistantEnabled: parsed.AI_ASSISTANT_ENABLED,
+    visualSearchEnabled: parsed.VISUAL_SEARCH_ENABLED,
     geminiApiKey: parsed.GEMINI_API_KEY,
     geminiModel: parsed.GEMINI_MODEL,
     aiRateLimitPerMinute: parsed.AI_RATE_LIMIT_PER_MINUTE,

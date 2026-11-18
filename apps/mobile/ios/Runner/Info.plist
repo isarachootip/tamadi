@@ -47,6 +47,10 @@
 			</array>
 		</dict>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>ใช้กล้องเพื่อถ่ายรูปสินค้าสำหรับค้นหาชิ้นงานที่คล้ายกันบน Tamadee</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>เลือกรูปภาพจากเครื่องเพื่อค้นหาสินค้าที่คล้ายกันบน Tamadee</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

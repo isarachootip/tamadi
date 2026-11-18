@@ -82,6 +82,7 @@
 | **ชำระเงิน & แยกใบสั่งซื้อ** | `POST /store/payment-collections`, `POST /store/carts/:id/complete` | ชำระครั้งเดียวและแตกเป็นใบสั่งซื้อย่อยรายผู้ขายภายใต้ `OrderGroup` |
 | **สมาชิก & คำสั่งซื้อลูกค้า** | `POST /auth/customer/emailpass(/register)`, `GET /store/customers/me`, `GET /store/order-groups` | สมัคร/เข้าสู่ระบบลูกค้า (แยกขาดจากบัญชีผู้ขาย `member`) และดูสถานะพัสดุรายร้าน |
 | **ผู้ช่วย AI "น้องทำมะดิ"** | `POST /store/ai/chat` | แชตภาษาไทยด้วย Google Gemini (`gemini-2.5-flash`) + โหมดสำรองค้นจากแคตตาล็อกจริงตามงบประมาณ จำกัดความถี่ด้วย `AI_RATE_LIMIT_PER_MINUTE` และเปิด/ปิดด้วย `AI_ASSISTANT_ENABLED` |
+| **ค้นหาสินค้าด้วยรูปภาพ** | `POST /store/ai/visual-search` | วิเคราะห์ภาพถ่าย (`image/jpeg\|png\|webp` ≤ 4 MB) ด้วย Gemini 2.5 Flash Vision จับคู่สินค้าจริงในแคตตาล็อก เปิด/ปิดได้ด้วย `VISUAL_SEARCH_ENABLED` |
 
 > **หมายเหตุสำหรับ Vendor API (`/vendor/*`):** ใช้โทเคนจาก `POST /auth/member/emailpass` คู่กับ Header `x-seller-id: <SELLER_ID>`
 

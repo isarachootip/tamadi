@@ -24,5 +24,6 @@
 - **ระยะ 3:** ชำระเงิน Opn Payments, จัดส่งแยกร้าน, ล็อกสต็อก 15 นาที และรายงานยอดโอนผู้ขาย CSV
 - **ระยะ 4 (เสร็จแล้ว):** เว็บหน้าร้านจอใหญ่เต็มความกว้างและ SEO (`webtamdi.tamadee.online` แยก Layout จาก `tamdi` ด้วย `src/proxy.ts`, ตาราง 4–5 คอลัมน์, ตัวกรองด้านซ้าย, หน้าสินค้าและตะกร้า 2 คอลัมน์, `sitemap.xml`, `robots.txt`, Canonical & Product JSON-LD)
 - **ระยะ 5.1 (เสร็จแล้ว):** ผู้ช่วย AI "น้องทำมะดิ" (`POST /store/ai/chat` เชื่อม Google Gemini `gemini-2.5-flash` ผ่าน Backend + โหมดจับคู่ภาษาไทยตามงบอัตโนมัติ ห้ามแต่งสินค้าปลอม, Rate Limit, เปิด/ปิดผ่าน `AI_ASSISTANT_ENABLED`, การ์ดกดใส่ตะกร้าได้จริงทั้งเว็บและแอป Flutter)
-- **ระยะ 5.2–5.4:** ค้นหาด้วยรูปถ่าย, LINE Login & แจ้งเตือน, Push Notification
+- **ระยะ 5.2 (เสร็จแล้ว):** ค้นหาสินค้าด้วยรูปภาพ (`POST /store/ai/visual-search` ด้วย Gemini 2.5 Flash Vision + Catalog Grounding ย่อรูปฝั่งหน้าบ้าน ≤ `800px` เปิด/ปิดผ่าน `VISUAL_SEARCH_ENABLED` ครบทั้งเว็บ `/visual-search` และแอป Flutter)
+- **ระยะ 5.3–5.4:** LINE Login & แจ้งเตือน, Push Notification
 - **ระยะ 6:** ขึ้น Production, สำรองฐานข้อมูล, CI/CD, กฎหมาย PDPA และ E2E Tests

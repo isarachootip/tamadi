@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/config/app_config.dart';
+import '../../core/media/image_picker_adapter.dart';
 import '../../core/network/api_client.dart';
 import '../../core/storage/local_prefs_storage.dart';
 import '../../core/storage/token_storage.dart';
@@ -62,3 +63,8 @@ final Provider<AiRepository> aiRepositoryProvider = Provider<AiRepository>((
 ) {
   return MercurAiRepository(apiClient: ref.watch(apiClientProvider));
 });
+
+final Provider<ImagePickerAdapter> imagePickerAdapterProvider =
+    Provider<ImagePickerAdapter>((Ref ref) {
+      return const DeviceImagePickerAdapter();
+    });

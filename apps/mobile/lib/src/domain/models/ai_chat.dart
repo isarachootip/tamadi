@@ -57,3 +57,18 @@ class AiChatResult {
   final List<AiRecommendedProduct> products;
   final int? budgetThb;
 }
+
+@immutable
+class VisualSearchResult {
+  const VisualSearchResult({
+    required this.detectedSummary,
+    required this.keywords,
+    required this.source,
+    required this.products,
+  });
+
+  final String detectedSummary;
+  final List<String> keywords;
+  final String source;
+  final List<AiRecommendedProduct> products;
+}

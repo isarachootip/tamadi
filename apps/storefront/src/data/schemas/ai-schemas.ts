@@ -33,6 +33,21 @@ export const AiChatResponseSchema = z.object({
   products: z.array(AiRecommendedProductSchema).default([]),
 });
 
+export const VisualSearchInputSchema = z.object({
+  imageBase64: z.string().trim().min(16, "กรุณาเลือกรูปภาพสินค้าที่ต้องการค้นหา"),
+  mimeType: z.enum(["image/jpeg", "image/png", "image/webp"]),
+  hint: z.string().trim().max(160).optional(),
+});
+
+export const VisualSearchResponseSchema = z.object({
+  enabled: z.boolean().default(true),
+  detectedSummary: z.string().min(1),
+  keywords: z.array(z.string()).default([]),
+  source: z.enum(["gemini-vision", "catalog-fallback"]),
+  products: z.array(AiRecommendedProductSchema).default([]),
+});
+
 export type AiHistoryTurn = z.infer<typeof AiHistoryTurnSchema>;
 export type AiRecommendedProduct = z.infer<typeof AiRecommendedProductSchema>;
 export type AiChatResponse = z.infer<typeof AiChatResponseSchema>;
+export type VisualSearchResponse = z.infer<typeof VisualSearchResponseSchema>;

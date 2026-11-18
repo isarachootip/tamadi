@@ -1,3 +1,4 @@
+import 'package:tamadee_mobile/src/core/media/image_picker_adapter.dart';
 import 'package:tamadee_mobile/src/domain/models/ai_chat.dart';
 import 'package:tamadee_mobile/src/domain/models/category.dart';
 import 'package:tamadee_mobile/src/domain/models/product.dart';
@@ -141,6 +142,43 @@ class FakeAiRepository implements AiRepository {
           sellerName: 'ละไม สตูดิโอ',
         ),
       ],
+    );
+  }
+
+  @override
+  Future<VisualSearchResult> searchByImage({
+    required String imageBase64,
+    required String mimeType,
+    String? hint,
+  }) async {
+    return const VisualSearchResult(
+      detectedSummary: 'พบเสื้อเชิ้ตผ้าลินินโทนสีขาวครีมใกล้เคียงกับภาพของคุณ',
+      keywords: <String>['ลินิน', 'เชิ้ต'],
+      source: 'gemini-vision',
+      products: <AiRecommendedProduct>[
+        AiRecommendedProduct(
+          id: 'prod_shirt',
+          title: 'เสื้อเชิ้ตลินิน',
+          handle: 'linen-relaxed-shirt',
+          priceAmount: 890,
+          offerId: 'off_shirt_m',
+          variantId: 'var_shirt_m',
+          variantTitle: 'M / ขาวครีม',
+          sellerId: 'sel_lamai',
+          sellerName: 'ละไม สตูดิโอ',
+        ),
+      ],
+    );
+  }
+}
+
+class FakeImagePickerAdapter implements ImagePickerAdapter {
+  @override
+  Future<PickedSearchImage?> pickCompressedImage() async {
+    return const PickedSearchImage(
+      base64Data: 'ZmFrZV9qcGVnX2J5dGVzX2Zvcl90ZXN0',
+      mimeType: 'image/jpeg',
+      fileName: 'beach-shirt.jpg',
     );
   }
 }

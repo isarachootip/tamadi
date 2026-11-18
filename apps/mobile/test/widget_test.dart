@@ -26,6 +26,7 @@ ProviderContainer _createTestContainer() {
       cartRepositoryProvider.overrideWithValue(FakeCartRepository()),
       authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
       aiRepositoryProvider.overrideWithValue(FakeAiRepository()),
+      imagePickerAdapterProvider.overrideWithValue(FakeImagePickerAdapter()),
     ],
   );
 }
@@ -92,7 +93,14 @@ void main() {
       await tester.tap(find.text('ขอโทนสีเข้มกว่านี้'));
       await tester.pumpAndSettle();
       expect(find.text('จัดให้ตามคำขอ "ขอโทนสีเข้มกว่านี้" ครับ!'), findsOneWidget);
-      expect(find.text('ใส่ตะกร้า'), findsOneWidget);
+
+      await tester.tap(find.byIcon(Icons.camera_alt_outlined));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('พบเสื้อเชิ้ตผ้าลินินโทนสีขาวครีมใกล้เคียงกับภาพของคุณ'),
+        findsOneWidget,
+      );
+      expect(find.text('ใส่ตะกร้า'), findsWidgets);
 
       await tester.tap(find.byIcon(Icons.arrow_back_ios_new_rounded));
       await tester.pumpAndSettle();
