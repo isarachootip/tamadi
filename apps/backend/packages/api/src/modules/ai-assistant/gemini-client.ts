@@ -41,6 +41,14 @@ function buildSystemInstruction(catalog: readonly AiCatalogItem[]): string {
   ].join("\n");
 }
 
+export function resolveGeminiEndpoint(apiKey: string, model: string): string {
+  const encodedModel = encodeURIComponent(model);
+  if (apiKey.trim().startsWith("AQ.")) {
+    return `https://aiplatform.googleapis.com/v1/publishers/google/models/${encodedModel}:generateContent`;
+  }
+  return `https://generativelanguage.googleapis.com/v1beta/models/${encodedModel}:generateContent`;
+}
+
 export async function generateAssistantReply(
   input: GenerateAssistantReplyInput
 ): Promise<AiAssistantResult> {
@@ -61,7 +69,7 @@ export async function generateAssistantReply(
   }
 
   const fetchImpl = input.fetchFn ?? fetch;
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(input.geminiModel)}:generateContent`;
+  const endpoint = resolveGeminiEndpoint(input.geminiApiKey, input.geminiModel);
 
   const contents = [
     ...input.history.slice(-6).map((turn) => ({
@@ -80,13 +88,15 @@ export async function generateAssistantReply(
       },
       body: JSON.stringify({
         systemInstruction: {
+          role: "system",
           parts: [{ text: buildSystemInstruction(input.catalog) }],
         },
         contents,
         generationConfig: {
           temperature: 0.3,
-          maxOutputTokens: 500,
+          maxOutputTokens: 1200,
           responseMimeType: "application/json",
+          thinkingConfig: { thinkingBudget: 0 },
         },
       }),
       signal: AbortSignal.timeout(12_000),

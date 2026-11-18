@@ -4,7 +4,10 @@ import {
   groundProductIds,
   matchCatalogProducts,
 } from "../catalog-matcher";
-import { generateAssistantReply } from "../gemini-client";
+import {
+  generateAssistantReply,
+  resolveGeminiEndpoint,
+} from "../gemini-client";
 import { SlidingWindowRateLimiter } from "../rate-limiter";
 import type { AiCatalogItem } from "../types";
 
@@ -178,5 +181,14 @@ describe("Phase 5.1 AI Assistant ('Nong Tammadi') Domain & Security", () => {
 
     expect(fallbackResult.source).toBe("catalog-fallback");
     expect(fallbackResult.products[0]?.id).toBe("prod_ceramic_mug");
+  });
+
+  it("routes AQ.* Vertex AI Express keys to aiplatform.googleapis.com and AIza* keys to generativelanguage", () => {
+    expect(resolveGeminiEndpoint("AQ.test_express_key", "gemini-2.5-flash")).toBe(
+      "https://aiplatform.googleapis.com/v1/publishers/google/models/gemini-2.5-flash:generateContent"
+    );
+    expect(resolveGeminiEndpoint("AIzaSyTestStudioKey", "gemini-2.5-flash")).toBe(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
+    );
   });
 });
