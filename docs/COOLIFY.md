@@ -63,6 +63,10 @@ TAMADEE_SEED_SELLER_PASSWORD=ตั้งรหัสร้านค้าตั
 
 AUTO_SEED=true
 TAMADEE_PUBLISHABLE_KEY=
+AI_ASSISTANT_ENABLED=true
+GEMINI_API_KEY=
+GEMINI_MODEL=gemini-2.5-flash
+AI_RATE_LIMIT_PER_MINUTE=15
 ```
 
 > **สำคัญสำหรับ `TAMADEE_PUBLISHABLE_KEY` และ `MERCUR_BACKEND_URL`:** ในหน้า Environment Variables ของ Coolify ให้ติ๊ก **Available at Buildtime** ให้ตัวแปร `TAMADEE_PUBLISHABLE_KEY`, `MERCUR_BACKEND_URL`, และ `MOBILE_SITE_URL` ด้วย เพื่อให้ขั้นตอน Build ของ Flutter Web (`mobile-web`) และ Dashboard รับค่าไปคอมไพล์ได้ครบถ้วน

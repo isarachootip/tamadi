@@ -1,24 +1,42 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tamadee_flutter_ui/tamadee_flutter_ui.dart';
 
+import '../../core/network/api_exception.dart';
+import '../../domain/models/ai_chat.dart';
+import '../providers/core_providers.dart';
 import 'widgets/ai_input_bar.dart';
 import 'widgets/ai_outfit_preview_card.dart';
+import 'widgets/ai_product_card_tile.dart';
 
-class AiAssistantScreen extends StatefulWidget {
+class _ConversationTurn {
+  const _ConversationTurn({
+    required this.isUser,
+    required this.text,
+    this.products = const <AiRecommendedProduct>[],
+  });
+
+  final bool isUser;
+  final String text;
+  final List<AiRecommendedProduct> products;
+}
+
+class AiAssistantScreen extends ConsumerStatefulWidget {
   const AiAssistantScreen({super.key});
 
   @override
-  State<AiAssistantScreen> createState() => _AiAssistantScreenState();
+  ConsumerState<AiAssistantScreen> createState() => _AiAssistantScreenState();
 }
 
-class _AiAssistantScreenState extends State<AiAssistantScreen> {
+class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
   final TextEditingController _inputCtrl = TextEditingController();
-  final List<(bool isUser, String text)> _extraTurns = <(bool, String)>[];
+  final List<_ConversationTurn> _turns = <_ConversationTurn>[];
+  bool _sending = false;
 
   static const List<String> _suggestions = <String>[
     'ขอโทนสีเข้มกว่านี้',
-    'ถูกกว่านี้',
+    'ของขวัญขึ้นบ้านใหม่ งบไม่เกิน 1,000',
     'เพิ่มกระเป๋า',
   ];
 
@@ -28,17 +46,57 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
     super.dispose();
   }
 
-  void _sendPrompt(String raw) {
+  Future<void> _sendPrompt(String raw) async {
     final String text = raw.trim();
-    if (text.isEmpty) return;
+    if (text.isEmpty || _sending) return;
     _inputCtrl.clear();
+
+    final List<AiHistoryTurn> history = <AiHistoryTurn>[
+      for (final _ConversationTurn t in _turns.skip(
+        _turns.length > 6 ? _turns.length - 6 : 0,
+      ))
+        AiHistoryTurn(role: t.isUser ? 'user' : 'assistant', content: t.text),
+    ];
+
     setState(() {
-      _extraTurns.add((true, text));
-      _extraTurns.add((
-        false,
-        'รับข้อความ "$text" แล้วครับ! ตอนนี้หน้าจอผู้ช่วย AI น้องทำมะดิเป็น UI ตัวอย่างสำหรับระยะที่ 2 และจะเชื่อมต่อสมอง AI ค้นหาสินค้าจริงในระยะที่ 5 ครับ',
-      ));
+      _sending = true;
+      _turns.add(_ConversationTurn(isUser: true, text: text));
     });
+
+    try {
+      final AiChatResult res = await ref
+          .read(aiRepositoryProvider)
+          .askAssistant(message: text, history: history);
+      if (!mounted) return;
+      setState(() {
+        _turns.add(
+          _ConversationTurn(
+            isUser: false,
+            text: res.reply,
+            products: res.products,
+          ),
+        );
+      });
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _turns.add(_ConversationTurn(isUser: false, text: e.message));
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _turns.add(
+          const _ConversationTurn(
+            isUser: false,
+            text: 'ไม่สามารถเชื่อมต่อผู้ช่วย AI ได้ในขณะนี้ กรุณาลองใหม่อีกครั้งครับ',
+          ),
+        );
+      });
+    } finally {
+      if (mounted) {
+        setState(() => _sending = false);
+      }
+    }
   }
 
   @override
@@ -47,48 +105,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
       data: TamadeeTheme.dark(),
       child: Scaffold(
         backgroundColor: TamadeeColors.ink,
-        appBar: AppBar(
-          backgroundColor: TamadeeColors.ink,
-          surfaceTintColor: Colors.transparent,
-          leading: IconButton(
-            icon: const Icon(
-              Icons.arrow_back_ios_new_rounded,
-              size: 18,
-              color: TamadeeColors.white,
-            ),
-            onPressed: () =>
-                context.canPop() ? context.pop() : context.go('/'),
-          ),
-          titleSpacing: 0,
-          title: const Row(
-            children: <Widget>[
-              NongTammadiMascotWidget(size: 34, brightness: Brightness.dark),
-              SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      'น้องทำมะดิ',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: TamadeeColors.white,
-                      ),
-                    ),
-                    Text(
-                      'ผู้ช่วยช้อปของ Tamadee ถามเป็นภาษาพูดได้เลย',
-                      style: TextStyle(
-                        fontSize: 11.5,
-                        color: TamadeeColors.textMutedDark,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
+        appBar: const AiAssistantAppBar(),
         body: Column(
           children: <Widget>[
             Expanded(
@@ -100,12 +117,23 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
                     text: 'หาชุดไปทะเลให้หน่อย งบไม่เกิน 2,500',
                   ),
                   AiOutfitPreviewCard(
-                    onBrowseSet: () => context.push('/search'),
+                    onBrowseSet: () => context.push('/products'),
                   ),
-                  for (final (bool isUser, String text) in _extraTurns)
+                  for (final _ConversationTurn turn in _turns) ...<Widget>[
                     Padding(
                       padding: const EdgeInsets.only(top: 10),
-                      child: AiChatBubble(isUser: isUser, text: text),
+                      child: AiChatBubble(isUser: turn.isUser, text: turn.text),
+                    ),
+                    for (final AiRecommendedProduct item in turn.products)
+                      AiProductCardTile(product: item),
+                  ],
+                  if (_sending)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 10),
+                      child: AiChatBubble(
+                        isUser: false,
+                        text: 'น้องทำมะดิกำลังค้นสินค้าจริงให้สักครู่...',
+                      ),
                     ),
                   const SizedBox(height: 14),
                   Wrap(
@@ -122,7 +150,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
                             chip,
                             style: const TextStyle(color: TamadeeColors.white),
                           ),
-                          onPressed: () => _sendPrompt(chip),
+                          onPressed: _sending ? null : () => _sendPrompt(chip),
                         ),
                     ],
                   ),

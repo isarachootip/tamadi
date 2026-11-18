@@ -1,5 +1,58 @@
+import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tamadee_flutter_ui/tamadee_flutter_ui.dart';
+
+class AiAssistantAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const AiAssistantAppBar({super.key});
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      backgroundColor: TamadeeColors.ink,
+      surfaceTintColor: Colors.transparent,
+      leading: IconButton(
+        icon: const Icon(
+          Icons.arrow_back_ios_new_rounded,
+          size: 18,
+          color: TamadeeColors.white,
+        ),
+        onPressed: () => context.canPop() ? context.pop() : context.go('/'),
+      ),
+      titleSpacing: 0,
+      title: const Row(
+        children: <Widget>[
+          NongTammadiMascotWidget(size: 34, brightness: Brightness.dark),
+          SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  'น้องทำมะดิ',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: TamadeeColors.white,
+                  ),
+                ),
+                Text(
+                  'ผู้ช่วยช้อป AI Gemini ค้นสินค้าจริงจากร้านไทย',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    color: TamadeeColors.textMutedDark,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class AiChatBubble extends StatelessWidget {
   const AiChatBubble({

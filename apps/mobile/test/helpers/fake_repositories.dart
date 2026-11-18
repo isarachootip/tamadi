@@ -1,6 +1,8 @@
+import 'package:tamadee_mobile/src/domain/models/ai_chat.dart';
 import 'package:tamadee_mobile/src/domain/models/category.dart';
 import 'package:tamadee_mobile/src/domain/models/product.dart';
 import 'package:tamadee_mobile/src/domain/models/seller.dart';
+import 'package:tamadee_mobile/src/domain/repositories/ai_repository.dart';
 import 'package:tamadee_mobile/src/domain/repositories/catalog_repository.dart';
 
 class FakeCatalogRepository implements CatalogRepository {
@@ -114,4 +116,31 @@ class FakeCatalogRepository implements CatalogRepository {
   @override
   Future<List<ProductSummary>> listSellerProducts(String sellerId) async =>
       const <ProductSummary>[shirtSummary];
+}
+
+class FakeAiRepository implements AiRepository {
+  @override
+  Future<AiChatResult> askAssistant({
+    required String message,
+    List<AiHistoryTurn> history = const <AiHistoryTurn>[],
+  }) async {
+    return AiChatResult(
+      reply: 'จัดให้ตามคำขอ "$message" ครับ!',
+      source: 'gemini',
+      budgetThb: 2500,
+      products: const <AiRecommendedProduct>[
+        AiRecommendedProduct(
+          id: 'prod_shirt',
+          title: 'เสื้อเชิ้ตลินิน',
+          handle: 'linen-relaxed-shirt',
+          priceAmount: 890,
+          offerId: 'off_shirt_m',
+          variantId: 'var_shirt_m',
+          variantTitle: 'M / ขาวครีม',
+          sellerId: 'sel_lamai',
+          sellerName: 'ละไม สตูดิโอ',
+        ),
+      ],
+    );
+  }
 }

@@ -5,16 +5,34 @@ import type { JSX } from "react";
 import { AiChatShell } from "../../components/ai/AiChatShell";
 import { StorefrontShell } from "../../components/shell/StorefrontShell";
 import { listProducts } from "../../data/repositories/catalog-repo";
+import type { AiRecommendedProduct } from "../../data/schemas/ai-schemas";
 import { buildPageMetadata } from "../../data/seo";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "ผู้ช่วย AI น้องทำมะดิ",
-  description: "ให้ผู้ช่วย AI น้องทำมะดิช่วยจับคู่ชุดและเลือกของขวัญจากสตูดิโอผู้สร้างสรรค์ไทย",
+  description:
+    "แชตกับผู้ช่วย AI น้องทำมะดิเพื่อค้นหาเสื้อผ้า รองเท้า กระเป๋า และของขวัญงานคราฟต์จริงจากร้านไทยตามงบประมาณ",
   pathname: "/ai",
 });
 
 export default async function AiAssistantPage(): Promise<JSX.Element> {
   const products = await listProducts().catch(() => []);
+  const seedCards: AiRecommendedProduct[] = products
+    .filter((p) => Boolean(p.primaryOfferId))
+    .slice(0, 2)
+    .map((p) => ({
+      id: p.id,
+      title: p.title,
+      handle: p.handle,
+      thumbnail: p.thumbnail,
+      categoryNames: [...p.categoryNames],
+      priceAmount: p.priceAmount,
+      offerId: p.primaryOfferId!,
+      variantId: p.id,
+      variantTitle: "มาตรฐาน",
+      sellerId: "seller_tamadee",
+      sellerName: "สตูดิโอทำมาดี",
+    }));
 
   return (
     <StorefrontShell
@@ -37,12 +55,12 @@ export default async function AiAssistantPage(): Promise<JSX.Element> {
             <span className="min-w-[44px]" />
           </header>
 
-          <AiChatShell sampleProducts={products.slice(0, 4)} />
+          <AiChatShell initialProducts={seedCards} />
         </>
       }
       desktopContent={
         <div className="rounded-3xl border border-[#2E2E2B] bg-[#161614] p-4">
-          <AiChatShell sampleProducts={products.slice(0, 4)} />
+          <AiChatShell initialProducts={seedCards} />
         </div>
       }
     />

@@ -4,9 +4,11 @@ import '../../core/config/app_config.dart';
 import '../../core/network/api_client.dart';
 import '../../core/storage/local_prefs_storage.dart';
 import '../../core/storage/token_storage.dart';
+import '../../data/repositories/mercur_ai_repository.dart';
 import '../../data/repositories/mercur_auth_repository.dart';
 import '../../data/repositories/mercur_cart_repository.dart';
 import '../../data/repositories/mercur_catalog_repository.dart';
+import '../../domain/repositories/ai_repository.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/repositories/cart_repository.dart';
 import '../../domain/repositories/catalog_repository.dart';
@@ -54,3 +56,9 @@ final Provider<AuthRepository> authRepositoryProvider =
         tokenStorage: ref.watch(tokenStorageProvider),
       );
     });
+
+final Provider<AiRepository> aiRepositoryProvider = Provider<AiRepository>((
+  Ref ref,
+) {
+  return MercurAiRepository(apiClient: ref.watch(apiClientProvider));
+});

@@ -1,3 +1,4 @@
+import { runAiSchemaTests } from "./ai-schemas.test";
 import { runDomainTests } from "./domain.test";
 import { runMapperAndSchemaTests } from "./mappers-and-schemas.test";
 import { runSurfaceAndSeoTests } from "./surface-and-seo.test";
@@ -15,6 +16,9 @@ function main(): void {
 
   runSurfaceAndSeoTests();
   console.log("✓ Desktop surface & SEO canonical/JSON-LD tests passed");
+
+  runAiSchemaTests();
+  console.log("✓ AI assistant boundary schema tests passed");
 
   console.log("All @tamadee/storefront unit tests passed!");
 }

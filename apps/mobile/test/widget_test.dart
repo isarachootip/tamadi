@@ -25,6 +25,7 @@ ProviderContainer _createTestContainer() {
       catalogRepositoryProvider.overrideWithValue(FakeCatalogRepository()),
       cartRepositoryProvider.overrideWithValue(FakeCartRepository()),
       authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
+      aiRepositoryProvider.overrideWithValue(FakeAiRepository()),
     ],
   );
 }
@@ -87,6 +88,11 @@ void main() {
         findsOneWidget,
       );
       expect(find.text('ใส่ตะกร้าทั้งชุด ฿2,480'), findsOneWidget);
+
+      await tester.tap(find.text('ขอโทนสีเข้มกว่านี้'));
+      await tester.pumpAndSettle();
+      expect(find.text('จัดให้ตามคำขอ "ขอโทนสีเข้มกว่านี้" ครับ!'), findsOneWidget);
+      expect(find.text('ใส่ตะกร้า'), findsOneWidget);
 
       await tester.tap(find.byIcon(Icons.arrow_back_ios_new_rounded));
       await tester.pumpAndSettle();

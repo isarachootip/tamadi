@@ -54,6 +54,13 @@ const rawEnvSchema = z.object({
   S3_REGION: z.string().optional(),
   S3_BUCKET: z.string().optional(),
   S3_ENDPOINT: z.string().optional(),
+  AI_ASSISTANT_ENABLED: z
+    .enum(["true", "false"])
+    .default("true")
+    .transform((v) => v === "true"),
+  GEMINI_API_KEY: z.string().optional(),
+  GEMINI_MODEL: z.string().min(1).default("gemini-2.5-flash"),
+  AI_RATE_LIMIT_PER_MINUTE: z.coerce.number().int().positive().default(15),
 });
 
 export type S3StorageConfig = z.infer<typeof s3ConfigSchema>;
@@ -71,6 +78,10 @@ export interface BackendEnv {
   readonly cookieSecret: string;
   readonly fileBackendUrl: string;
   readonly s3: S3StorageConfig | null;
+  readonly aiAssistantEnabled: boolean;
+  readonly geminiApiKey: string | undefined;
+  readonly geminiModel: string;
+  readonly aiRateLimitPerMinute: number;
 }
 
 export function parseBackendEnv(
@@ -81,6 +92,10 @@ export function parseBackendEnv(
     REDIS_URL: source.REDIS_URL?.trim() || undefined,
     S3_BUCKET: source.S3_BUCKET?.trim() || undefined,
     S3_ENDPOINT: source.S3_ENDPOINT?.trim() || undefined,
+    GEMINI_API_KEY: source.GEMINI_API_KEY?.trim() || undefined,
+    GEMINI_MODEL: source.GEMINI_MODEL?.trim() || undefined,
+    AI_RATE_LIMIT_PER_MINUTE:
+      source.AI_RATE_LIMIT_PER_MINUTE?.trim() || undefined,
   });
 
   const s3 = parsed.S3_BUCKET
@@ -108,5 +123,9 @@ export function parseBackendEnv(
     cookieSecret: parsed.COOKIE_SECRET,
     fileBackendUrl: parsed.FILE_BACKEND_URL,
     s3,
+    aiAssistantEnabled: parsed.AI_ASSISTANT_ENABLED,
+    geminiApiKey: parsed.GEMINI_API_KEY,
+    geminiModel: parsed.GEMINI_MODEL,
+    aiRateLimitPerMinute: parsed.AI_RATE_LIMIT_PER_MINUTE,
   };
 }
