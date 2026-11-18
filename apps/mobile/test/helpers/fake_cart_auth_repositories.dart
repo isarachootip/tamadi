@@ -86,6 +86,15 @@ class FakeAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<CustomerProfile> loginWithLineExchangeCode(String exchangeCode) async {
+    return _current = const CustomerProfile(
+      id: 'cus_line_1',
+      email: 'lineuser@line.tamadee.online',
+      firstName: 'ผู้ใช้ LINE',
+    );
+  }
+
+  @override
   Future<CustomerProfile> register(RegisterCustomerInput input) async =>
       login(email: input.email, password: input.password);
 

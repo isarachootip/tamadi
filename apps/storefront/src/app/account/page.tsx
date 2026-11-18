@@ -68,10 +68,24 @@ export default async function AccountPage(): Promise<JSX.Element> {
         ) : (
           <>
             <section className="rounded-3xl border border-[#E2E2DC] bg-[#F1F1EE] p-4 dark:border-[#2E2E2B] dark:bg-[#1C1C1A]">
-              <p className="text-xs font-bold text-[#4A4A45] dark:text-[#D4D4CE]">
-                บัญชีสมาชิก Tamadee
-              </p>
-              <h2 className="mt-0.5 text-lg font-extrabold">{fullName}</h2>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-xs font-bold text-[#4A4A45] dark:text-[#D4D4CE]">
+                  บัญชีสมาชิก Tamadee
+                </p>
+                {customer.lineLinked ? (
+                  <span className="rounded-full bg-[#06C755] px-3 py-0.5 text-[11px] font-extrabold text-white">
+                    ผูกแจ้งเตือน LINE น้องทำมะดิแล้ว ✓
+                  </span>
+                ) : (
+                  <a
+                    href="/api/auth/line/start"
+                    className="rounded-full bg-[#06C755] px-3 py-1 text-[11px] font-extrabold text-white"
+                  >
+                    + เชื่อมต่อแจ้งเตือน LINE
+                  </a>
+                )}
+              </div>
+              <h2 className="mt-1 text-lg font-extrabold">{fullName}</h2>
               <p className="text-xs font-medium text-[#4A4A45] dark:text-[#D4D4CE]">
                 {customer.email}
               </p>

@@ -5,6 +5,7 @@ import 'package:tamadee_flutter_ui/tamadee_flutter_ui.dart';
 
 import '../../core/network/api_exception.dart';
 import '../providers/auth_controller.dart';
+import 'widgets/line_sign_in_button.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -72,7 +73,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         padding: const EdgeInsets.all(20),
         children: <Widget>[
           const Center(child: TamadeeLogoWidget(height: 42)),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
+          const LineSignInButton(),
+          const SizedBox(height: 18),
           if (_error != null) ...<Widget>[
             Container(
               padding: const EdgeInsets.all(12),

@@ -81,12 +81,23 @@ export function mapCustomerDto(dto: CustomerDto): CustomerProfile {
     isDefaultShipping: addr.is_default_shipping ?? false,
   }));
 
+  const lineUserId =
+    typeof dto.metadata?.["line_user_id"] === "string"
+      ? dto.metadata["line_user_id"].trim()
+      : "";
+  const lineDisplayName =
+    typeof dto.metadata?.["line_display_name"] === "string"
+      ? dto.metadata["line_display_name"].trim()
+      : undefined;
+
   return {
     id: dto.id,
     email: dto.email,
     firstName: dto.first_name ?? undefined,
     lastName: dto.last_name ?? undefined,
     phone: dto.phone ?? undefined,
+    lineLinked: lineUserId.length > 0,
+    lineDisplayName,
     addresses,
   };
 }

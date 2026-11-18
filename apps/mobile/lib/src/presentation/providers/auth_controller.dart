@@ -28,6 +28,20 @@ class AuthController extends AsyncNotifier<CustomerProfile?> {
     }
   }
 
+  Future<void> loginWithLineCode(String exchangeCode) async {
+    final CustomerProfile customer = await ref
+        .read(authRepositoryProvider)
+        .loginWithLineExchangeCode(exchangeCode);
+    state = AsyncData<CustomerProfile?>(customer);
+    try {
+      await ref
+          .read(cartControllerProvider.notifier)
+          .attachToAuthenticatedCustomer();
+    } on Exception {
+      // Non-fatal if cart was already attached.
+    }
+  }
+
   Future<void> register(RegisterCustomerInput input) async {
     final CustomerProfile customer =
         await ref.read(authRepositoryProvider).register(input);

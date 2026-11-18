@@ -1,5 +1,6 @@
 import type { JSX } from "react";
 import { RegisterFormCard } from "../../../components/account/AuthForms";
+import { LineLoginButton } from "../../../components/account/LineLoginButton";
 import { TopBackHeader } from "../../../components/shared/TopBackHeader";
 import { StorefrontShell } from "../../../components/shell/StorefrontShell";
 
@@ -11,9 +12,10 @@ export default function RegisterPage(): JSX.Element {
           สร้างบัญชีสมาชิก Tamadee
         </h1>
         <p className="text-xs text-[#4A4A45] lg:text-sm dark:text-[#D4D4CE]">
-          สมัครฟรี ใช้บัญชีเดียวได้ทั้งบนเว็บ webtamdi, tamdi และแอปมือถือ
+          สมัครด่วนในคลิกเดียวด้วย LINE พร้อมรับแจ้งเตือนพัสดุ หรือกรอกอีเมลด้านล่าง
         </p>
       </div>
+      <LineLoginButton />
       <RegisterFormCard />
     </div>
   );

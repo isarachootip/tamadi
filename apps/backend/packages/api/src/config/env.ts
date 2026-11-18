@@ -65,6 +65,22 @@ const rawEnvSchema = z.object({
   GEMINI_API_KEY: z.string().optional(),
   GEMINI_MODEL: z.string().min(1).default("gemini-2.5-flash"),
   AI_RATE_LIMIT_PER_MINUTE: z.coerce.number().int().positive().default(15),
+  MERCUR_BACKEND_URL: z
+    .string()
+    .url()
+    .default("https://bwebtamdi.tamadee.online"),
+  LINE_AUTH_ENABLED: z
+    .enum(["true", "false"])
+    .default("true")
+    .transform((v) => v === "true"),
+  LINE_NOTIFICATIONS_ENABLED: z
+    .enum(["true", "false"])
+    .default("true")
+    .transform((v) => v === "true"),
+  LINE_LOGIN_CHANNEL_ID: z.string().optional(),
+  LINE_LOGIN_CHANNEL_SECRET: z.string().optional(),
+  LINE_MESSAGING_CHANNEL_ACCESS_TOKEN: z.string().optional(),
+  LINE_MESSAGING_CHANNEL_SECRET: z.string().optional(),
 });
 
 export type S3StorageConfig = z.infer<typeof s3ConfigSchema>;
@@ -87,6 +103,13 @@ export interface BackendEnv {
   readonly geminiApiKey: string | undefined;
   readonly geminiModel: string;
   readonly aiRateLimitPerMinute: number;
+  readonly publicBackendUrl: string;
+  readonly lineAuthEnabled: boolean;
+  readonly lineNotificationsEnabled: boolean;
+  readonly lineLoginChannelId: string | undefined;
+  readonly lineLoginChannelSecret: string | undefined;
+  readonly lineMessagingAccessToken: string | undefined;
+  readonly lineMessagingChannelSecret: string | undefined;
 }
 
 export function parseBackendEnv(
@@ -101,6 +124,14 @@ export function parseBackendEnv(
     GEMINI_MODEL: source.GEMINI_MODEL?.trim() || undefined,
     AI_RATE_LIMIT_PER_MINUTE:
       source.AI_RATE_LIMIT_PER_MINUTE?.trim() || undefined,
+    MERCUR_BACKEND_URL: source.MERCUR_BACKEND_URL?.trim() || undefined,
+    LINE_LOGIN_CHANNEL_ID: source.LINE_LOGIN_CHANNEL_ID?.trim() || undefined,
+    LINE_LOGIN_CHANNEL_SECRET:
+      source.LINE_LOGIN_CHANNEL_SECRET?.trim() || undefined,
+    LINE_MESSAGING_CHANNEL_ACCESS_TOKEN:
+      source.LINE_MESSAGING_CHANNEL_ACCESS_TOKEN?.trim() || undefined,
+    LINE_MESSAGING_CHANNEL_SECRET:
+      source.LINE_MESSAGING_CHANNEL_SECRET?.trim() || undefined,
   });
 
   const s3 = parsed.S3_BUCKET
@@ -133,5 +164,12 @@ export function parseBackendEnv(
     geminiApiKey: parsed.GEMINI_API_KEY,
     geminiModel: parsed.GEMINI_MODEL,
     aiRateLimitPerMinute: parsed.AI_RATE_LIMIT_PER_MINUTE,
+    publicBackendUrl: parsed.MERCUR_BACKEND_URL.replace(/\/+$/, ""),
+    lineAuthEnabled: parsed.LINE_AUTH_ENABLED,
+    lineNotificationsEnabled: parsed.LINE_NOTIFICATIONS_ENABLED,
+    lineLoginChannelId: parsed.LINE_LOGIN_CHANNEL_ID,
+    lineLoginChannelSecret: parsed.LINE_LOGIN_CHANNEL_SECRET,
+    lineMessagingAccessToken: parsed.LINE_MESSAGING_CHANNEL_ACCESS_TOKEN,
+    lineMessagingChannelSecret: parsed.LINE_MESSAGING_CHANNEL_SECRET,
   };
 }

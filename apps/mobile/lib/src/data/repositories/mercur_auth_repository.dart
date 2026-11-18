@@ -61,6 +61,21 @@ class MercurAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<CustomerProfile> loginWithLineExchangeCode(String exchangeCode) async {
+    final JsonMap res = await apiClient.post(
+      '/auth/line/exchange',
+      body: <String, Object?>{'exchangeCode': exchangeCode.trim()},
+    );
+    final String token = JsonParsers.readString(res, 'token');
+    await tokenStorage.saveToken(token);
+    final CustomerProfile? profile = await getCurrentCustomer();
+    if (profile == null) {
+      throw const ApiException(message: 'ไม่สามารถโหลดข้อมูลบัญชี LINE ได้');
+    }
+    return profile;
+  }
+
+  @override
   Future<CustomerProfile> register(RegisterCustomerInput input) async {
     final JsonMap regRes = await apiClient.post(
       '/auth/customer/emailpass/register',

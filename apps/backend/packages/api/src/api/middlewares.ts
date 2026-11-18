@@ -6,5 +6,9 @@ export default defineMiddlewares({
       matcher: "/store/ai/visual-search",
       bodyParser: { sizeLimit: "6mb" },
     },
+    {
+      matcher: "/webhooks/line",
+      bodyParser: { preserveRawBody: true },
+    },
   ],
 });

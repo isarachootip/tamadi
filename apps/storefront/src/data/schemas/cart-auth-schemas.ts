@@ -68,6 +68,7 @@ export const CustomerDtoSchema = z.object({
   first_name: z.string().nullable().optional(),
   last_name: z.string().nullable().optional(),
   phone: z.string().nullable().optional(),
+  metadata: z.record(z.string(), z.unknown()).nullable().optional(),
   addresses: z.array(AddressDtoSchema).nullable().optional(),
 });
 

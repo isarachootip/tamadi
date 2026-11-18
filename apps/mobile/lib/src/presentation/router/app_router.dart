@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../account/account_screen.dart';
 import '../account/addresses_screen.dart';
+import '../account/line_callback_screen.dart';
 import '../account/login_screen.dart';
 import '../account/register_screen.dart';
 import '../ai_assistant/ai_assistant_screen.dart';
@@ -117,6 +118,14 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((Ref ref) {
         path: '/account/addresses',
         builder: (BuildContext context, GoRouterState state) =>
             const AddressesScreen(),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavKey,
+        path: '/account/line-callback',
+        builder: (BuildContext context, GoRouterState state) =>
+            LineCallbackScreen(
+              exchangeCode: state.uri.queryParameters['exchange_code'] ?? '',
+            ),
       ),
     ],
   );

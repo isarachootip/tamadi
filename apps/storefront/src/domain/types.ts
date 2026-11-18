@@ -140,6 +140,8 @@ export interface CustomerProfile {
   readonly firstName?: string;
   readonly lastName?: string;
   readonly phone?: string;
+  readonly lineLinked?: boolean;
+  readonly lineDisplayName?: string;
   readonly addresses: readonly CustomerAddress[];
 }
 

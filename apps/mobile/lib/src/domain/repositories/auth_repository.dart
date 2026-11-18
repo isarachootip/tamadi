@@ -44,6 +44,7 @@ abstract interface class AuthRepository {
     required String email,
     required String password,
   });
+  Future<CustomerProfile> loginWithLineExchangeCode(String exchangeCode);
   Future<CustomerProfile> register(RegisterCustomerInput input);
   Future<void> logout();
   Future<CustomerProfile> addShippingAddress(CreateAddressInput input);

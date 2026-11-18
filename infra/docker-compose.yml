@@ -27,6 +27,13 @@ x-backend-env: &backend-env
   GEMINI_API_KEY: ${GEMINI_API_KEY:-}
   GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.5-flash}
   AI_RATE_LIMIT_PER_MINUTE: ${AI_RATE_LIMIT_PER_MINUTE:-15}
+  MERCUR_BACKEND_URL: ${MERCUR_BACKEND_URL:-https://bwebtamdi.tamadee.online}
+  LINE_AUTH_ENABLED: ${LINE_AUTH_ENABLED:-true}
+  LINE_NOTIFICATIONS_ENABLED: ${LINE_NOTIFICATIONS_ENABLED:-true}
+  LINE_LOGIN_CHANNEL_ID: ${LINE_LOGIN_CHANNEL_ID:-}
+  LINE_LOGIN_CHANNEL_SECRET: ${LINE_LOGIN_CHANNEL_SECRET:-}
+  LINE_MESSAGING_CHANNEL_ACCESS_TOKEN: ${LINE_MESSAGING_CHANNEL_ACCESS_TOKEN:-}
+  LINE_MESSAGING_CHANNEL_SECRET: ${LINE_MESSAGING_CHANNEL_SECRET:-}
 
 services:
   postgres:
@@ -82,13 +89,7 @@ services:
     networks:
       - tamadee_net
     healthcheck:
-      test:
-        [
-          "CMD",
-          "node",
-          "-e",
-          "fetch('http://127.0.0.1:9000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
-        ]
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:9000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 15s
       timeout: 5s
       retries: 6
@@ -151,13 +152,7 @@ services:
     networks:
       - tamadee_net
     healthcheck:
-      test:
-        [
-          "CMD",
-          "node",
-          "-e",
-          "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
-        ]
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 15s
       timeout: 5s
       retries: 5
