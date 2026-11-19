@@ -7,6 +7,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN git clone --depth 1 --branch stable https://github.com/flutter/flutter.git /usr/local/flutter
 ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
+ENV CI=true
+ENV FLUTTER_SUPPRESS_ANALYTICS=true
+
+# Pre-warm only the Web SDK in its own cached layer and skip Android/Desktop SDKs
+# to avoid ~3.5m unnecessary downloads and reduce Coolify build memory/time.
+RUN flutter config --disable-analytics \
+      --no-cli-animations \
+      --no-enable-android \
+      --no-enable-ios \
+      --no-enable-linux-desktop \
+      --no-enable-macos-desktop \
+      --no-enable-windows-desktop \
+      --enable-web \
+    && flutter precache --web
 
 WORKDIR /workspace
 
@@ -23,7 +37,7 @@ ARG TAMADEE_PUBLISHABLE_KEY=""
 ARG TAMADEE_SITE_URL=https://m.tamadee.online
 
 WORKDIR /workspace/apps/mobile
-RUN flutter build web --release \
+RUN flutter build web --release --no-wasm-dry-run --no-source-maps \
     --dart-define=TAMADEE_API_BASE_URL=${TAMADEE_API_BASE_URL} \
     --dart-define=TAMADEE_PUBLISHABLE_KEY=${TAMADEE_PUBLISHABLE_KEY} \
     --dart-define=TAMADEE_SITE_URL=${TAMADEE_SITE_URL}
