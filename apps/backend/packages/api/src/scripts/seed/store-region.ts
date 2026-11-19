@@ -90,6 +90,15 @@ export async function seedStoreAndRegion(
     thRegion = result[0];
   }
 
+  await updateStoresWorkflow(container).run({
+    input: {
+      selector: { id: store.id },
+      update: {
+        default_region_id: thRegion.id,
+      },
+    },
+  });
+
   let [thTaxRegion] = await taxModule.listTaxRegions({ country_code: "th" });
   if (!thTaxRegion) {
     const { result } = await createTaxRegionsWorkflow(container).run({
