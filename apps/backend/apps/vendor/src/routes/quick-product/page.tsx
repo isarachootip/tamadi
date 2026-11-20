@@ -1,5 +1,5 @@
 import { Plus } from "@medusajs/icons";
-import { Button, Container, Heading, Input, Label, Switch, Text, Textarea, toast } from "@medusajs/ui";
+import { Container, Heading, Input, Label, Text, Textarea, toast } from "@medusajs/ui";
 import type { RouteConfig } from "@mercurjs/dashboard-sdk";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { type FormEvent, useState } from "react";
@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { createTamadeeQuickProduct, listTamadeeCategories } from "../../lib/tamadee-api";
 import { ImageUploadField } from "./_components/image-upload-field";
 import { InlineCategorySelector } from "./_components/inline-category-selector";
+import { PublishAndSubmitSection } from "./_components/publish-and-submit-section";
 import {
   buildQuickProductPayload,
   createEmptyVariantRow,
@@ -89,104 +90,85 @@ export default function QuickProductPage() {
   };
 
   return (
-    <div className="mx-auto max-w-4xl space-y-4 pb-10">
-      <Container className="p-0">
-        <div className="border-b border-ui-border-base px-6 py-4">
-          <Heading level="h1">เพิ่มสินค้าใหม่พร้อมราคาและสต็อก</Heading>
-          <Text size="small" className="text-ui-fg-subtle">
-            สร้างสินค้า ตัวเลือก ตั้งราคาบาท (THB) และจำนวนสต็อกครบจบในหน้าเดียว
+    <div className="mx-auto max-w-4xl space-y-4 pb-24 sm:pb-10">
+      <Container className="overflow-hidden bg-ui-bg-base p-0">
+        <div className="border-b border-ui-border-base bg-ui-bg-base px-4 py-4 sm:px-6">
+          <Heading level="h1" className="text-lg sm:text-xl">
+            เพิ่มสินค้าใหม่พร้อมราคาและสต็อก
+          </Heading>
+          <Text size="small" className="mt-0.5 text-ui-fg-subtle">
+            กรอกง่ายในหน้าเดียว ครบทั้งชื่อ รูปภาพ ราคาบาท และจำนวนสต็อก
           </Text>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6 px-6 py-5">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="space-y-1.5">
-              <Label htmlFor="quick-product-title">ชื่อสินค้า *</Label>
-              <Input
-                id="quick-product-title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="เช่น น้ำพริกเผากุ้งแห้งสูตรครัวคุณแหม่ม"
-                required
+        <form onSubmit={handleSubmit} className="divide-y divide-ui-border-base">
+          <section className="space-y-4 px-4 py-5 sm:px-6">
+            <Text size="small" weight="plus" className="text-ui-fg-base">
+              1. ข้อมูลสินค้า
+            </Text>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="quick-product-title">ชื่อสินค้า *</Label>
+                <Input
+                  id="quick-product-title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="เช่น พอร์คช็อป, น้ำพริกเผากุ้งแห้ง"
+                  required
+                />
+              </div>
+
+              <InlineCategorySelector
+                categories={categories}
+                selectedCategoryId={categoryId}
+                onSelect={setCategoryId}
               />
             </div>
 
-            <InlineCategorySelector
-              categories={categories}
-              selectedCategoryId={categoryId}
-              onSelect={setCategoryId}
+            <div className="space-y-1.5">
+              <Label htmlFor="quick-product-desc">รายละเอียดสินค้า</Label>
+              <Textarea
+                id="quick-product-desc"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="บอกจุดเด่น วัตถุดิบ วิธีเก็บรักษา หรือข้อมูลจัดส่ง"
+                rows={3}
+              />
+            </div>
+          </section>
+
+          <section className="space-y-3 px-4 py-5 sm:px-6">
+            <Text size="small" weight="plus" className="text-ui-fg-base">
+              2. รูปภาพสินค้า
+            </Text>
+            <ImageUploadField
+              images={images}
+              pendingUrl={pendingImageUrl}
+              onPendingUrlChange={setPendingImageUrl}
+              onChange={setImages}
             />
-          </div>
+          </section>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="quick-product-desc">รายละเอียดสินค้า</Label>
-            <Textarea
-              id="quick-product-desc"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="บอกจุดเด่น วัตถุดิบ วิธีเก็บรักษา หรือข้อมูลจัดส่ง"
-              rows={3}
-            />
-          </div>
-
-          <ImageUploadField
-            images={images}
-            pendingUrl={pendingImageUrl}
-            onPendingUrlChange={setPendingImageUrl}
-            onChange={setImages}
-          />
-
-          <div className="border-t border-ui-border-base pt-5">
+          <section className="space-y-3 px-4 py-5 sm:px-6">
+            <Text size="small" weight="plus" className="text-ui-fg-base">
+              3. ราคาและสต็อก
+            </Text>
             <VariantRowsEditor
               rows={variantRows}
               optionTitle={optionTitle}
               onOptionTitleChange={setOptionTitle}
               onChange={setVariantRows}
             />
-          </div>
+          </section>
 
-          <div className="grid grid-cols-1 gap-4 border-t border-ui-border-base pt-5 md:grid-cols-2">
-            <div className="space-y-1.5">
-              <Label htmlFor="quick-product-weight">น้ำหนักโดยประมาณ (กรัม)</Label>
-              <Input
-                id="quick-product-weight"
-                type="number"
-                min="1"
-                step="1"
-                value={weightGrams}
-                onChange={(e) => setWeightGrams(e.target.value)}
-                placeholder="เช่น 250"
-              />
-            </div>
-
-            <div className="flex items-center justify-between rounded-lg border border-ui-border-base px-4 py-3">
-              <div>
-                <Label htmlFor="quick-product-publish">เผยแพร่ขายทันที</Label>
-                <Text size="xsmall" className="text-ui-fg-subtle">
-                  เปิดขายและแสดงสินค้าบนหน้าร้านทันทีหลังบันทึก (ปิดเพื่อบันทึกเป็นแบบร่าง)
-                </Text>
-              </div>
-              <Switch
-                id="quick-product-publish"
-                checked={publishImmediately}
-                onCheckedChange={setPublishImmediately}
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center justify-end gap-2 border-t border-ui-border-base pt-4">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => navigate("/products")}
-              disabled={createProductMutation.isPending}
-            >
-              ยกเลิก
-            </Button>
-            <Button type="submit" isLoading={createProductMutation.isPending}>
-              บันทึกและลงขายสินค้า
-            </Button>
-          </div>
+          <PublishAndSubmitSection
+            weightGrams={weightGrams}
+            onWeightChange={setWeightGrams}
+            publishImmediately={publishImmediately}
+            onPublishChange={setPublishImmediately}
+            isSubmitting={createProductMutation.isPending}
+            onCancel={() => navigate("/products")}
+          />
         </form>
       </Container>
     </div>

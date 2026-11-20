@@ -76,7 +76,7 @@ export function InlineCategorySelector({
       </Select>
 
       {showInlineCreate && (
-        <div className="flex items-center gap-2 rounded-lg border border-ui-border-base bg-ui-bg-subtle p-2.5">
+        <div className="flex flex-col gap-2 rounded-lg border border-ui-border-base bg-ui-bg-subtle p-2.5 sm:flex-row sm:items-center">
           <Input
             value={newCategoryName}
             onChange={(e) => setNewCategoryName(e.target.value)}
@@ -85,6 +85,7 @@ export function InlineCategorySelector({
           <Button
             type="button"
             size="small"
+            className="w-full shrink-0 sm:w-auto"
             isLoading={createCategoryMutation.isPending}
             onClick={handleCreateInline}
           >

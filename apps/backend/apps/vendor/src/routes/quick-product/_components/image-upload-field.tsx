@@ -147,21 +147,22 @@ export function ImageUploadField({
         onDragLeave={() => setIsDragging(false)}
         onDrop={handleDrop}
         onClick={() => !isUploading && remainingSlots > 0 && fileInputRef.current?.click()}
-        className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed px-4 py-4 text-center transition-colors ${
+        className={`flex cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed px-4 py-5 text-center transition-colors ${
           isDragging
             ? "border-ui-fg-interactive bg-ui-bg-subtle-hover"
             : "border-ui-border-strong bg-ui-bg-subtle hover:bg-ui-bg-subtle-hover"
         }`}
       >
-        <Text size="small" className="font-medium">
-          คลิกหรือลากไฟล์รูปภาพมาวางที่นี่ (เพิ่มได้อีก {remainingSlots} รูป)
+        <Photo className="h-6 w-6 text-ui-fg-subtle" />
+        <Text size="small" weight="plus">
+          แตะเพื่อเลือกรูปจากมือถือ หรือลากวางหลายรูปที่นี่ (เพิ่มได้อีก {remainingSlots} รูป)
         </Text>
         <Text size="xsmall" className="text-ui-fg-subtle">
           รองรับ JPG / PNG / WebP • ไฟล์ใหญ่กว่า 1 MB จะถูก Resize อัตโนมัติก่อนอัปโหลด
         </Text>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
         <Input
           value={pendingUrl}
           onChange={(e) => onPendingUrlChange(e.target.value)}
@@ -173,6 +174,7 @@ export function ImageUploadField({
           type="button"
           size="small"
           variant="secondary"
+          className="w-full shrink-0 sm:w-auto"
           disabled={!pendingUrl.trim() || remainingSlots <= 0}
           onClick={handleAddUrl}
         >

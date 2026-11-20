@@ -77,72 +77,83 @@ export function VariantRowsEditor({
         {rows.map((row, index) => (
           <div
             key={row.id}
-            className="grid grid-cols-1 gap-3 rounded-lg border border-ui-border-base p-3 md:grid-cols-12"
+            className="space-y-3 rounded-lg border border-ui-border-base bg-ui-bg-subtle/60 p-3.5 sm:p-4"
           >
-            <div className="space-y-1 md:col-span-4">
-              <Label htmlFor={`variant-title-${row.id}`}>
-                ชื่อตัวเลือก #{index + 1} *
-              </Label>
-              <Input
-                id={`variant-title-${row.id}`}
-                value={row.title}
-                onChange={(e) => updateRow(row.id, "title", e.target.value)}
-                placeholder="เช่น ธรรมดา, พิเศษ, ไซส์ M"
-                required
-              />
+            <div className="flex items-center justify-between">
+              <Text size="xsmall" weight="plus" className="text-ui-fg-subtle">
+                ตัวเลือกที่ {index + 1}
+              </Text>
+              {rows.length > 1 && (
+                <Button
+                  type="button"
+                  size="small"
+                  variant="transparent"
+                  onClick={() => removeRow(row.id)}
+                  aria-label="ลบตัวเลือก"
+                >
+                  <Trash />
+                  ลบ
+                </Button>
+              )}
             </div>
 
-            <div className="space-y-1 md:col-span-3">
-              <Label htmlFor={`variant-price-${row.id}`}>ราคา (THB) *</Label>
-              <Input
-                id={`variant-price-${row.id}`}
-                type="number"
-                min="1"
-                step="1"
-                value={row.priceThb}
-                onChange={(e) => updateRow(row.id, "priceThb", e.target.value)}
-                placeholder="เช่น 120"
-                required
-              />
-            </div>
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-12">
+              <div className="space-y-1 md:col-span-4">
+                <Label htmlFor={`variant-title-${row.id}`}>ชื่อตัวเลือก *</Label>
+                <Input
+                  id={`variant-title-${row.id}`}
+                  value={row.title}
+                  onChange={(e) => updateRow(row.id, "title", e.target.value)}
+                  placeholder="เช่น มาตรฐาน, พิเศษ, ไซส์ M"
+                  required
+                />
+              </div>
 
-            <div className="space-y-1 md:col-span-2">
-              <Label htmlFor={`variant-stock-${row.id}`}>สต็อก (ชิ้น) *</Label>
-              <Input
-                id={`variant-stock-${row.id}`}
-                type="number"
-                min="0"
-                step="1"
-                value={row.stockQuantity}
-                onChange={(e) =>
-                  updateRow(row.id, "stockQuantity", e.target.value)
-                }
-                placeholder="10"
-                required
-              />
-            </div>
+              <div className="grid grid-cols-2 gap-3 md:col-span-5">
+                <div className="space-y-1">
+                  <Label htmlFor={`variant-price-${row.id}`}>ราคา (บาท) *</Label>
+                  <Input
+                    id={`variant-price-${row.id}`}
+                    type="number"
+                    inputMode="decimal"
+                    min="1"
+                    step="1"
+                    value={row.priceThb}
+                    onChange={(e) =>
+                      updateRow(row.id, "priceThb", e.target.value)
+                    }
+                    placeholder="เช่น 120"
+                    required
+                  />
+                </div>
 
-            <div className="space-y-1 md:col-span-2">
-              <Label htmlFor={`variant-sku-${row.id}`}>SKU (ไม่บังคับ)</Label>
-              <Input
-                id={`variant-sku-${row.id}`}
-                value={row.sku}
-                onChange={(e) => updateRow(row.id, "sku", e.target.value)}
-                placeholder="สร้างให้อัตโนมัติ"
-              />
-            </div>
+                <div className="space-y-1">
+                  <Label htmlFor={`variant-stock-${row.id}`}>สต็อก (ชิ้น) *</Label>
+                  <Input
+                    id={`variant-stock-${row.id}`}
+                    type="number"
+                    inputMode="numeric"
+                    min="0"
+                    step="1"
+                    value={row.stockQuantity}
+                    onChange={(e) =>
+                      updateRow(row.id, "stockQuantity", e.target.value)
+                    }
+                    placeholder="10"
+                    required
+                  />
+                </div>
+              </div>
 
-            <div className="flex items-end justify-end md:col-span-1">
-              <Button
-                type="button"
-                size="small"
-                variant="transparent"
-                disabled={rows.length <= 1}
-                onClick={() => removeRow(row.id)}
-                aria-label="ลบตัวเลือก"
-              >
-                <Trash />
-              </Button>
+              <div className="space-y-1 md:col-span-3">
+                <Label htmlFor={`variant-sku-${row.id}`}>SKU (ไม่บังคับ)</Label>
+                <Input
+                  id={`variant-sku-${row.id}`}
+                  value={row.sku}
+                  onChange={(e) => updateRow(row.id, "sku", e.target.value)}
+                  placeholder="สร้างให้อัตโนมัติ"
+                />
+              </div>
             </div>
           </div>
         ))}

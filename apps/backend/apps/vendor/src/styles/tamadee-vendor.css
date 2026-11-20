@@ -1,0 +1,92 @@
+/* Tamadee Vendor Hub: Clean White Base + Mobile-First Form Ergonomics */
+
+html.light {
+  --bg-subtle: #f8fafc;
+  --bg-base: #ffffff;
+  --bg-component: #ffffff;
+  --bg-field: #ffffff;
+  --bg-field-hover: #f8fafc;
+  --fg-base: #0f172a;
+  --fg-subtle: #475569;
+  --fg-muted: #64748b;
+  --border-base: #e2e8f0;
+  --border-strong: #cbd5e1;
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
+html.light body {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+/* Crisp visible inputs & labels on white background */
+html.light input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+html.light textarea,
+html.light select,
+html.light button[role="combobox"] {
+  background-color: #ffffff !important;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: #94a3b8;
+}
+
+html.light input:not([type="checkbox"]):not([type="radio"]):focus,
+html.light textarea:focus,
+html.light select:focus,
+html.light button[role="combobox"]:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+}
+
+html.light label {
+  color: #0f172a;
+  font-weight: 500;
+}
+
+/* Mobile-First Form & Touch Target Ergonomics */
+@media (max-width: 768px) {
+  /* Prevent iOS Safari zoom-on-focus (requires >= 16px) & enlarge tap targets */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  textarea,
+  select,
+  button[role="combobox"] {
+    font-size: 16px !important;
+    min-height: 44px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  textarea {
+    min-height: 92px;
+    line-height: 1.5;
+  }
+
+  label {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    line-height: 1.4;
+  }
+
+  /* Comfortable thumb-friendly buttons in forms and modal footers */
+  form button[type="submit"],
+  form button[type="button"],
+  [role="dialog"] button {
+    min-height: 42px;
+  }
+
+  /* Keep narrow mobile modals / forms clean with breathing room */
+  [role="dialog"] form {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  /* Ensure wide data tables scroll smoothly inside mobile viewports */
+  table {
+    font-size: 14px;
+  }
+}

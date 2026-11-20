@@ -11,8 +11,8 @@ export default function ProductQuickCreateBanner() {
   const navigate = useNavigate();
 
   return (
-    <Container className="mb-4 px-6 py-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <Container className="mb-4 px-4 py-4 sm:px-6">
+      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:flex-wrap sm:items-center">
         <div className="space-y-0.5">
           <Heading level="h2">เพิ่มสินค้าพร้อมราคาและสต็อกในหน้าเดียว</Heading>
           <Text size="small" className="text-ui-fg-subtle">
@@ -21,11 +21,12 @@ export default function ProductQuickCreateBanner() {
           </Text>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <Button
             type="button"
             size="small"
             variant="secondary"
+            className="w-full sm:w-auto"
             onClick={() => navigate("/categories")}
           >
             <Tag />
@@ -35,6 +36,7 @@ export default function ProductQuickCreateBanner() {
             type="button"
             size="small"
             variant="primary"
+            className="w-full sm:w-auto"
             onClick={() => navigate("/quick-product")}
           >
             <Plus />
