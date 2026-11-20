@@ -1,16 +1,23 @@
 import { Photo, Trash } from "@medusajs/icons";
 import { Button, Input, Label, Text, toast } from "@medusajs/ui";
-import { type ChangeEvent, useRef, useState } from "react";
+import { type ChangeEvent, type KeyboardEvent, useRef, useState } from "react";
 import { uploadVendorImage } from "../../../lib/tamadee-api";
+import { mergePendingImageUrl } from "./quick-product-helpers";
 
 interface ImageUploadFieldProps {
   readonly images: string[];
+  readonly pendingUrl: string;
+  readonly onPendingUrlChange: (nextUrl: string) => void;
   readonly onChange: (nextImages: string[]) => void;
 }
 
-export function ImageUploadField({ images, onChange }: ImageUploadFieldProps) {
+export function ImageUploadField({
+  images,
+  pendingUrl,
+  onPendingUrlChange,
+  onChange,
+}: ImageUploadFieldProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const [urlInput, setUrlInput] = useState("");
   const [isUploading, setIsUploading] = useState(false);
 
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -41,22 +48,24 @@ export function ImageUploadField({ images, onChange }: ImageUploadFieldProps) {
   };
 
   const handleAddUrl = () => {
-    const trimmed = urlInput.trim();
+    const trimmed = pendingUrl.trim();
     if (!trimmed) {
       return;
     }
-    try {
-      new URL(trimmed);
-    } catch {
-      toast.error("กรุณากรอก URL รูปภาพที่ถูกต้อง (ขึ้นต้นด้วย https://)");
+    const merged = mergePendingImageUrl(images, trimmed);
+    if (!merged.ok) {
+      toast.error(merged.error);
       return;
     }
-    if (images.includes(trimmed)) {
-      setUrlInput("");
-      return;
+    onChange(merged.images);
+    onPendingUrlChange("");
+  };
+
+  const handleUrlKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      handleAddUrl();
     }
-    onChange([...images, trimmed]);
-    setUrlInput("");
   };
 
   const handleRemove = (index: number) => {
@@ -98,8 +107,9 @@ export function ImageUploadField({ images, onChange }: ImageUploadFieldProps) {
 
       <div className="flex items-center gap-2">
         <Input
-          value={urlInput}
-          onChange={(e) => setUrlInput(e.target.value)}
+          value={pendingUrl}
+          onChange={(e) => onPendingUrlChange(e.target.value)}
+          onKeyDown={handleUrlKeyDown}
           placeholder="หรือวางลิงก์รูปภาพ เช่น https://..."
           disabled={images.length >= 8}
         />
@@ -107,7 +117,7 @@ export function ImageUploadField({ images, onChange }: ImageUploadFieldProps) {
           type="button"
           size="small"
           variant="secondary"
-          disabled={!urlInput.trim() || images.length >= 8}
+          disabled={!pendingUrl.trim() || images.length >= 8}
           onClick={handleAddUrl}
         >
           เพิ่มลิงก์

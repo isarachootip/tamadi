@@ -54,6 +54,7 @@ module.exports = withMercur({
   },
   featureFlags: {
     seller_registration: true,
+    product_request: false,
   },
   modules: [
     ...(env.disableDashboards

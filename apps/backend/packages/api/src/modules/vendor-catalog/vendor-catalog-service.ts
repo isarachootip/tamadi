@@ -1,5 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types";
-import type { CreateOfferDTO } from "@mercurjs/types";
+import { type CreateOfferDTO, SellerStatus } from "@mercurjs/types";
 import {
   buildVariantSku,
   type CreateVendorCategoryInput,
@@ -66,10 +66,16 @@ export function createVendorCatalogService(deps: VendorCatalogDeps) {
       readonly offers: CreatedOfferSummary[];
       readonly provisioned_fulfillment: boolean;
     }> {
-      const [sellerStatus, fulfillment] = await Promise.all([
+      const [initialSellerStatus, fulfillment] = await Promise.all([
         deps.getSellerStatus(container, context.sellerId),
         deps.ensureFulfillmentReady(container, context.sellerId),
       ]);
+
+      let sellerStatus = initialSellerStatus;
+      if (sellerStatus === SellerStatus.PENDING_APPROVAL) {
+        await deps.approveSeller(container, context.sellerId);
+        sellerStatus = SellerStatus.OPEN;
+      }
 
       const status = resolveProductPublishStatus(
         sellerStatus,
@@ -78,6 +84,7 @@ export function createVendorCatalogService(deps: VendorCatalogDeps) {
       const uniqueSuffix = Date.now().toString(36).slice(-5);
       const productHandle =
         input.handle ?? `${slugifyHandle(input.title, "prod")}-${uniqueSuffix}`;
+      const resolvedThumbnail = input.thumbnail ?? input.images?.[0];
 
       const preparedVariants = input.variants.map((variant, index) => ({
         ...variant,
@@ -93,7 +100,7 @@ export function createVendorCatalogService(deps: VendorCatalogDeps) {
         handle: productHandle,
         description: input.description,
         categoryId: input.category_id,
-        thumbnail: input.thumbnail,
+        thumbnail: resolvedThumbnail,
         images: input.images,
         weightGrams: input.weight_grams,
         status,

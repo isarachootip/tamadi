@@ -1,11 +1,20 @@
 import type { MedusaContainer } from "@medusajs/framework/types";
-import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils";
+import {
+  ContainerRegistrationKeys,
+  FeatureFlag,
+  Modules,
+} from "@medusajs/framework/utils";
 import { createProductCategoriesWorkflow } from "@medusajs/medusa/core-flows";
 import {
+  approveSellerWorkflow,
   createOffersWorkflow,
   createProductsWorkflow,
 } from "@mercurjs/core/workflows";
-import type { CreateOfferDTO, CreateProductDTO } from "@mercurjs/types";
+import {
+  type CreateOfferDTO,
+  type CreateProductDTO,
+  MercurFeatureFlags,
+} from "@mercurjs/types";
 import { defaultSellerFulfillmentDeps } from "./seller-fulfillment-adapters";
 import { createEnsureSellerFulfillmentReady } from "./seller-fulfillment-provisioner";
 import {
@@ -13,6 +22,7 @@ import {
   type CreatedProductSummary,
   type VendorCatalogDeps,
 } from "./vendor-catalog-service";
+import { createVendorProductCreateMiddleware } from "./vendor-product-defaults-middleware";
 
 const ensureSellerFulfillmentReady = createEnsureSellerFulfillmentReady(
   defaultSellerFulfillmentDeps
@@ -64,6 +74,12 @@ export const defaultVendorCatalogDeps: VendorCatalogDeps = {
     return (
       (data as Array<{ status?: string }>)[0]?.status ?? "pending_approval"
     );
+  },
+
+  async approveSeller(container, sellerId) {
+    await approveSellerWorkflow(container).run({
+      input: { seller_id: sellerId },
+    });
   },
 
   ensureFulfillmentReady: ensureSellerFulfillmentReady,
@@ -152,3 +168,11 @@ export const defaultVendorCatalogDeps: VendorCatalogDeps = {
 export const vendorCatalogService = createVendorCatalogService(
   defaultVendorCatalogDeps
 );
+
+export const ensureVendorProductCreateDefaultsMiddleware =
+  createVendorProductCreateMiddleware({
+    getSellerStatus: defaultVendorCatalogDeps.getSellerStatus,
+    approveSeller: defaultVendorCatalogDeps.approveSeller,
+    isProductRequestEnabled: () =>
+      FeatureFlag.isFeatureEnabled(MercurFeatureFlags.PRODUCT_REQUEST),
+  });

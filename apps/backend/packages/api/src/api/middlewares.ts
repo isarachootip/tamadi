@@ -1,4 +1,6 @@
 import { defineMiddlewares } from "@medusajs/medusa";
+import { ensureVendorProductCreateDefaultsMiddleware } from "../modules/vendor-catalog/vendor-catalog-adapters";
+import { ensureVendorProductUpdateThumbnailMiddleware } from "../modules/vendor-catalog/vendor-product-defaults-middleware";
 import {
   ensureStoreDefaultRegionMiddleware,
   unregisteredSellersListMiddleware,
@@ -15,6 +17,16 @@ export default defineMiddlewares({
       matcher: "/vendor/sellers",
       method: ["POST"],
       middlewares: [ensureStoreDefaultRegionMiddleware],
+    },
+    {
+      matcher: "/vendor/products",
+      method: ["POST"],
+      middlewares: [ensureVendorProductCreateDefaultsMiddleware],
+    },
+    {
+      matcher: "/vendor/products/:id",
+      method: ["POST"],
+      middlewares: [ensureVendorProductUpdateThumbnailMiddleware],
     },
     {
       matcher: "/store/ai/visual-search",

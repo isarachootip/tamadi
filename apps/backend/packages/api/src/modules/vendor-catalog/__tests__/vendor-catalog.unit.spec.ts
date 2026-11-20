@@ -173,20 +173,22 @@ describe("VendorCatalogService", () => {
         is_active: true,
       })),
       getSellerStatus: jest.fn(async () => "open"),
+      approveSeller: jest.fn(async () => undefined),
       ensureFulfillmentReady: jest.fn(async () => ({
         stockLocationId: "sloc_1",
         shippingProfileId: "sp_1",
         provisioned: true,
       })),
-      createProductWithVariants: jest.fn(async () => ({
+      createProductWithVariants: jest.fn(async (_scope, params) => ({
         id: "prod_1",
-        title: "ข้าวผัดปู",
-        handle: "prod-1",
-        status: ProductStatus.PUBLISHED,
-        variants: [
-          { id: "var_1", title: "ธรรมดา", sku: "SKU-1" },
-          { id: "var_2", title: "พิเศษ", sku: "SKU-2" },
-        ],
+        title: params.title,
+        handle: params.handle,
+        status: params.status,
+        variants: params.variants.map((variant, idx) => ({
+          id: `var_${idx + 1}`,
+          title: variant.title,
+          sku: variant.sku,
+        })),
       })),
       createOffers: jest.fn(async (_scope, offers) =>
         offers.map((offer, idx) => ({
@@ -266,5 +268,60 @@ describe("VendorCatalogService", () => {
     );
     expect(result.offers).toHaveLength(2);
     expect(result.provisioned_fulfillment).toBe(true);
+  });
+
+  it("auto-approves pending_approval seller and publishes quick product immediately", async () => {
+    const deps = createMockCatalogDeps({
+      getSellerStatus: jest.fn(async () => "pending_approval"),
+    });
+    const service = createVendorCatalogService(deps);
+
+    await service.createQuickProductWithOffers(
+      {} as never,
+      { sellerId: "sel_pending", memberId: "mem_2" },
+      {
+        title: "หน่อไม้ส้ม",
+        publish_immediately: true,
+        images: ["https://bwebtamdi.tamadee.online/static/bamboo.jpg"],
+        variants: [{ title: "มาตรฐาน", price_thb: 65, stock_quantity: 10 }],
+      }
+    );
+
+    expect(deps.approveSeller).toHaveBeenCalledWith(
+      expect.anything(),
+      "sel_pending"
+    );
+    expect(deps.createProductWithVariants).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        status: ProductStatus.PUBLISHED,
+        thumbnail: "https://bwebtamdi.tamadee.online/static/bamboo.jpg",
+      })
+    );
+  });
+
+  it("keeps suspended seller products as PROPOSED without auto-approving", async () => {
+    const deps = createMockCatalogDeps({
+      getSellerStatus: jest.fn(async () => "suspended"),
+    });
+    const service = createVendorCatalogService(deps);
+
+    await service.createQuickProductWithOffers(
+      {} as never,
+      { sellerId: "sel_suspended", memberId: "mem_3" },
+      {
+        title: "สินค้าทดสอบ",
+        publish_immediately: true,
+        variants: [{ title: "มาตรฐาน", price_thb: 100, stock_quantity: 5 }],
+      }
+    );
+
+    expect(deps.approveSeller).not.toHaveBeenCalled();
+    expect(deps.createProductWithVariants).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        status: ProductStatus.PROPOSED,
+      })
+    );
   });
 });

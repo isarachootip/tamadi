@@ -64,6 +64,10 @@ export interface VendorCatalogDeps {
     container: MedusaContainer,
     sellerId: string
   ) => Promise<string>;
+  approveSeller: (
+    container: MedusaContainer,
+    sellerId: string
+  ) => Promise<void>;
   ensureFulfillmentReady: (
     container: MedusaContainer,
     sellerId: string

@@ -7,7 +7,11 @@ import { useNavigate } from "react-router-dom";
 import { createTamadeeQuickProduct, listTamadeeCategories } from "../../lib/tamadee-api";
 import { ImageUploadField } from "./_components/image-upload-field";
 import { InlineCategorySelector } from "./_components/inline-category-selector";
-import { createEmptyVariantRow, parseVariantRows, type VariantRowDraft } from "./_components/quick-product-helpers";
+import {
+  buildQuickProductPayload,
+  createEmptyVariantRow,
+  type VariantRowDraft,
+} from "./_components/quick-product-helpers";
 import { VariantRowsEditor } from "./_components/variant-rows-editor";
 
 export const config: RouteConfig = {
@@ -29,6 +33,7 @@ export default function QuickProductPage() {
   const [categoryId, setCategoryId] = useState("__none__");
   const [weightGrams, setWeightGrams] = useState("");
   const [images, setImages] = useState<string[]>([]);
+  const [pendingImageUrl, setPendingImageUrl] = useState("");
   const [optionTitle, setOptionTitle] = useState("ตัวเลือก");
   const [publishImmediately, setPublishImmediately] = useState(true);
   const [variantRows, setVariantRows] = useState<VariantRowDraft[]>([
@@ -61,33 +66,26 @@ export default function QuickProductPage() {
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const trimmedTitle = title.trim();
-    if (!trimmedTitle) {
-      toast.error("กรุณาระบุชื่อสินค้า");
-      return;
-    }
-
-    const parsedVariants = parseVariantRows(variantRows);
-    if (!parsedVariants.ok) {
-      toast.error(parsedVariants.error);
-      return;
-    }
-
-    const parsedWeight = weightGrams.trim() ? Number(weightGrams) : undefined;
-    createProductMutation.mutate({
-      title: trimmedTitle,
-      description: description.trim() || undefined,
-      category_id: categoryId === "__none__" ? null : categoryId,
-      thumbnail: images[0],
-      images: images.length > 0 ? images : undefined,
-      weight_grams:
-        parsedWeight && Number.isInteger(parsedWeight) && parsedWeight > 0
-          ? parsedWeight
-          : undefined,
-      option_title: optionTitle.trim() || "ตัวเลือก",
-      publish_immediately: publishImmediately,
-      variants: parsedVariants.variants,
+    const built = buildQuickProductPayload({
+      title,
+      description,
+      categoryId,
+      weightGrams,
+      images,
+      pendingImageUrl,
+      optionTitle,
+      publishImmediately,
+      variantRows,
     });
+    if (!built.ok) {
+      toast.error(built.error);
+      return;
+    }
+    if (pendingImageUrl.trim()) {
+      setImages(built.finalImages);
+      setPendingImageUrl("");
+    }
+    createProductMutation.mutate(built.payload);
   };
 
   return (
@@ -131,7 +129,12 @@ export default function QuickProductPage() {
             />
           </div>
 
-          <ImageUploadField images={images} onChange={setImages} />
+          <ImageUploadField
+            images={images}
+            pendingUrl={pendingImageUrl}
+            onPendingUrlChange={setPendingImageUrl}
+            onChange={setImages}
+          />
 
           <div className="border-t border-ui-border-base pt-5">
             <VariantRowsEditor
@@ -160,7 +163,7 @@ export default function QuickProductPage() {
               <div>
                 <Label htmlFor="quick-product-publish">เผยแพร่ขายทันที</Label>
                 <Text size="xsmall" className="text-ui-fg-subtle">
-                  ร้านที่อนุมัติแล้วจะแสดงสินค้าทันที (ร้านรออนุมัติจะส่งตรวจอัตโนมัติ)
+                  เปิดขายและแสดงสินค้าบนหน้าร้านทันทีหลังบันทึก (ปิดเพื่อบันทึกเป็นแบบร่าง)
                 </Text>
               </div>
               <Switch

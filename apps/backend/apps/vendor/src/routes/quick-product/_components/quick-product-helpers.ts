@@ -1,4 +1,7 @@
-import type { QuickProductVariantPayload } from "../../../lib/tamadee-api";
+import type {
+  CreateQuickProductPayload,
+  QuickProductVariantPayload,
+} from "../../../lib/tamadee-api";
 
 export interface VariantRowDraft {
   readonly id: string;
@@ -63,4 +66,93 @@ export function parseVariantRows(
   }
 
   return { ok: true, variants };
+}
+
+export function mergePendingImageUrl(
+  images: string[],
+  pendingUrl: string,
+  maxImages = 8
+): { ok: true; images: string[] } | { ok: false; error: string } {
+  const trimmed = pendingUrl.trim();
+  if (!trimmed) {
+    return { ok: true, images };
+  }
+
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      return {
+        ok: false,
+        error: "กรุณากรอก URL รูปภาพที่ขึ้นต้นด้วย https:// หรือ http://",
+      };
+    }
+  } catch {
+    return {
+      ok: false,
+      error: "กรุณากรอก URL รูปภาพที่ถูกต้อง (ขึ้นต้นด้วย https://)",
+    };
+  }
+
+  if (images.includes(trimmed) || images.length >= maxImages) {
+    return { ok: true, images };
+  }
+
+  return { ok: true, images: [...images, trimmed] };
+}
+
+export interface QuickProductFormDraft {
+  readonly title: string;
+  readonly description: string;
+  readonly categoryId: string;
+  readonly weightGrams: string;
+  readonly images: string[];
+  readonly pendingImageUrl: string;
+  readonly optionTitle: string;
+  readonly publishImmediately: boolean;
+  readonly variantRows: VariantRowDraft[];
+}
+
+export function buildQuickProductPayload(
+  draft: QuickProductFormDraft
+):
+  | { ok: true; payload: CreateQuickProductPayload; finalImages: string[] }
+  | { ok: false; error: string } {
+  const trimmedTitle = draft.title.trim();
+  if (!trimmedTitle) {
+    return { ok: false, error: "กรุณาระบุชื่อสินค้า" };
+  }
+
+  const parsedVariants = parseVariantRows(draft.variantRows);
+  if (!parsedVariants.ok) {
+    return parsedVariants;
+  }
+
+  const mergedImages = mergePendingImageUrl(draft.images, draft.pendingImageUrl);
+  if (!mergedImages.ok) {
+    return mergedImages;
+  }
+
+  const parsedWeight = draft.weightGrams.trim()
+    ? Number(draft.weightGrams)
+    : undefined;
+  const finalImages = mergedImages.images;
+
+  return {
+    ok: true,
+    finalImages,
+    payload: {
+      title: trimmedTitle,
+      description: draft.description.trim() || undefined,
+      category_id: draft.categoryId === "__none__" ? null : draft.categoryId,
+      thumbnail: finalImages[0],
+      images: finalImages.length > 0 ? finalImages : undefined,
+      weight_grams:
+        parsedWeight && Number.isInteger(parsedWeight) && parsedWeight > 0
+          ? parsedWeight
+          : undefined,
+      option_title: draft.optionTitle.trim() || "ตัวเลือก",
+      publish_immediately: draft.publishImmediately,
+      variants: parsedVariants.variants,
+    },
+  };
 }
