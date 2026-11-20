@@ -23,6 +23,10 @@ import {
   type VendorCatalogDeps,
 } from "./vendor-catalog-service";
 import { createVendorProductCreateMiddleware } from "./vendor-product-defaults-middleware";
+import {
+  checkSellerOwnsProduct,
+  persistProductMediaUpdate,
+} from "./vendor-product-media-adapters";
 
 const ensureSellerFulfillmentReady = createEnsureSellerFulfillmentReady(
   defaultSellerFulfillmentDeps
@@ -81,6 +85,9 @@ export const defaultVendorCatalogDeps: VendorCatalogDeps = {
       input: { seller_id: sellerId },
     });
   },
+
+  sellerOwnsProduct: checkSellerOwnsProduct,
+  updateProductMediaRecord: persistProductMediaUpdate,
 
   ensureFulfillmentReady: ensureSellerFulfillmentReady,
 

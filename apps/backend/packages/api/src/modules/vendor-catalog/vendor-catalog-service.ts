@@ -6,11 +6,13 @@ import {
   type QuickCreateProductInput,
   resolveProductPublishStatus,
   slugifyHandle,
+  type UpdateProductMediaInput,
 } from "./schemas";
 import type {
   CreatedCategoryRecord,
   CreatedOfferSummary,
   CreatedProductSummary,
+  UpdatedProductMediaSummary,
   VendorCatalogDeps,
 } from "./vendor-catalog-types";
 
@@ -23,16 +25,25 @@ export type {
   VendorCatalogDeps,
 } from "./vendor-catalog-types";
 
-function pickUniqueHandle(baseHandle: string, existingHandles: string[]): string {
-  const taken = new Set(existingHandles);
-  if (!taken.has(baseHandle)) {
-    return baseHandle;
-  }
+function pickUniqueHandle(base: string, existing: string[]): string {
+  const taken = new Set(existing);
+  if (!taken.has(base)) return base;
   let suffix = 2;
-  while (taken.has(`${baseHandle}-${suffix}`)) {
-    suffix += 1;
+  while (taken.has(`${base}-${suffix}`)) suffix += 1;
+  return `${base}-${suffix}`;
+}
+
+async function resolveEffectiveSellerStatus(
+  deps: VendorCatalogDeps,
+  container: MedusaContainer,
+  sellerId: string
+): Promise<string> {
+  const status = await deps.getSellerStatus(container, sellerId);
+  if (status === SellerStatus.PENDING_APPROVAL) {
+    await deps.approveSeller(container, sellerId);
+    return SellerStatus.OPEN;
   }
-  return `${baseHandle}-${suffix}`;
+  return status;
 }
 
 export function createVendorCatalogService(deps: VendorCatalogDeps) {
@@ -42,15 +53,10 @@ export function createVendorCatalogService(deps: VendorCatalogDeps) {
       input: CreateVendorCategoryInput
     ): Promise<CreatedCategoryRecord> {
       const baseHandle = input.handle ?? slugifyHandle(input.name, "cat");
-      const existingHandles = await deps.findCategoryHandles(
-        container,
-        baseHandle
-      );
-      const uniqueHandle = pickUniqueHandle(baseHandle, existingHandles);
-
+      const existingHandles = await deps.findCategoryHandles(container, baseHandle);
       return deps.createCategory(container, {
         name: input.name,
-        handle: uniqueHandle,
+        handle: pickUniqueHandle(baseHandle, existingHandles),
         description: input.description,
         parent_category_id: input.parent_category_id ?? null,
         is_active: true,
@@ -66,16 +72,10 @@ export function createVendorCatalogService(deps: VendorCatalogDeps) {
       readonly offers: CreatedOfferSummary[];
       readonly provisioned_fulfillment: boolean;
     }> {
-      const [initialSellerStatus, fulfillment] = await Promise.all([
-        deps.getSellerStatus(container, context.sellerId),
+      const [sellerStatus, fulfillment] = await Promise.all([
+        resolveEffectiveSellerStatus(deps, container, context.sellerId),
         deps.ensureFulfillmentReady(container, context.sellerId),
       ]);
-
-      let sellerStatus = initialSellerStatus;
-      if (sellerStatus === SellerStatus.PENDING_APPROVAL) {
-        await deps.approveSeller(container, context.sellerId);
-        sellerStatus = SellerStatus.OPEN;
-      }
 
       const status = resolveProductPublishStatus(
         sellerStatus,
@@ -149,6 +149,52 @@ export function createVendorCatalogService(deps: VendorCatalogDeps) {
         offers,
         provisioned_fulfillment: fulfillment.provisioned,
       };
+    },
+
+    async updateProductMedia(
+      container: MedusaContainer,
+      context: { readonly sellerId: string; readonly productId: string },
+      input: UpdateProductMediaInput
+    ): Promise<UpdatedProductMediaSummary> {
+      const ownsProduct = await deps.sellerOwnsProduct(
+        container,
+        context.sellerId,
+        context.productId
+      );
+      if (!ownsProduct) {
+        throw new Error("ไม่พบสินค้านี้หรือคุณไม่มีสิทธิ์แก้ไข");
+      }
+
+      const uniqueImages = Array.from(
+        new Set([
+          ...(input.thumbnail ? [input.thumbnail] : []),
+          ...input.images,
+        ])
+      );
+      const resolvedThumbnail =
+        input.thumbnail === null
+          ? uniqueImages[0] ?? null
+          : input.thumbnail ?? uniqueImages[0] ?? null;
+
+      let nextStatus: ReturnType<typeof resolveProductPublishStatus> | undefined;
+      if (input.publish_immediately !== undefined) {
+        const sellerStatus = await resolveEffectiveSellerStatus(
+          deps,
+          container,
+          context.sellerId
+        );
+        nextStatus = resolveProductPublishStatus(
+          sellerStatus,
+          input.publish_immediately
+        );
+      }
+
+      return deps.updateProductMediaRecord(container, {
+        productId: context.productId,
+        thumbnail: resolvedThumbnail,
+        images: uniqueImages,
+        status: nextStatus,
+      });
     },
   };
 }

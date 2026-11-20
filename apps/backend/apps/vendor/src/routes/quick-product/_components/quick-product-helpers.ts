@@ -71,7 +71,7 @@ export function parseVariantRows(
 export function mergePendingImageUrl(
   images: string[],
   pendingUrl: string,
-  maxImages = 8
+  maxImages = 10
 ): { ok: true; images: string[] } | { ok: false; error: string } {
   const trimmed = pendingUrl.trim();
   if (!trimmed) {

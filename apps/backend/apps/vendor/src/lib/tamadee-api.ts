@@ -51,6 +51,23 @@ export interface CreateQuickProductResponse {
   readonly provisioned_fulfillment: boolean;
 }
 
+export interface UpdateProductMediaPayload {
+  readonly images: string[];
+  readonly thumbnail?: string | null;
+  readonly publish_immediately?: boolean;
+}
+
+export interface UpdateProductMediaResponse {
+  readonly product: {
+    readonly id: string;
+    readonly title: string;
+    readonly handle: string;
+    readonly status: string;
+    readonly thumbnail: string | null;
+    readonly images: Array<{ readonly url: string }>;
+  };
+}
+
 interface ErrorResponseBody {
   readonly message?: string;
 }
@@ -127,10 +144,28 @@ export async function createTamadeeQuickProduct(
   );
 }
 
-export async function uploadVendorImage(file: File): Promise<string> {
+export async function updateTamadeeProductMedia(
+  productId: string,
+  payload: UpdateProductMediaPayload
+): Promise<UpdateProductMediaResponse> {
+  return requestJson<UpdateProductMediaResponse>(
+    `/vendor/tamadee/products/${encodeURIComponent(productId)}/media`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
+export async function uploadVendorImages(files: File[]): Promise<string[]> {
+  if (files.length === 0) {
+    return [];
+  }
   const authHeaders = await getAuthHeaders();
   const formData = new FormData();
-  formData.append("files", file);
+  for (const file of files) {
+    formData.append("files", file);
+  }
 
   const response = await fetch(`${getBaseUrl()}/vendor/uploads`, {
     method: "POST",
@@ -146,9 +181,16 @@ export async function uploadVendorImage(file: File): Promise<string> {
   const data = (await response.json()) as {
     files?: Array<{ url?: string }>;
   };
-  const url = data.files?.[0]?.url;
-  if (!url) {
+  const urls = (data.files ?? [])
+    .map((entry) => entry.url)
+    .filter((url): url is string => typeof url === "string" && url.length > 0);
+  if (urls.length === 0) {
     throw new Error("ไม่ได้รับ URL รูปภาพจากเซิร์ฟเวอร์");
   }
-  return url;
+  return urls;
+}
+
+export async function uploadVendorImage(file: File): Promise<string> {
+  const urls = await uploadVendorImages([file]);
+  return urls[0]!;
 }

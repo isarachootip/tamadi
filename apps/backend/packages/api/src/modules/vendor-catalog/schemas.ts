@@ -63,7 +63,7 @@ export const QuickCreateProductSchema = z
     description: z.string().trim().max(4000).optional(),
     category_id: z.string().trim().min(1).optional().nullable(),
     thumbnail: z.string().trim().url("URL รูปภาพหลักไม่ถูกต้อง").optional(),
-    images: z.array(z.string().trim().url("URL รูปภาพไม่ถูกต้อง")).max(8).optional(),
+    images: z.array(z.string().trim().url("URL รูปภาพไม่ถูกต้อง")).max(10).optional(),
     weight_grams: z.coerce.number().int().positive().max(100_000).optional(),
     option_title: z.string().trim().min(1).max(60).optional(),
     publish_immediately: z.boolean().default(true),
@@ -88,6 +88,21 @@ export const QuickCreateProductSchema = z
   });
 
 export type QuickCreateProductInput = z.infer<typeof QuickCreateProductSchema>;
+
+export const UpdateProductMediaSchema = z.object({
+  images: z
+    .array(z.string().trim().url("URL รูปภาพไม่ถูกต้อง"))
+    .max(10, "รองรับรูปภาพสูงสุด 10 รูปต่อสินค้า"),
+  thumbnail: z
+    .string()
+    .trim()
+    .url("URL รูปภาพหลักไม่ถูกต้อง")
+    .nullable()
+    .optional(),
+  publish_immediately: z.boolean().optional(),
+});
+
+export type UpdateProductMediaInput = z.infer<typeof UpdateProductMediaSchema>;
 
 /**
  * Produces a URL-safe lowercase ASCII handle from English or Thai text.

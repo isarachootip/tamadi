@@ -5,6 +5,7 @@ import {
   QuickCreateProductSchema,
   resolveProductPublishStatus,
   slugifyHandle,
+  UpdateProductMediaSchema,
 } from "../schemas";
 import {
   createEnsureSellerFulfillmentReady,
@@ -60,6 +61,34 @@ describe("Vendor Catalog Schemas & Pure Helpers", () => {
         variants: [{ title: "ธรรมดา", price_thb: 0, stock_quantity: 5 }],
       }).success
     ).toBe(false);
+  });
+
+  it("allows up to 10 product images and validates UpdateProductMediaSchema", () => {
+    const tenUrls = Array.from(
+      { length: 10 },
+      (_, idx) => `https://bwebtamdi.tamadee.online/static/img-${idx + 1}.jpg`
+    );
+    expect(
+      QuickCreateProductSchema.safeParse({
+        title: "พอร์คช็อป",
+        images: tenUrls,
+        variants: [{ title: "มาตรฐาน", price_thb: 150, stock_quantity: 10 }],
+      }).success
+    ).toBe(true);
+
+    expect(
+      QuickCreateProductSchema.safeParse({
+        title: "พอร์คช็อป",
+        images: [...tenUrls, "https://bwebtamdi.tamadee.online/static/11.jpg"],
+        variants: [{ title: "มาตรฐาน", price_thb: 150, stock_quantity: 10 }],
+      }).success
+    ).toBe(false);
+
+    const mediaParsed = UpdateProductMediaSchema.safeParse({
+      images: tenUrls.slice(0, 3),
+      publish_immediately: true,
+    });
+    expect(mediaParsed.success).toBe(true);
   });
 
   it("generates URL-safe ASCII handles for both English and Thai titles", () => {
@@ -174,6 +203,15 @@ describe("VendorCatalogService", () => {
       })),
       getSellerStatus: jest.fn(async () => "open"),
       approveSeller: jest.fn(async () => undefined),
+      sellerOwnsProduct: jest.fn(async () => true),
+      updateProductMediaRecord: jest.fn(async (_scope, params) => ({
+        id: params.productId,
+        title: "พอร์คช็อป",
+        handle: "pork-chop",
+        status: params.status ?? ProductStatus.PUBLISHED,
+        thumbnail: params.thumbnail,
+        images: params.images.map((url) => ({ url })),
+      })),
       ensureFulfillmentReady: jest.fn(async () => ({
         stockLocationId: "sloc_1",
         shippingProfileId: "sp_1",
@@ -323,5 +361,59 @@ describe("VendorCatalogService", () => {
         status: ProductStatus.PROPOSED,
       })
     );
+  });
+
+  it("updates multiple images, sets cover thumbnail, and publishes product for pending seller", async () => {
+    const deps = createMockCatalogDeps({
+      getSellerStatus: jest.fn(async () => "pending_approval"),
+    });
+    const service = createVendorCatalogService(deps);
+
+    const updated = await service.updateProductMedia(
+      {} as never,
+      { sellerId: "sel_1", productId: "prod_pork" },
+      {
+        images: [
+          "https://bwebtamdi.tamadee.online/static/1.jpg",
+          "https://bwebtamdi.tamadee.online/static/2.jpg",
+        ],
+        publish_immediately: true,
+      }
+    );
+
+    expect(deps.sellerOwnsProduct).toHaveBeenCalledWith(
+      expect.anything(),
+      "sel_1",
+      "prod_pork"
+    );
+    expect(deps.approveSeller).toHaveBeenCalledWith(expect.anything(), "sel_1");
+    expect(deps.updateProductMediaRecord).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        productId: "prod_pork",
+        thumbnail: "https://bwebtamdi.tamadee.online/static/1.jpg",
+        images: [
+          "https://bwebtamdi.tamadee.online/static/1.jpg",
+          "https://bwebtamdi.tamadee.online/static/2.jpg",
+        ],
+        status: ProductStatus.PUBLISHED,
+      })
+    );
+    expect(updated.status).toBe(ProductStatus.PUBLISHED);
+  });
+
+  it("rejects media update when seller does not own the product", async () => {
+    const deps = createMockCatalogDeps({
+      sellerOwnsProduct: jest.fn(async () => false),
+    });
+    const service = createVendorCatalogService(deps);
+
+    await expect(
+      service.updateProductMedia(
+        {} as never,
+        { sellerId: "sel_other", productId: "prod_pork" },
+        { images: ["https://bwebtamdi.tamadee.online/static/1.jpg"] }
+      )
+    ).rejects.toThrow("ไม่พบสินค้านี้หรือคุณไม่มีสิทธิ์แก้ไข");
   });
 });

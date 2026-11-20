@@ -45,6 +45,22 @@ export interface CreateProductWorkflowParams {
   readonly variants: Array<{ readonly title: string; readonly sku: string }>;
 }
 
+export interface UpdatedProductMediaSummary {
+  readonly id: string;
+  readonly title: string;
+  readonly handle: string;
+  readonly status: string;
+  readonly thumbnail: string | null;
+  readonly images: Array<{ readonly url: string }>;
+}
+
+export interface UpdateProductMediaRecordParams {
+  readonly productId: string;
+  readonly thumbnail: string | null;
+  readonly images: string[];
+  readonly status?: ProductStatus;
+}
+
 export interface VendorCatalogDeps {
   findCategoryHandles: (
     container: MedusaContainer,
@@ -68,6 +84,15 @@ export interface VendorCatalogDeps {
     container: MedusaContainer,
     sellerId: string
   ) => Promise<void>;
+  sellerOwnsProduct: (
+    container: MedusaContainer,
+    sellerId: string,
+    productId: string
+  ) => Promise<boolean>;
+  updateProductMediaRecord: (
+    container: MedusaContainer,
+    params: UpdateProductMediaRecordParams
+  ) => Promise<UpdatedProductMediaSummary>;
   ensureFulfillmentReady: (
     container: MedusaContainer,
     sellerId: string
