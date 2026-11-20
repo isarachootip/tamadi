@@ -105,7 +105,7 @@ export function ImageUploadField({
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3" data-tamadee-auto-resize="handled">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <Label>
