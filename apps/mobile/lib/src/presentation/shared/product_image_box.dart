@@ -22,14 +22,15 @@ class ProductImageBox extends StatelessWidget {
         isDark ? TamadeeColors.textMutedDark : TamadeeColors.textMutedLight;
 
     final String? trimmed = imageUrl?.trim();
+    final bool hasImage = trimmed != null && trimmed.isNotEmpty;
     return ClipRRect(
       borderRadius: borderRadius,
       child: ColoredBox(
-        color: placeholderBg,
-        child: trimmed != null && trimmed.isNotEmpty
+        color: hasImage ? TamadeeColors.white : placeholderBg,
+        child: hasImage
             ? Image.network(
                 trimmed,
-                fit: BoxFit.cover,
+                fit: BoxFit.contain,
                 width: double.infinity,
                 height: double.infinity,
                 errorBuilder: (
@@ -37,9 +38,12 @@ class ProductImageBox extends StatelessWidget {
                   Object error,
                   StackTrace? stackTrace,
                 ) {
-                  return _FallbackPlaceholder(
-                    iconColor: iconColor,
-                    iconSize: iconSize,
+                  return ColoredBox(
+                    color: placeholderBg,
+                    child: _FallbackPlaceholder(
+                      iconColor: iconColor,
+                      iconSize: iconSize,
+                    ),
                   );
                 },
               )

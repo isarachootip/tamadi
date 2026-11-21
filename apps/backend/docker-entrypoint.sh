@@ -2,6 +2,7 @@
 set -e
 
 SEED_MARKER="/app/packages/api/.medusa/server/static/.tamadee_seeded_v1"
+DEMO_PURGE_MARKER="/app/packages/api/.medusa/server/static/.tamadee_demo_purged_v1"
 
 if [ "${MEDUSA_WORKER_MODE}" != "worker" ]; then
   echo "[Tamadee] Running database migrations..."
@@ -12,6 +13,13 @@ if [ "${MEDUSA_WORKER_MODE}" != "worker" ]; then
     pnpm exec medusa exec ./src/scripts/seed.js
     mkdir -p "$(dirname "${SEED_MARKER}")"
     touch "${SEED_MARKER}"
+  fi
+
+  if [ "${PURGE_DEMO_PRODUCTS:-true}" = "true" ] && [ ! -f "${DEMO_PURGE_MARKER}" ]; then
+    echo "[Tamadee] Running one-time demo product purge..."
+    pnpm exec medusa exec ./src/scripts/purge-demo-products.js
+    mkdir -p "$(dirname "${DEMO_PURGE_MARKER}")"
+    touch "${DEMO_PURGE_MARKER}"
   fi
 fi
 

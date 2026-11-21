@@ -49,7 +49,7 @@ export function ProductGallery({
                 onClick={() => setActiveIndex(idx)}
                 aria-label={`ดูรูปสินค้าที่ ${idx + 1}`}
                 aria-pressed={selected}
-                className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl border-2 transition ${
+                className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl border-2 bg-white transition ${
                   selected
                     ? "border-[#111111] dark:border-[#C6F432]"
                     : "border-transparent opacity-75 hover:opacity-100"
@@ -60,7 +60,7 @@ export function ProductGallery({
                   alt={`${title} มุมที่ ${idx + 1}`}
                   fill
                   sizes="64px"
-                  className="object-cover"
+                  className="object-contain"
                 />
               </button>
             );

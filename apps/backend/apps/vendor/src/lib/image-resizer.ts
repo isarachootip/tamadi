@@ -1,13 +1,20 @@
+import {
+  computeContainPlacement,
+  STANDARD_BG_HEX,
+  STANDARD_CANVAS_SIZE,
+} from "./image-canvas-geometry";
+
 export const MAX_IMAGE_BYTES = 1_000_000;
 export const TARGET_IMAGE_BYTES = 950 * 1024;
 export const MAX_PRODUCT_IMAGES = 10;
 
-const DIMENSION_STEPS = [1600, 1280, 960, 720, 480] as const;
-const QUALITY_STEPS = [0.85, 0.75, 0.65, 0.55, 0.45] as const;
+const CANVAS_SIZE_STEPS = [STANDARD_CANVAS_SIZE, 960, 800, 640] as const;
+const QUALITY_STEPS = [0.88, 0.80, 0.72, 0.62, 0.50] as const;
 
-export interface Dimensions {
-  readonly width: number;
-  readonly height: number;
+export interface StandardizeImageOptions {
+  readonly targetBytes?: number;
+  readonly backgroundColor?: string;
+  readonly paddingRatio?: number;
 }
 
 export interface ResizedImageResult {
@@ -15,25 +22,6 @@ export interface ResizedImageResult {
   readonly originalBytes: number;
   readonly finalBytes: number;
   readonly wasResized: boolean;
-}
-
-export function computeTargetDimensions(
-  width: number,
-  height: number,
-  maxDimension: number
-): Dimensions {
-  if (width <= 0 || height <= 0 || maxDimension <= 0) {
-    return { width: Math.max(1, width), height: Math.max(1, height) };
-  }
-  const longest = Math.max(width, height);
-  if (longest <= maxDimension) {
-    return { width: Math.round(width), height: Math.round(height) };
-  }
-  const scale = maxDimension / longest;
-  return {
-    width: Math.max(1, Math.round(width * scale)),
-    height: Math.max(1, Math.round(height * scale)),
-  };
 }
 
 export function buildResizedFilename(originalName: string): string {
@@ -53,35 +41,43 @@ export function formatBytes(bytes: number): string {
 }
 
 async function decodeImageSource(
-  file: File
+  sourceBlob: Blob,
+  label: string
 ): Promise<{
   readonly width: number;
   readonly height: number;
-  readonly draw: (ctx: CanvasRenderingContext2D, w: number, h: number) => void;
+  readonly draw: (
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    w: number,
+    h: number
+  ) => void;
   readonly release: () => void;
 }> {
   if (typeof createImageBitmap === "function") {
-    const bitmap = await createImageBitmap(file);
+    const bitmap = await createImageBitmap(sourceBlob);
     return {
       width: bitmap.width,
       height: bitmap.height,
-      draw: (ctx, w, h) => ctx.drawImage(bitmap, 0, 0, w, h),
+      draw: (ctx, x, y, w, h) => ctx.drawImage(bitmap, x, y, w, h),
       release: () => bitmap.close(),
     };
   }
 
-  const objectUrl = URL.createObjectURL(file);
+  const objectUrl = URL.createObjectURL(sourceBlob);
   const img = await new Promise<HTMLImageElement>((resolve, reject) => {
     const element = new Image();
     element.onload = () => resolve(element);
-    element.onerror = () => reject(new Error(`ไม่สามารถอ่านไฟล์รูปภาพ ${file.name} ได้`));
+    element.onerror = () =>
+      reject(new Error(`ไม่สามารถอ่านไฟล์รูปภาพ ${label} ได้`));
     element.src = objectUrl;
   });
 
   return {
     width: img.naturalWidth || img.width,
     height: img.naturalHeight || img.height,
-    draw: (ctx, w, h) => ctx.drawImage(img, 0, 0, w, h),
+    draw: (ctx, x, y, w, h) => ctx.drawImage(img, x, y, w, h),
     release: () => URL.revokeObjectURL(objectUrl),
   };
 }
@@ -106,42 +102,43 @@ function canvasToJpegBlob(
 }
 
 /**
- * Automatically resizes and compresses an image File in the browser until it is
- * strictly <= 1 MB (`TARGET_IMAGE_BYTES`), outputting JPEG (`.jpg`) for broad
- * compatibility with `@mercurjs/core` upload validation and mobile storefronts.
+ * Standardizes any uploaded product image into a uniform 1:1 square (`1080x1080`)
+ * JPEG on a pure white (`#FFFFFF`) background using centered `contain` framing
+ * (zero cropping of food/products), compressed strictly <= 1 MB.
  */
-export async function resizeImageFileToLimit(
-  file: File,
-  targetBytes: number = TARGET_IMAGE_BYTES
+export async function standardizeProductImage(
+  source: File | Blob,
+  filename: string,
+  options: StandardizeImageOptions = {}
 ): Promise<ResizedImageResult> {
-  if (file.size <= targetBytes) {
-    return {
-      file,
-      originalBytes: file.size,
-      finalBytes: file.size,
-      wasResized: false,
-    };
-  }
+  const targetBytes = options.targetBytes ?? TARGET_IMAGE_BYTES;
+  const backgroundColor = options.backgroundColor ?? STANDARD_BG_HEX;
+  const paddingRatio = options.paddingRatio ?? 0;
 
-  const source = await decodeImageSource(file);
+  const decoded = await decodeImageSource(source, filename);
   try {
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
     if (!ctx) {
-      throw new Error("เบราว์เซอร์ไม่รองรับการย่อขนาดรูปภาพ");
+      throw new Error("เบราว์เซอร์ไม่รองรับการปรับขนาดรูปภาพ");
     }
 
     let smallestBlob: Blob | null = null;
 
-    for (const maxDim of DIMENSION_STEPS) {
-      const target = computeTargetDimensions(source.width, source.height, maxDim);
-      canvas.width = target.width;
-      canvas.height = target.height;
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, target.width, target.height);
+    for (const canvasSize of CANVAS_SIZE_STEPS) {
+      const rect = computeContainPlacement(
+        decoded.width,
+        decoded.height,
+        canvasSize,
+        paddingRatio
+      );
+      canvas.width = canvasSize;
+      canvas.height = canvasSize;
+      ctx.fillStyle = backgroundColor;
+      ctx.fillRect(0, 0, canvasSize, canvasSize);
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = "high";
-      source.draw(ctx, target.width, target.height);
+      decoded.draw(ctx, rect.x, rect.y, rect.drawWidth, rect.drawHeight);
 
       for (const quality of QUALITY_STEPS) {
         const blob = await canvasToJpegBlob(canvas, quality);
@@ -149,15 +146,14 @@ export async function resizeImageFileToLimit(
           smallestBlob = blob;
         }
         if (blob.size <= targetBytes) {
-          const resizedFile = new File(
-            [blob],
-            buildResizedFilename(file.name),
-            { type: "image/jpeg", lastModified: Date.now() }
-          );
+          const standardized = new File([blob], buildResizedFilename(filename), {
+            type: "image/jpeg",
+            lastModified: Date.now(),
+          });
           return {
-            file: resizedFile,
-            originalBytes: file.size,
-            finalBytes: resizedFile.size,
+            file: standardized,
+            originalBytes: source.size,
+            finalBytes: standardized.size,
             wasResized: true,
           };
         }
@@ -166,22 +162,29 @@ export async function resizeImageFileToLimit(
 
     if (!smallestBlob || smallestBlob.size > MAX_IMAGE_BYTES) {
       throw new Error(
-        `ไม่สามารถย่อขนาด "${file.name}" ให้ต่ำกว่า 1 MB ได้ กรุณาเลือกรูปที่เล็กลง`
+        `ไม่สามารถย่อขนาด "${filename}" ให้ต่ำกว่า 1 MB ได้ กรุณาเลือกรูปที่เล็กลง`
       );
     }
 
     const fallbackFile = new File(
       [smallestBlob],
-      buildResizedFilename(file.name),
+      buildResizedFilename(filename),
       { type: "image/jpeg", lastModified: Date.now() }
     );
     return {
       file: fallbackFile,
-      originalBytes: file.size,
+      originalBytes: source.size,
       finalBytes: fallbackFile.size,
       wasResized: true,
     };
   } finally {
-    source.release();
+    decoded.release();
   }
+}
+
+export async function resizeImageFileToLimit(
+  file: File,
+  targetBytes: number = TARGET_IMAGE_BYTES
+): Promise<ResizedImageResult> {
+  return standardizeProductImage(file, file.name, { targetBytes });
 }

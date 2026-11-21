@@ -4,8 +4,10 @@ import "@mercurjs/vendor/index.css";
 import "./styles/tamadee-vendor.css";
 import App from "@mercurjs/vendor";
 import { installGlobalImageAutoResize } from "./lib/global-image-auto-resize";
+import { installStaleChunkRecovery } from "./lib/stale-chunk-recovery";
 import { initLightThemeDefault } from "./lib/theme-bootstrap";
 
+installStaleChunkRecovery();
 initLightThemeDefault();
 installGlobalImageAutoResize();
 

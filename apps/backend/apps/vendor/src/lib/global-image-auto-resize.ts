@@ -1,6 +1,6 @@
 import { toast } from "@medusajs/ui";
 import {
-  resizeImageFileToLimit,
+  standardizeProductImage,
   TARGET_IMAGE_BYTES,
 } from "./image-resizer";
 
@@ -20,32 +20,29 @@ function isAlreadyHandledTarget(target: EventTarget | null): boolean {
   return Boolean(target.closest(`[${HANDLED_ATTR}="handled"]`));
 }
 
-export function needsAutoResize(
-  files: readonly File[],
-  targetBytes: number = TARGET_IMAGE_BYTES
-): boolean {
-  return files.some((file) => isResizableImage(file) && file.size > targetBytes);
+export function needsAutoResize(files: readonly File[]): boolean {
+  return files.some((file) => isResizableImage(file));
 }
 
-async function resizeBatch(
+async function standardizeBatch(
   files: readonly File[]
-): Promise<{ readonly dataTransfer: DataTransfer; readonly resizedCount: number }> {
+): Promise<{ readonly dataTransfer: DataTransfer; readonly standardizedCount: number }> {
   const dataTransfer = new DataTransfer();
-  let resizedCount = 0;
+  let standardizedCount = 0;
 
   for (const file of files) {
-    if (isResizableImage(file) && file.size > TARGET_IMAGE_BYTES) {
-      const result = await resizeImageFileToLimit(file, TARGET_IMAGE_BYTES);
+    if (isResizableImage(file)) {
+      const result = await standardizeProductImage(file, file.name, {
+        targetBytes: TARGET_IMAGE_BYTES,
+      });
       dataTransfer.items.add(result.file);
-      if (result.wasResized) {
-        resizedCount += 1;
-      }
+      standardizedCount += 1;
     } else {
       dataTransfer.items.add(file);
     }
   }
 
-  return { dataTransfer, resizedCount };
+  return { dataTransfer, standardizedCount };
 }
 
 function handleFileInputChange(event: Event): void {
@@ -70,11 +67,11 @@ function handleFileInputChange(event: Event): void {
 
   void (async () => {
     try {
-      const { dataTransfer, resizedCount } = await resizeBatch(files);
+      const { dataTransfer, standardizedCount } = await standardizeBatch(files);
       target.files = dataTransfer.files;
-      if (resizedCount > 0) {
+      if (standardizedCount > 0) {
         toast.success(
-          `ย่อขนาดรูปภาพอัตโนมัติไม่เกิน 1 MB แล้ว ${resizedCount} รูป`
+          `ปรับขนาดมาตรฐาน 1:1 พื้นหลังขาว (≤ 1 MB) แล้ว ${standardizedCount} รูป`
         );
       }
       const nextEvent = new Event("change", { bubbles: true });
@@ -83,7 +80,7 @@ function handleFileInputChange(event: Event): void {
     } catch (error: unknown) {
       target.value = "";
       toast.error(
-        error instanceof Error ? error.message : "ไม่สามารถย่อขนาดรูปภาพได้"
+        error instanceof Error ? error.message : "ไม่สามารถปรับขนาดรูปภาพได้"
       );
     }
   })();
@@ -109,10 +106,10 @@ function handleFileDrop(event: Event): void {
 
   void (async () => {
     try {
-      const { dataTransfer, resizedCount } = await resizeBatch(files);
-      if (resizedCount > 0) {
+      const { dataTransfer, standardizedCount } = await standardizeBatch(files);
+      if (standardizedCount > 0) {
         toast.success(
-          `ย่อขนาดรูปภาพอัตโนมัติไม่เกิน 1 MB แล้ว ${resizedCount} รูป`
+          `ปรับขนาดมาตรฐาน 1:1 พื้นหลังขาว (≤ 1 MB) แล้ว ${standardizedCount} รูป`
         );
       }
       const nextEvent = new DragEvent("drop", {
@@ -129,7 +126,7 @@ function handleFileDrop(event: Event): void {
       target?.dispatchEvent(nextEvent);
     } catch (error: unknown) {
       toast.error(
-        error instanceof Error ? error.message : "ไม่สามารถย่อขนาดรูปภาพได้"
+        error instanceof Error ? error.message : "ไม่สามารถปรับขนาดรูปภาพได้"
       );
     }
   })();
@@ -137,8 +134,8 @@ function handleFileDrop(event: Event): void {
 
 /**
  * Installs capture-phase listeners so every image uploader across `@mercurjs/vendor`
- * (including built-in Create Product, Product Media Edit, and Store Settings)
- * automatically resizes images > 1 MB before MercurJS's 2 MB validation runs.
+ * (built-in Create Product, Product Media Edit, Store Settings) automatically
+ * standardizes uploaded images to 1:1 1080x1080 #FFFFFF JPEG <= 1 MB.
  */
 export function installGlobalImageAutoResize(): void {
   if (installed || typeof window === "undefined") {

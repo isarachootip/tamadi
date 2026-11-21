@@ -34,9 +34,11 @@ class _ProductGalleryHeaderState extends State<ProductGalleryHeader> {
         ? TamadeeColors.ink.withValues(alpha: 0.85)
         : TamadeeColors.white.withValues(alpha: 0.92);
 
-    return SizedBox(
-      height: 360,
-      child: Stack(
+    return ColoredBox(
+      color: TamadeeColors.white,
+      child: SizedBox(
+        height: 360,
+        child: Stack(
         children: <Widget>[
           PageView.builder(
             itemCount: pages.length,
@@ -144,6 +146,7 @@ class _ProductGalleryHeaderState extends State<ProductGalleryHeader> {
             ),
           ),
         ],
+      ),
       ),
     );
   }

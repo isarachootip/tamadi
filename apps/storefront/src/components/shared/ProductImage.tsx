@@ -33,7 +33,7 @@ export function ProductImage({
 
   return (
     <div
-      className={`relative aspect-square w-full overflow-hidden bg-[#F1F1EE] dark:bg-[#1C1C1A] ${className}`}
+      className={`relative aspect-square w-full overflow-hidden bg-white ${className}`}
     >
       <Image
         src={src}
@@ -42,7 +42,7 @@ export function ProductImage({
         sizes={sizes}
         priority={priority}
         onError={() => setFailed(true)}
-        className="object-cover transition duration-300 group-hover:scale-105"
+        className="object-contain transition duration-300 group-hover:scale-105"
       />
     </div>
   );

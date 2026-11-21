@@ -7,13 +7,11 @@ import {
   useRef,
   useState,
 } from "react";
-import {
-  MAX_PRODUCT_IMAGES,
-  resizeImageFileToLimit,
-} from "../../../lib/image-resizer";
-import { uploadVendorImages } from "../../../lib/tamadee-api";
+import { MAX_PRODUCT_IMAGES } from "../../../lib/image-resizer";
+import { AiBgToggleBar } from "./ai-bg-toggle-bar";
 import { ImagePreviewGrid } from "./image-preview-grid";
 import { mergePendingImageUrl } from "./quick-product-helpers";
+import { useImageUploadBatch } from "./use-image-upload-batch";
 
 interface ImageUploadFieldProps {
   readonly images: string[];
@@ -29,44 +27,26 @@ export function ImageUploadField({
   onChange,
 }: ImageUploadFieldProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
-  const remainingSlots = Math.max(0, MAX_PRODUCT_IMAGES - images.length);
-
-  const processAndUploadFiles = async (selectedFiles: File[]) => {
-    const imageFiles = selectedFiles.filter((f) => f.type.startsWith("image/"));
-    if (imageFiles.length === 0 || remainingSlots <= 0) return;
-
-    setIsUploading(true);
-    try {
-      const resizedFiles: File[] = [];
-      let resizedCount = 0;
-      for (const file of imageFiles.slice(0, remainingSlots)) {
-        const result = await resizeImageFileToLimit(file);
-        resizedFiles.push(result.file);
-        if (result.wasResized) resizedCount += 1;
-      }
-
-      const uploadedUrls = await uploadVendorImages(resizedFiles);
-      onChange(
-        Array.from(new Set([...images, ...uploadedUrls])).slice(0, MAX_PRODUCT_IMAGES)
-      );
-      const resizeNote =
-        resizedCount > 0 ? ` (ย่อขนาดอัตโนมัติ ≤ 1MB จำนวน ${resizedCount} รูป)` : "";
-      toast.success(`อัปโหลดรูปภาพแล้ว ${uploadedUrls.length} รูป${resizeNote}`);
-    } catch (error: unknown) {
-      toast.error(
-        error instanceof Error ? error.message : "อัปโหลดรูปภาพไม่สำเร็จ"
-      );
-    } finally {
-      setIsUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    }
-  };
+  const {
+    isUploading,
+    remainingSlots,
+    removeBgEnabled,
+    setRemoveBgEnabled,
+    statusMessage,
+    revertingUrl,
+    revertableUrls,
+    processAndUploadFiles,
+    revertOriginal,
+    clearFallbackForUrl,
+  } = useImageUploadBatch({ images, onChange });
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-    void processAndUploadFiles(Array.from(event.target.files ?? []));
+    const files = Array.from(event.target.files ?? []);
+    void processAndUploadFiles(files).finally(() => {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    });
   };
 
   const handleDrop = (event: DragEvent<HTMLDivElement>) => {
@@ -101,7 +81,9 @@ export function ImageUploadField({
   };
 
   const handleRemove = (index: number) => {
+    const removedUrl = images[index];
     onChange(images.filter((_, idx) => idx !== index));
+    clearFallbackForUrl(removedUrl);
   };
 
   return (
@@ -112,7 +94,7 @@ export function ImageUploadField({
             รูปภาพสินค้า ({images.length}/{MAX_PRODUCT_IMAGES} รูป — รูปแรกเป็นภาพปก)
           </Label>
           <Text size="xsmall" className="text-ui-fg-subtle">
-            เลือกหรือลากวางได้หลายรูปพร้อมกัน ระบบจะย่อขนาดอัตโนมัติให้ไม่เกิน 1 MB ต่อรูป
+            ปรับขนาดอัตโนมัติเป็นสี่เหลี่ยมจัตุรัส 1:1 (1080×1080) พื้นหลังขาว (≤ 1 MB) ไม่ตัดขอบสินค้า
           </Text>
         </div>
 
@@ -134,10 +116,17 @@ export function ImageUploadField({
             onClick={() => fileInputRef.current?.click()}
           >
             <Photo />
-            {isUploading ? "กำลังย่อขนาดและอัปโหลด..." : "เลือกรูปภาพ (หลายรูป)"}
+            {isUploading ? "กำลังประมวลผลรูปภาพ..." : "เลือกรูปภาพ (หลายรูป)"}
           </Button>
         </div>
       </div>
+
+      <AiBgToggleBar
+        enabled={removeBgEnabled}
+        disabled={isUploading}
+        statusMessage={statusMessage}
+        onChange={setRemoveBgEnabled}
+      />
 
       <div
         onDragOver={(e) => {
@@ -146,7 +135,9 @@ export function ImageUploadField({
         }}
         onDragLeave={() => setIsDragging(false)}
         onDrop={handleDrop}
-        onClick={() => !isUploading && remainingSlots > 0 && fileInputRef.current?.click()}
+        onClick={() =>
+          !isUploading && remainingSlots > 0 && fileInputRef.current?.click()
+        }
         className={`flex cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed px-4 py-5 text-center transition-colors ${
           isDragging
             ? "border-ui-fg-interactive bg-ui-bg-subtle-hover"
@@ -158,7 +149,7 @@ export function ImageUploadField({
           แตะเพื่อเลือกรูปจากมือถือ หรือลากวางหลายรูปที่นี่ (เพิ่มได้อีก {remainingSlots} รูป)
         </Text>
         <Text size="xsmall" className="text-ui-fg-subtle">
-          รองรับ JPG / PNG / WebP • ไฟล์ใหญ่กว่า 1 MB จะถูก Resize อัตโนมัติก่อนอัปโหลด
+          รองรับ JPG / PNG / WebP • จัดกรอบ 1:1 พื้นหลังขาวให้อัตโนมัติ (≤ 1 MB)
         </Text>
       </div>
 
@@ -184,7 +175,10 @@ export function ImageUploadField({
 
       <ImagePreviewGrid
         images={images}
+        revertableUrls={revertableUrls}
+        revertingUrl={revertingUrl}
         onMakeCover={handleMakeCover}
+        onRevertOriginal={(idx) => void revertOriginal(idx)}
         onRemove={handleRemove}
       />
     </div>
