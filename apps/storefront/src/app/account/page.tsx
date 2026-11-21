@@ -3,12 +3,14 @@ import { ChevronRight, Globe, LogOut, MapPin, Package } from "lucide-react";
 import Link from "next/link";
 import type { JSX } from "react";
 import { logoutCustomerAction } from "../../actions/auth-actions";
+import { BackofficePortalSection } from "../../components/account/BackofficePortalSection";
 import { CartIconLink } from "../../components/shared/CartIconLink";
 import { LanguageSwitcher } from "../../components/shared/LanguageSwitcher";
 import { TopBackHeader } from "../../components/shared/TopBackHeader";
 import { StorefrontShell } from "../../components/shell/StorefrontShell";
 import { ThemeModeSelector } from "../../components/theme/ThemeModeSelector";
 import { readCustomerToken } from "../../data/cookies";
+import { getStorefrontEnv } from "../../data/env";
 import { getServerI18n } from "../../data/i18n-server";
 import { fetchCustomerOrderGroups } from "../../data/repositories/auth-repo";
 import { getServerCart, getServerCustomer } from "../../data/session";
@@ -161,6 +163,11 @@ export default async function AccountPage(): Promise<JSX.Element> {
           </form>
         </>
       )}
+
+      <BackofficePortalSection
+        publicBackendUrl={getStorefrontEnv().publicBackendUrl}
+        copy={copy}
+      />
     </div>
   );
 

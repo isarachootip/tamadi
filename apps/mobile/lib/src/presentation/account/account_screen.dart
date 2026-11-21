@@ -11,6 +11,7 @@ import '../providers/auth_controller.dart';
 import '../providers/locale_controller.dart';
 import '../providers/theme_controller.dart';
 import '../shared/language_pill_selector.dart';
+import 'widgets/backoffice_portal_section.dart';
 import 'widgets/guest_welcome_card.dart';
 
 class AccountScreen extends ConsumerWidget {
@@ -164,6 +165,7 @@ class AccountScreen extends ConsumerWidget {
             },
             orElse: () => const SizedBox.shrink(),
           ),
+          const BackofficePortalSection(),
         ],
       ),
     );

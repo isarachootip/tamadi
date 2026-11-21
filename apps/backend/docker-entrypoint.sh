@@ -21,6 +21,9 @@ if [ "${MEDUSA_WORKER_MODE}" != "worker" ]; then
     mkdir -p "$(dirname "${DEMO_PURGE_MARKER}")"
     touch "${DEMO_PURGE_MARKER}"
   fi
+
+  echo "[Tamadee] Syncing operator admin accounts from environment..."
+  pnpm exec medusa exec ./src/scripts/sync-admin-users.js
 fi
 
 echo "[Tamadee] Starting Mercur server (mode=${MEDUSA_WORKER_MODE:-server})..."

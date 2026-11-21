@@ -39,6 +39,12 @@ class AppStrings {
     required this.themeSystem,
     required this.ordersHeading,
     required this.noOrders,
+    required this.backofficeHeading,
+    required this.sellerLoginTitle,
+    required this.sellerLoginSub,
+    required this.adminLoginTitle,
+    required this.adminLoginSub,
+    required this.linkCopiedFallback,
     required this.aiName,
     required this.aiSamplePrompt,
     required this.aiThinking,
@@ -79,6 +85,12 @@ class AppStrings {
   final String themeSystem;
   final String ordersHeading;
   final String noOrders;
+  final String backofficeHeading;
+  final String sellerLoginTitle;
+  final String sellerLoginSub;
+  final String adminLoginTitle;
+  final String adminLoginSub;
+  final String linkCopiedFallback;
   final String aiName;
   final String aiSamplePrompt;
   final String aiThinking;

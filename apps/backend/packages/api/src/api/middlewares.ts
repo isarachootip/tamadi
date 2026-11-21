@@ -1,4 +1,5 @@
 import { defineMiddlewares } from "@medusajs/medusa";
+import { adminUsernameAliasMiddleware } from "../modules/admin-auth/admin-auth-aliases";
 import { ensureVendorProductCreateDefaultsMiddleware } from "../modules/vendor-catalog/vendor-catalog-adapters";
 import { ensureVendorProductUpdateThumbnailMiddleware } from "../modules/vendor-catalog/vendor-product-defaults-middleware";
 import {
@@ -8,6 +9,11 @@ import {
 
 export default defineMiddlewares({
   routes: [
+    {
+      matcher: "/auth/user/emailpass",
+      method: ["POST"],
+      middlewares: [adminUsernameAliasMiddleware],
+    },
     {
       matcher: "/vendor/sellers",
       method: ["GET"],
